@@ -10,5 +10,8 @@ public class SanadyaBrahminSmajApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SanadyaBrahminSmajApplication.class, args);
 	}
-
+//	   @Override
+//	    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+//	        return builder.sources(MyApp.class);
+//	    }
 }
