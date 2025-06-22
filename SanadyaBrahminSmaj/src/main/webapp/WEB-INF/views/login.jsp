@@ -75,6 +75,7 @@
                 password: $("#password").val()
             }),
             success: function (response) {
+                debugger;
                 localStorage.setItem("token", response.data.token);
                 window.location.href = "/home.jsp";
             },

@@ -6,6 +6,9 @@ import com.hst.repository.UserRepository;
 import com.hst.security.JwtTokenProvider;
 import com.hst.service.RegistrationNumberService;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
@@ -18,7 +21,7 @@ import java.util.Optional;
 import com.hst.response.ApiResponse;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/auth/")
 public class AuthController {
 
 	@Autowired
@@ -38,30 +41,32 @@ public class AuthController {
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<ApiResponse<Map<String, String>>> login(@RequestBody LoginRequest request) {
+	public ResponseEntity<ApiResponse<Map<String, String>>> login(@RequestBody LoginRequest request,
+	                                                              HttpServletResponse response) {
+	    Optional<User> optionalUser = userRepository.findByMobile(request.getMobile());
+	    if (optionalUser.isEmpty()) {
+	        return ResponseEntity.badRequest().body(new ApiResponse<>(false, "मोबाइल नंबर पंजीकृत नहीं है।", null));
+	    }
 
-		User user = null;
-		Optional<User> optionalUser = userRepository.findByMobile(request.getMobile());
-		if (optionalUser.isPresent()) {
-			user = optionalUser.get();
-		}
+	    User user = optionalUser.get();
+	    if (!user.isApproved()) {
+	        return ResponseEntity.badRequest().body(new ApiResponse<>(false, "आपका पंजीकरण अनुमोदित नहीं है।", null));
+	    }
 
-		if (user == null) {
-			return ResponseEntity.badRequest().body(new ApiResponse<>(false, "मोबाइल नंबर पंजीकृत नहीं है।", null));
-		}
+	    authenticationManager.authenticate(
+	        new UsernamePasswordAuthenticationToken(request.getMobile(), request.getPassword())
+	    );
 
-		if (!user.isApproved()) {
-			return ResponseEntity.badRequest().body(
-					new ApiResponse<>(false, "आपका पंजीकरण अभी अनुमोदित नहीं हुआ है। कृपया प्रतीक्षा करें।", null));
-		}
+	    String token = jwtTokenProvider.generateToken(request.getMobile());
 
-		Authentication authentication = authenticationManager
-				.authenticate(new UsernamePasswordAuthenticationToken(request.getMobile(), request.getPassword()));
+	    // ✅ Set token in HttpOnly Cookie
+	    Cookie cookie = new Cookie("authToken", token);
+	    cookie.setHttpOnly(true);
+	    cookie.setPath("/");
+	    cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
+	    response.addCookie(cookie);
 
-		String token = jwtTokenProvider.generateToken(request.getMobile());
-		ApiResponse<Map<String, String>> response = new ApiResponse<>(true, "लॉगिन सफल हुआ।", Map.of("token", token));
-
-		return ResponseEntity.ok(response);
+	    return ResponseEntity.ok(new ApiResponse<>(true, user.getFullName(), Map.of("token", token)));
 	}
 
 	@PostMapping("/register")
@@ -121,5 +126,4 @@ public class AuthController {
 		return ResponseEntity.ok(new ApiResponse<>(true,
 				"आपकी पंजीकरण अनुरोध सफलतापूर्वक सबमिट हो गया है, कृपया अनुमोदन की प्रतीक्षा करें।", null));
 	}
-
 }
