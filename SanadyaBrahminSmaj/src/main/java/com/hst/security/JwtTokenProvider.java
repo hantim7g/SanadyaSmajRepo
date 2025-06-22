@@ -20,26 +20,21 @@ public class JwtTokenProvider {
     @Value("${jwt.expiration}")
     private long jwtExpiration;
 
-    // ✅ Updated to accept UserDetails so we can extract roles
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(String mobile, String role) {
         Map<String, Object> claims = new HashMap<>();
-
-        // Extract and add roles
-        List<String> roles = userDetails.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-
-        claims.put("roles", roles); // ✅ embed roles in token
+        
+        // Store role in claims (you can store as List if needed)
+        claims.put("roles", List.of(role)); // ✅ convert single role to list for consistency
 
         return Jwts.builder()
-                .setSubject(userDetails.getUsername()) // typically mobile/email
+                .setSubject(mobile) // ✅ typically mobile/email
                 .setClaims(claims)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(SignatureAlgorithm.HS256, jwtSecret)
                 .compact();
     }
+
 
     public String getUsernameFromToken(String token) {
         return Jwts.parser()
