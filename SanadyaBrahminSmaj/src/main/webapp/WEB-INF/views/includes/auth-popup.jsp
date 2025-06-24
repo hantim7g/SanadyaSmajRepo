@@ -30,6 +30,7 @@
           <div class="tab-content mt-3" id="authTabContent">
 
             <!-- 🔐 Login -->
+             <div class="tab-pane fade show active" id="loginTab" role="tabpanel">
           <form id="loginForm">
   <div class="mb-3">
     <label>मोबाइल नंबर *</label>
@@ -42,7 +43,7 @@
   <button type="submit" class="btn btn-primary w-100">लॉगिन</button>
 </form>
 <div id="loginError" class="text-danger mt-2"></div>
-
+</div>
 
             <!-- 📝 Registration -->
             <div class="tab-pane fade" id="registerTab" role="tabpanel">

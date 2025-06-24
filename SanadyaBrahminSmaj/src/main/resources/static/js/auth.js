@@ -24,8 +24,11 @@ $(function() {
 				if (res.success) {
 					debugger;
 					// ✅ Store JWT
-					localStorage.setItem("authToken", res.data.token);
-					localStorage.setItem("userName", res.message);
+				localStorage.setItem("authToken", res.data.token);
+				localStorage.setItem("userName", res.message);
+      if (isAdminUser(res.data.token)) {
+        document.getElementById("adminArea").classList.remove("d-none");
+      }
 
 					// ✅ Store user name (assuming backend sends name in token or decode it if needed)
 					const userName = res.message || "प्रयोगकर्ता"; // Or extract from token
@@ -37,14 +40,16 @@ $(function() {
   <a class="dropdown-item" href="/member/profile">👤 प्रोफ़ाइल देखें</a>
             <li><a class="dropdown-item" href="/member/doc">📜 सदस्य निर्देशिका</a></li>
 
-        <li><a class="dropdown-item text-danger"  href="/api/auth/logout" id="logoutBtn">🚪 लॉगआउट</a></li>
+<li><a class="dropdown-item text-danger" href="#" onclick="handleLogout(event)">🚪 लॉगआउट</a></li>
       </ul>
     `);
+
 
 					$('#authModal').modal('hide');
 				} else {
 					$('#loginError').text(res.message || "लॉगिन विफल रहा");
 				}
+
 			},
 
 			error: function(xhr) {
@@ -152,10 +157,10 @@ $(function() {
 
 
 
-$(document).on("click", "#logoutBtn", function () {
-  localStorage.removeItem("authToken");
-  location.reload(); // Refresh to reflect logout state
-});
+//$(document).on("click", "#logoutBtn", function () {
+ // localStorage.removeItem("authToken");
+  //location.reload(); // Refresh to reflect logout state
+//});
 $(document).ready(function () {
   const token = localStorage.getItem("authToken");
   const userNameStore = localStorage.getItem("userName");
@@ -180,7 +185,7 @@ $(document).ready(function () {
   <a class="dropdown-item" href="/member/profile">👤 प्रोफ़ाइल देखें</a>
             <li><a class="dropdown-item" href="/member/doc">📜 सदस्य निर्देशिका</a></li>
 
-        <li><a class="dropdown-item text-danger"  href="/api/auth/logout" id="logoutBtn">🚪 लॉगआउट</a></li>
+<li><a class="dropdown-item text-danger" href="#" onclick="handleLogout(event)">🚪 लॉगआउट</a></li>
       </ul>
     `);
   }

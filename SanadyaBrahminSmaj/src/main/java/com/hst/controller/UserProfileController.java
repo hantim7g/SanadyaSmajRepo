@@ -2,6 +2,7 @@
 package com.hst.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,12 +14,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 // If using @Autowired or Repository
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.hst.entity.Payment;
 import com.hst.entity.User;
 import com.hst.repository.UserRepository;
 
@@ -26,6 +30,7 @@ import com.hst.entity.User;
 import com.hst.repository.UserRepository;
 import com.hst.response.ApiResponse;
 import com.hst.security.JwtTokenProvider;
+import com.hst.service.PaymentService;
 import com.hst.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,6 +40,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/user")
 public class UserProfileController {
+	
+	@Autowired
+	private PaymentService paymentService;
+	
 	@Autowired
 	private UserService userService;
 	@Autowired
@@ -92,6 +101,13 @@ public class UserProfileController {
 		} catch (IOException e) {
 			return ResponseEntity.status(500).body("Failed to upload image");
 		}
+	}
+	@GetMapping("/payments")
+	public ResponseEntity<List<Payment>> getUserPayments(Authentication auth) {
+	    String mobile = auth.getName();
+	    User user = userRepository.findByMobile(mobile).orElseThrow();
+	    List<Payment> payments = paymentService.getPaymentsByUserId(user.getId());
+	    return ResponseEntity.ok(payments);
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.hst.ViewController;
 
+import com.hst.entity.User;
 import com.hst.entity.VivhaUser;
 import com.hst.repository.VivhaUserRepository;
 import com.itextpdf.text.Document;
@@ -7,6 +8,7 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfWriter;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
@@ -25,11 +28,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Controller
-public class ViewController {
+public class ViewVivhaController {
 
     private final VivhaUserRepository userRepository;
 
-    public ViewController(VivhaUserRepository userRepository) {
+    public ViewVivhaController(VivhaUserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -47,22 +50,19 @@ public class ViewController {
     public String saveUser(@ModelAttribute VivhaUser user,
                            @RequestParam(value = "image", required = false) MultipartFile imageFile,
                            RedirectAttributes redirect,
-                           org.springframework.security.core.Authentication authentication) throws Exception {
+                           Authentication authentication) throws Exception {
 
-        String loggedInMobile = authentication.getName(); // ✅ Get current login mobile
+        String loggedInMobile = authentication.getName();
 
-        // 🛡️ 1. If this is an update, ensure the logged-in user is the owner
         if (user.getId() != null) {
             Optional<VivhaUser> existing = userRepository.findById(user.getId());
             if (existing.isPresent()) {
                 VivhaUser existingUser = existing.get();
                 if (!loggedInMobile.equals(existingUser.getLoginMobile())) {
-                    // ❌ Unauthorized update attempt
                     redirect.addFlashAttribute("error", "आप इस प्रोफ़ाइल को अपडेट करने के लिए अधिकृत नहीं हैं।");
                     return "redirect:/vivhauser/form?id=" + user.getId();
                 }
 
-                // ✅ Preserve previous image if no new one uploaded
                 if ((imageFile == null || imageFile.isEmpty()) && existingUser.getProfileImagePath() != null) {
                     user.setProfileImagePath(existingUser.getProfileImagePath());
                 }
@@ -72,7 +72,6 @@ public class ViewController {
             }
         }
 
-        // 🖼️ 2. Handle image upload (if new)
         if (imageFile != null && !imageFile.isEmpty()) {
             String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
             String uploadPath = Paths.get(uploadDir).toAbsolutePath().toString();
@@ -83,10 +82,7 @@ public class ViewController {
             user.setProfileImagePath("/images/" + fileName);
         }
 
-        // 📌 3. Save who created/edited it
         user.setLoginMobile(loggedInMobile);
-
-        // 💾 4. Save to DB
         userRepository.save(user);
         redirect.addFlashAttribute("success", true);
         return "redirect:/vivhauser/form?id=" + user.getId();
@@ -140,4 +136,5 @@ public class ViewController {
 
         return "matrimony/my-profiles";
     }
+
 }

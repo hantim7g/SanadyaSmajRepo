@@ -13,7 +13,36 @@ public class User {
 
     @Column(unique = true)
     private String RegistrationNo;
+    @Transient
+    private Integer annualFeeDue;
+    @Transient
+    private LocalDate lastAnnualFeePaid;
+    @Transient
+    private Double lastAnnualFeeAmount;
 
+    public Double getLastAnnualFeeAmount() {
+        return lastAnnualFeeAmount;
+    }
+
+    public Integer getAnnualFeeDue() {
+		return annualFeeDue;
+	}
+
+	public void setAnnualFeeDue(Integer annualFeeDue) {
+		this.annualFeeDue = annualFeeDue;
+	}
+
+	public LocalDate getLastAnnualFeePaid() {
+		return lastAnnualFeePaid;
+	}
+
+	public void setLastAnnualFeePaid(LocalDate lastAnnualFeePaid) {
+		this.lastAnnualFeePaid = lastAnnualFeePaid;
+	}
+
+	public void setLastAnnualFeeAmount(Double lastAnnualFeeAmount) {
+        this.lastAnnualFeeAmount = lastAnnualFeeAmount;
+    }
     private String fullName;
     private String fatherName;
     private String gotra;

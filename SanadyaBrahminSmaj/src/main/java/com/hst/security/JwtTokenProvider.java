@@ -27,8 +27,8 @@ public class JwtTokenProvider {
         claims.put("roles", List.of(role)); // ✅ convert single role to list for consistency
 
         return Jwts.builder()
-                .setSubject(mobile) // ✅ typically mobile/email
-                .setClaims(claims)
+                .setClaims(claims)             // ✅ First add your claims
+                .setSubject(mobile)           // ✅ THEN add subject
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(SignatureAlgorithm.HS256, jwtSecret)
@@ -37,12 +37,20 @@ public class JwtTokenProvider {
 
 
     public String getUsernameFromToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(jwtSecret)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        try {
+            String subject = Jwts.parser()
+                    .setSigningKey(jwtSecret)
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject();
+            System.out.println("✅ Extracted subject from JWT: " + subject);
+            return subject;
+        } catch (Exception e) {
+            System.out.println("❌ Failed to extract username: " + e.getMessage());
+            return null;
+        }
     }
+
 
     // ✅ New method to extract roles
     public List<String> getRolesFromToken(String token) {

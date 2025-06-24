@@ -53,6 +53,7 @@ public class SecurityConfig {
 
                 .anyRequest().permitAll() // Everything else is public
             )
+            .logout(logout -> logout.disable())
             .exceptionHandling(ex -> ex
                 .accessDeniedHandler(accessDeniedHandler)
                 .authenticationEntryPoint((request, response, authException) -> {

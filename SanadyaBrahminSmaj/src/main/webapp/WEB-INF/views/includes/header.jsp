@@ -10,6 +10,7 @@
 
   <!-- Bootstrap 5 CDN -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 
@@ -193,7 +194,34 @@
             <li><a class="dropdown-item" href="/contact/map">लोकेशन / नक्शा</a></li>
           </ul>
         </li>
+        <li class="nav-item dropdown d-none" id="adminArea">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">⚙️ प्रशासन</a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="/admin/dashboard">📊 डैशबोर्ड</a></li>
 
+            <li class="dropdown-submenu dropend">
+              <a class="dropdown-item dropdown-toggle" href="#">👥 सदस्य प्रबंधन</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/admin/memberList">सभी सदस्य</a></li>
+                <li><a class="dropdown-item" href="/admin/registrations">पंजीकरण अनुरोध</a></li>
+                <li><a class="dropdown-item" href="/admin/verified">सत्यापित सदस्य</a></li>
+              </ul>
+            </li>
+
+            <li class="dropdown-submenu dropend">
+              <a class="dropdown-item dropdown-toggle" href="#">📅 कार्यक्रम</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/admin/events">सभी कार्यक्रम</a></li>
+                <li><a class="dropdown-item" href="/admin/events/create">कार्यक्रम जोड़ें</a></li>
+              </ul>
+            </li>
+
+            <li><a class="dropdown-item" href="/admin/hall-bookings">🏛️ हॉल बुकिंग्स</a></li>
+            <li><a class="dropdown-item" href="/admin/approvals">✅ अनुमोदन</a></li>
+          </ul>
+        </li>
+
+        <!-- 👤 Login / Member -->
 <li class="nav-item dropdown" id="loginArea">
   <a class="nav-link dropdown-toggle" href="#" role="button" id="loginDropdown" data-bs-toggle="dropdown" aria-expanded="false">
     लॉगिन / सदस्यता
@@ -212,42 +240,81 @@
 <%@ include file="/WEB-INF/views/includes/auth-popup.jsp" %>
 </body>
 
-</html>
+<!-- 🔧 JS Logic for Auth/Admin Handling -->
 <script>
+  function isAdminUser(token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload && payload.roles && payload.roles.includes('ADMIN');
+    } catch (e) {
+      console.warn("Invalid token", e);
+      return false;
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     const token = localStorage.getItem("authToken");
-     const usernameStore = localStorage.getItem("userName");
-
+    const username = localStorage.getItem("userName") || "प्रयोगकर्ता";
+debugger;
     if (token) {
-      let userName = "प्रयोगकर्ता";
+      let usernameStore = "प्रयोगकर्ता";
 
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        userName = usernameStore  || "प्रयोगकर्ता";
+        usernameStore = payload.username || "प्रयोगकर्ता";
       } catch (e) {
         console.warn("Invalid token", e);
       }
 
       // Update dropdown button
       const loginDropdown = document.getElementById("loginDropdown");
-      loginDropdown.textContent = userName;
+      loginDropdown.textContent = usernameStore;
 
       // Update dropdown menu
-      const dropdownMenu = document.getElementById("loginDropdownMenu");
-      dropdownMenu.innerHTML = `
+      const dropdownMenu = document.getElementById("loginDropdownMenu").innerHTML = `
         <li><a class="dropdown-item" href="/member/profile">👤 प्रोफ़ाइल देखें</a></li>
         <li><a class="dropdown-item" href="/member/list">📜 सदस्य निर्देशिका</a></li>
         <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item text-danger" href="/api/auth/logout" id="logoutBtn">🚪 लॉगआउट</a></li>
+<li><a class="dropdown-item text-danger" href="#" onclick="handleLogout(event)">🚪 लॉगआउट</a></li>
       `;
 
-      // Logout logic
-      document.addEventListener("click", function (e) {
-        if (e.target && e.target.id === "logoutBtn") {
-          localStorage.removeItem("authToken");
-          location.reload();
-        }
-      });
+      if (isAdminUser(token)) {
+        document.getElementById("adminArea").classList.remove("d-none");
+      }
+
+   
     }
   });
+
+  // Handle nested dropdown toggle
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.dropdown-submenu > a').forEach(function (element) {
+      element.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        let submenu = this.nextElementSibling;
+        if (submenu && submenu.classList.contains('dropdown-menu')) {
+          submenu.classList.toggle('show');
+        }
+      });
+    });
+
+    // Hide all nested when main dropdown closes
+    document.querySelectorAll('.dropdown').forEach(function (dropdown) {
+      dropdown.addEventListener('hide.bs.dropdown', function () {
+        this.querySelectorAll('.dropdown-menu.show').forEach(function (submenu) {
+          submenu.classList.remove('show');
+        });
+      });
+    });
+  });
+function handleLogout(e) {
+  if (e) e.preventDefault();
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("userName");
+  window.location.href = "/logout";
+}
+
 </script>
+
+</html>

@@ -4,6 +4,7 @@ import com.hst.security.JwtTokenProvider;
 import com.hst.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -31,34 +32,44 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain) throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
-
-        String username = null;
         String token = null;
 
+        // ✅ Try Authorization header
+        String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
-            username = jwtProvider.getUsernameFromToken(token);
         }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        // ✅ Fallback to cookie
+        if (token == null && request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("authToken".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
 
-            if (jwtProvider.validateToken(token)) {
-                // ✅ Extract roles from token and convert to authorities
-                List<String> roles = jwtProvider.getRolesFromToken(token);
-                List<SimpleGrantedAuthority> authorities = roles.stream()
+        // ✅ Validate and extract user
+        if (token != null && jwtProvider.validateToken(token)) {
+            String username = jwtProvider.getUsernameFromToken(token);
+
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                List<SimpleGrantedAuthority> authorities = jwtProvider.getRolesFromToken(token).stream()
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
-                UsernamePasswordAuthenticationToken auth =
+                UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
 
