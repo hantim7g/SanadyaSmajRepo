@@ -36,65 +36,76 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/payment")
 public class PaymentController {
 	@Value("${upload.image.dir}")
 	private String uploadDir;
-	
+
 	@Autowired
-	private  UserRepository    userRepository;
-    
-    private final PaymentService paymentService;
-    public PaymentController(PaymentService paymentService) {
-        this.paymentService = paymentService;
-    }
+	private UserRepository userRepository;
 
-    @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> addPayment(
-            @RequestPart("payment") String paymentJson,
-            @RequestPart(value = "receiptImage", required = false) MultipartFile receiptImage,
-            Authentication authentication
-    ) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body("Unauthorized");
-        }
+	private final PaymentService paymentService;
 
-        String mobile = authentication.getName(); // mobile from JWT
+	public PaymentController(PaymentService paymentService) {
+		this.paymentService = paymentService;
+	}
 
-        Optional<User> userOptional = userRepository.findByMobile(mobile);
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body("User not found");
-        }
+	@PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<?> addPayment(@RequestPart("payment") String paymentJson,
+			@RequestPart(value = "receiptImage", required = false) MultipartFile receiptImage,
+			Authentication authentication) {
+		if (authentication == null || !authentication.isAuthenticated()) {
+			return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body("Unauthorized");
+		}
 
-        User user = userOptional.get();
+		String mobile = authentication.getName(); // mobile from JWT
 
-        // 🧾 JSON को Payment object में बदलें
-        ObjectMapper objectMapper = new ObjectMapper();
-        Payment payment;
-        try {
-            payment = objectMapper.readValue(paymentJson, Payment.class);
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().body("Invalid payment data");
-        }
+		Optional<User> userOptional = userRepository.findByMobile(mobile);
+		if (userOptional.isEmpty()) {
+			return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body("User not found");
+		}
 
-        // 🔗 user सेट करें
-        payment.setUser(user);
+		User user = userOptional.get();
 
-        // 🖼️ Save receipt image if present
-        if (receiptImage != null && !receiptImage.isEmpty()) {
-            try {
-                String fileName = UUID.randomUUID() + "_" + receiptImage.getOriginalFilename();
-                Path filePath = Paths.get(uploadDir).resolve(fileName);
-                Files.createDirectories(filePath.getParent());
-                Files.write(filePath, receiptImage.getBytes());
-                payment.setReceiptImagePath(fileName); // 🆕 आप को entity में ये field add करनी होगी
-            } catch (IOException e) {
-                return ResponseEntity.status(500).body("Failed to save receipt image");
-            }
-        }
+		// 🧾 JSON को Payment object में बदलें
+		ObjectMapper objectMapper = new ObjectMapper();
+		Payment payment;
+		try {
+			payment = objectMapper.readValue(paymentJson, Payment.class);
+		} catch (IOException e) {
+			return ResponseEntity.badRequest().body("Invalid payment data");
+		}
 
-        Payment saved = paymentService.addPayment(payment);
-        return ResponseEntity.ok(saved);
-    }
+		// 🔗 user सेट करें
+		payment.setUser(user);
+
+		// 🖼️ Save receipt image if present
+		if (receiptImage != null && !receiptImage.isEmpty()) {
+			try {
+				String fileName = UUID.randomUUID() + "_" + receiptImage.getOriginalFilename();
+				Path filePath = Paths.get(uploadDir).resolve(fileName);
+				Files.createDirectories(filePath.getParent());
+				Files.write(filePath, receiptImage.getBytes());
+				payment.setReceiptImagePath(fileName); // 🆕 आप को entity में ये field add करनी होगी
+			} catch (IOException e) {
+				return ResponseEntity.status(500).body("Failed to save receipt image");
+			}
+		}
+
+		Payment saved = paymentService.addPayment(payment);
+
+		if (payment.getDescription() != null && payment.getDescription().toLowerCase().contains("membership")
+				&& payment.getPaymentDate().toLocalDate().getYear() == LocalDate.now().getYear()
+				&& "Success".equalsIgnoreCase(payment.getStatus())) {
+
+			user.setAnnualFeeDue(2); // 0 = not due (paid) // 1 due // 2 yet to validate
+			user.setLastAnnualFeePaid(payment.getPaymentDate().toLocalDate());
+			user.setLastAnnualFeeAmount(payment.getAmount());
+			user.setAnnualFeeValidated("प्रक्रिया में");
+			userRepository.save(user); // 💾 Save updated fee info
+		}
+		return ResponseEntity.ok(saved);
+	}
 }

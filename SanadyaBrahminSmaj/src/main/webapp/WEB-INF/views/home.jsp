@@ -1,4 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+
+
 <%@ include file="/WEB-INF/views/includes/header.jsp" %>
 <!-- <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%> -->
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -10,10 +12,7 @@
 
 
     <style>
-        body {
-            background-color: #fffaf0;
-            font-family: 'Segoe UI', 'Noto Sans Devanagari', sans-serif;
-        }
+       
 
         .main-wrapper {
             padding: 20px;

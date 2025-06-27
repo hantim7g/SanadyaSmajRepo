@@ -12,13 +12,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
-
-    private final UserRepository userRepository;
-
     @Autowired
-    public AdminController(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private  UserRepository userRepository;
+
 
     // ⏳ Get all users with approved = false
     @GetMapping("/pending-users")
@@ -39,4 +35,7 @@ public class AdminController {
             return ResponseEntity.status(404).body("यूज़र नहीं मिला।");
         }
     }
+
+
+
 }

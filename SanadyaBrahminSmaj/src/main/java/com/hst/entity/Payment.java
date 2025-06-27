@@ -35,7 +35,7 @@ public class Payment {
 
 	private String description;
 	private  String validated="प्रक्रिया में";
-	// === Getters and Setters ===
+
 	@Column(name = "receipt_image_path")
 	private String receiptImagePath;
 

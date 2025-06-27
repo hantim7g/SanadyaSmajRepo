@@ -23,6 +23,10 @@
 
 
   <style>
+     body {
+            background-color: #fffaf0;
+            font-family: 'Segoe UI', 'Noto Sans Devanagari', sans-serif;
+        }
     .navbar-custom {
       background: linear-gradient(to right, #f87e03, #b65c02);
       font-family: 'Segoe UI', sans-serif;
