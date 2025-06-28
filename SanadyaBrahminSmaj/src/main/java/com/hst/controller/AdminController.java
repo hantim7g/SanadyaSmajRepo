@@ -28,7 +28,7 @@ public class AdminController {
         Optional<User> userOpt = userRepository.findById(id);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            user.setApproved(true);
+            user.setApproved("स्वीकृत");
             userRepository.save(user);
             return ResponseEntity.ok("यूज़र को सफलतापूर्वक अनुमोदित किया गया।");
         } else {

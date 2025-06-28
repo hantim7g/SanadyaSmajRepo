@@ -33,12 +33,20 @@ public class Payment {
 	@Column(nullable = false)
 	private String status; // e.g., Success, Failed, Pending
 
+	
 	private String description;
 	private  String validated="प्रक्रिया में";
 
 	@Column(name = "receipt_image_path")
 	private String receiptImagePath;
 
+	private Date crtDt;
+	private Long crtBy;
+	private Date lstUpDt;
+	private Long lstUpBy;
+	
+	private String reason;
+	
 	public String getReceiptImagePath() {
 		return receiptImagePath;
 	}
@@ -117,5 +125,45 @@ public class Payment {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public String getReason() {
+		return reason;
+	}
+
+	public void setReason(String reason) {
+		this.reason = reason;
+	}
+
+	public Date getCrtDt() {
+		return crtDt;
+	}
+
+	public void setCrtDt(Date crtDt) {
+		this.crtDt = crtDt;
+	}
+
+	public Long getCrtBy() {
+		return crtBy;
+	}
+
+	public void setCrtBy(Long crtBy) {
+		this.crtBy = crtBy;
+	}
+
+	public Date getLstUpDt() {
+		return lstUpDt;
+	}
+
+	public void setLstUpDt(Date lstUpDt) {
+		this.lstUpDt = lstUpDt;
+	}
+
+	public Long getLstUpBy() {
+		return lstUpBy;
+	}
+
+	public void setLstUpBy(Long lstUpBy) {
+		this.lstUpBy = lstUpBy;
 	}
 }

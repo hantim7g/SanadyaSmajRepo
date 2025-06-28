@@ -2,16 +2,17 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <!-- Result Count and Page Size Selector -->
-<div class="row align-items-left mb-3">
+
+
+<!-- User Card List -->
+<div id="userCardList">
+  <div class="row align-items-left mb-3">
   
   <div class="col-md-12 text-end">
     <span class="text-muted fw-light">कुल परिणाम: ${totalItems}</span>
   </div>
 </div>
-
-<!-- User Card List -->
-<div id="userCardList">
-  <c:forEach var="user" items="${userList}">
+        <c:forEach var="user" items="${userList}">
     <div class="card profile-card border-0 shadow-sm hover-shadow mb-4">
       <div class="name-banner">${user.fullName}</div>
 
@@ -63,41 +64,50 @@
                 <strong>देय शुल्क:</strong> <span class="text-danger fw-bold">₹ ${user.annualFeeDue}</span>
               </div>
             </div>
-            <div class="row mb-2 align-items-center">
-              <div class="col-md-6">
-                <strong>स्थिति:</strong>
-                <span class="badge ${user.approved ? 'bg-success' : 'bg-warning text-dark'}">
-                  ${user.approved ? "स्वीकृत" : "स्वीकृति लंबित"}
-                </span>
-              </div>
-              <c:if test="${!user.approved || !user.annualFeeValidated || !user.otherFeeValidated}">
+
+                <div class="row mb-2 align-items-center">
+                  <div class="col-md-6 filedt">
+                    <strong>स्थिति:</strong>
+                    <span class="badge ${user.approved == 'स्वीकृत'? 'bg-success' : 'bg-warning text-dark'}">
+                      ${user.approved}
+                    </span>
+                  </div>
+
+                  <c:if test="${!user.approved || !user.annualFeeValidated || !user.otherFeeValidated}">
   <div class="row mt-2">
     <div class="col-md-12 d-flex justify-content-start gap-2 flex-wrap">
       <c:if test="${!user.annualFeeValidated}">
-        <button class="btn btn-outline-success btn-sm validate-annual-btn" data-user-id="${user.id}">
+        <button class="btn btnn btn-outline-success validate-annual-btn" data-user-id="${user.id}">
           ✔️ वार्षिक शुल्क सत्यापित करें
         </button>
       </c:if>
       <c:if test="${!user.otherFeeValidated}">
-        <button class="btn btn-outline-info btn-sm validate-other-btn" data-user-id="${user.id}">
+        <button class="btn btnn btn-outline-info btn-sm validate-other-btn" data-user-id="${user.id}">
           💼 अन्य शुल्क सत्यापित करें
         </button>
       </c:if>
-      <c:if test="${!user.approved}">
-        <button class="btn btn-outline-primary btn-sm validate-profile-btn" data-user-id="${user.id}">
-          🧾 प्रोफाइल सत्यापित करें
-        </button>
-      </c:if>
+      <c:if test="${!(user.approved == 'स्वीकृत')}">
+  <button class="btn btn-outline-success btn-sm validate-profile-btn" data-user-id="${user.id}">
+    ✅ प्रोफाइल सत्यापित करें
+  </button>
+  <button class="btn btn-outline-danger btn-sm reject-profile-btn" data-user-id="${user.id}">
+    ❌ अस्वीकृत करें
+  </button>
+</c:if>
+
     </div>
   </div>
 </c:if>
 
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </c:forEach>
+      </c:forEach>
+      <!-- 📄 Pagination Bar -->
+
+
 </div>
 
 <!-- Page Info -->

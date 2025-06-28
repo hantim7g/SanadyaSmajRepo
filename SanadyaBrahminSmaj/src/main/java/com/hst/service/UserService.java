@@ -1,7 +1,5 @@
 package com.hst.service;
 
-
-
 import com.hst.entity.Payment;
 import com.hst.entity.User;
 import com.hst.repository.UserRepository;
@@ -20,52 +18,50 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-
 @Service
 public class UserService {
-	   private static final int ANNUAL_FEE = 100;
-	    private static final int START_YEAR = 2020;
-	    
-    private final UserRepository userRepo;
+	private static final int ANNUAL_FEE = 100;
+	private static final int START_YEAR = 2020;
 
+	private final UserRepository userRepo;
 
-    @Autowired
-    private PaymentRepository paymentRepo;
+	@Autowired
+	private PaymentRepository paymentRepo;
 
-    public UserService(UserRepository userRepo) {
-        this.userRepo = userRepo;
-    }
-    public User findByMobile(String mobile) {
-    	
-        return userRepo.findByMobile(mobile).orElseThrow(() -> new RuntimeException("User not found"));
-    }
+	public UserService(UserRepository userRepo) {
+		this.userRepo = userRepo;
+	}
 
-    public void updateProfile(String mobile, User updated) {
-        User user = findByMobile(mobile);
+	public User findByMobile(String mobile) {
 
-        user.setFullName(updated.getFullName());
-        user.setFatherName(updated.getFatherName());
-        user.setEmail(updated.getEmail());
-        user.setGender(updated.getGender());
-        user.setDateOfBirth(updated.getDateOfBirth());
-        user.setAddress(updated.getAddress());
-        user.setEducation(updated.getEducation());
-        user.setOccupation(updated.getOccupation());
-        user.setBloodGroup(updated.getBloodGroup());
-        user.setMaritalStatus(updated.getMaritalStatus());
+		return userRepo.findByMobile(mobile).orElseThrow(() -> new RuntimeException("User not found"));
+	}
 
-        userRepo.save(user);
-    }
+	public void updateProfile(String mobile, User updated) {
+		User user = findByMobile(mobile);
 
-    
-    public Page<User> filterUsersPaginated(String name, String city, Boolean approved, Boolean due, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size); // Optional: add Sort.by("fullName")
-        return userRepo.filterUsers(name, city, approved, due, pageable);
-    }
-    
-    public Page<User>  getAllUsersWithPaymentInfo(int page, int size) {
-    	Pageable pageable = PageRequest.of(page, size); 
-    	Page<User> users = userRepo.findAllByOrderByFullNameAsc(pageable);
+		user.setFullName(updated.getFullName());
+		user.setFatherName(updated.getFatherName());
+		user.setEmail(updated.getEmail());
+		user.setGender(updated.getGender());
+		user.setDateOfBirth(updated.getDateOfBirth());
+		user.setAddress(updated.getAddress());
+		user.setEducation(updated.getEducation());
+		user.setOccupation(updated.getOccupation());
+		user.setBloodGroup(updated.getBloodGroup());
+		user.setMaritalStatus(updated.getMaritalStatus());
+
+		userRepo.save(user);
+	}
+
+	public Page<User> filterUsersPaginated(String name, String city, String approved, Boolean due, int page, int size) {
+		Pageable pageable = PageRequest.of(page, size); // Optional: add Sort.by("fullName")
+		return userRepo.filterUsers(name, city, approved, due, pageable);
+	}
+
+	public Page<User> getAllUsersWithPaymentInfo(int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
+		Page<User> users = userRepo.findAllByOrderByFullNameAsc(pageable);
 
 //        for (User user : users) {
 //            Payment lastAnnual = paymentRepo.findLastAnnualFeePaymentByUserId(user.getId());
@@ -92,19 +88,19 @@ public class UserService {
 //            user.setAnnualFeeDue(due);
 //        }
 //
-        return users;
-    }    
-    public void approveUser(Long userId) {
-        User user = userRepo.findById(userId).orElseThrow();
-        user.setApproved(true);
-        userRepo.save(user);
-    }
+		return users;
+	}
 
-    
-    public List<User> getAllUsers() {
-        List<User> users = userRepo.findAll();
-        return enrichUsers(users);
-    }
+	public void approveUser(Long userId, String status) {
+		User user = userRepo.findById(userId).orElseThrow();
+		user.setApproved(status);
+		userRepo.save(user);
+	}
+
+	public List<User> getAllUsers() {
+		List<User> users = userRepo.findAll();
+		return enrichUsers(users);
+	}
 
 //    public List<User> filterUsers(String name, String city, Boolean approved, Boolean due) {
 //        List<User> users = userRepo.findFiltered(name, city, approved);
@@ -117,24 +113,45 @@ public class UserService {
 //        return enrichUsers(users);
 //    }
 
-    private List<User> enrichUsers(List<User> users) {
-        for (User user : users) {
-            Payment lastPayment = paymentRepo.findTopByUserIdAndDescriptionOrderByPaymentDateDesc(user.getId(), "Annual Fee");
-            if (lastPayment != null) {
-                user.setLastAnnualFeePaid(lastPayment.getPaymentDate().toLocalDate());
-                user.setAnnualFeeDue(calculateAnnualFeeDue(user));
-                user.setLastAnnualFeeAmount(lastPayment.getAmount());
-            } else {
-                user.setAnnualFeeDue(calculateAnnualFeeDue(user));
-            }
-        }
-        return users;
+	private List<User> enrichUsers(List<User> users) {
+		for (User user : users) {
+			Payment lastPayment = paymentRepo.findTopByUserIdAndDescriptionOrderByPaymentDateDesc(user.getId(),
+					"Annual Fee");
+			if (lastPayment != null) {
+				user.setLastAnnualFeePaid(lastPayment.getPaymentDate().toLocalDate());
+				user.setAnnualFeeDue(calculateAnnualFeeDue(user));
+				user.setLastAnnualFeeAmount(lastPayment.getAmount());
+			} else {
+				user.setAnnualFeeDue(calculateAnnualFeeDue(user));
+			}
+		}
+		return users;
+	}
+
+	private int calculateAnnualFeeDue(User user) {
+		int currentYear = LocalDate.now().getYear();
+		int lastPaidYear = user.getLastAnnualFeePaid() != null ? user.getLastAnnualFeePaid().getYear() : 2020; // default
+																												// base
+																												// year
+		return currentYear - lastPaidYear;
+	}
+
+	public Payment getAnnualPaymentsByUserId(Long userId)
+    {
+    	return    	paymentRepo.findLastAnnualFeePaymentByUserId(userId);
     }
 
-    private int calculateAnnualFeeDue(User user) {
-        int currentYear = LocalDate.now().getYear();
-        int lastPaidYear = user.getLastAnnualFeePaid() != null ? user.getLastAnnualFeePaid().getYear() : 2020; // default base year
-        return currentYear - lastPaidYear;
-    }
-
+	public void   validateSinglePayment(Long paymentId,String response,String reason,User user)
+	{
+		Payment pmt = paymentRepo.findPaymentById(paymentId);
+		
+		pmt.setLstUpBy(user.getId());
+		pmt.setLstUpDt(Date.valueOf(LocalDate.now()));
+		pmt.setValidated(response);
+		pmt.setReason(reason);
+		paymentRepo.save(pmt);
+//		paymentRepo
+		
+	}
+    
 }

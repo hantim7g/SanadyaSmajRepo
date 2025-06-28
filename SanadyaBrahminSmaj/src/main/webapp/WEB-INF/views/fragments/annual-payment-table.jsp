@@ -1,3 +1,5 @@
+<%@ page language="java"  contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
@@ -14,6 +16,7 @@
           <th>मान्य</th>
           <th>रसीद</th>
           <th>कार्य</th>
+           <th>एक्शन</th>
         </tr>
       </thead>
       <tbody>
@@ -47,11 +50,18 @@
               </c:if>
             </td>
             <td>
-              <c:if test="${payment.validated != 'सत्यापित'}">
-                <button class="btn btn-sm btn-success validate-payment-btn" data-payment-id="${payment.id}">
-                  ✔️ सत्यापित करें
-                </button>
-              </c:if>
+              <td>
+  <c:if test="${payment.validated != 'सत्यापित'}">
+    <button class="btn btn-sm btn-success validate-payment-btn" data-payment-id="${payment.id}">
+      ✔️ सत्यापित करें
+    </button>
+    <button class="btn btn-sm btn-danger reject-payment-btn" data-payment-id="${payment.id}">
+      ❌ अस्वीकृत करें
+    </button>
+    <input type="text" class="form-control mt-1 reason-input" placeholder="कारण दर्ज करें..." />
+  </c:if>
+</td>
+
             </td>
           </tr>
         </c:forEach>

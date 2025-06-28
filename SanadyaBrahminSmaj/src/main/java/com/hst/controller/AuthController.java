@@ -52,7 +52,7 @@ public class AuthController {
         }
 
         User user = optionalUser.get();
-        if (!user.isApproved()) {
+        if (!(user.getApproved().equalsIgnoreCase("स्वीकृत"))) {
             return ResponseEntity.badRequest()
                     .body(new ApiResponse<>(false, "आपका पंजीकरण अनुमोदित नहीं है।", null));
         }
@@ -100,7 +100,7 @@ public class AuthController {
         user.setAgreeToTerms(req.isAgreeToTerms());
 
         user.setRole("USER"); // ✅ Add Spring Security compatible role format
-        user.setApproved(false);
+        user.setApproved("प्रक्रिया में");
 
         String regNo = registrationNumberService.generateRegistrationNumber();
         user.setRegistrationNo(regNo);

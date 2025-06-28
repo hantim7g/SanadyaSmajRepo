@@ -48,7 +48,11 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.isApproved(); // Use approved status to enable/disable login
+    	
+    	if(user.getApproved().equalsIgnoreCase("स्वीकृत"))
+        return true;
+    	else 
+    		return false;
     }
 
     public User getUser() {

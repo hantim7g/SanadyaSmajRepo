@@ -21,8 +21,8 @@ public class User {
 	private String gender;
 	private String address;
 
-	@Column(name = "approved", nullable = false)
-	private boolean approved = false;
+
+	private String approved = "प्रक्रिया में";
 
 	@Column(unique = true, nullable = false)
 	private String mobile;
@@ -148,13 +148,6 @@ public class User {
 		this.address = address;
 	}
 
-	public boolean isApproved() {
-		return approved;
-	}
-
-	public void setApproved(boolean approved) {
-		this.approved = approved;
-	}
 
 	public String getMobile() {
 		return mobile;
@@ -286,5 +279,13 @@ public class User {
 
 	public void setOtherFeeValidated(String otherFeeValidated) {
 		this.otherFeeValidated = otherFeeValidated;
+	}
+
+	public String getApproved() {
+		return approved;
+	}
+
+	public void setApproved(String approved) {
+		this.approved = approved;
 	}
 }

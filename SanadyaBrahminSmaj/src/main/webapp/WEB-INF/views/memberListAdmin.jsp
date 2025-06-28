@@ -92,9 +92,9 @@
     </div>
     <div class="col-md-2">
       <select name="approved" class="form-select">
-        <option value="">स्थिति</option>
-        <option value="true">स्वीकृत</option>
-        <option value="false">लंबित</option>
+        <option value="" >स्थिति</option>
+        <option value="स्वीकृत">स्वीकृत</option>
+        <option value="प्रक्रिया में">प्रक्रिया में</option>
       </select>
     </div>
     <div class="col-md-2">
@@ -122,82 +122,70 @@
 
     <!-- 🧾 User Card List -->
     <div id="userCardListContainer">
+      <div class="row align-items-left mb-3">
+  
+  <div class="col-md-12 text-end">
+    <span class="text-muted fw-light">कुल परिणाम: ${totalItems}</span>
+  </div>
+</div>
       <c:forEach var="user" items="${userList}">
-        <div class="card profile-card border-0 shadow-sm hover-shadow mb-4">
-                        <div class="name-banner">${user.fullName}</div>
+    <div class="card profile-card border-0 shadow-sm hover-shadow mb-4">
+      <div class="name-banner">${user.fullName}</div>
 
-          <div class="row g-3">
-            <!-- Profile Image -->
-            <div class="col-md-3  d-flex align-items-center justify-content-center">
-              <div class="w-100 text-center">
-                <img src="${user.profileImagePath != null ? user.profileImagePath : '/images/default.png'}"
-                     class="img-fluid profile-img border border-2 border-light rounded-3 shadow-sm"
-                     alt="Photo" >
+      <div class="row g-3">
+        <!-- Profile Image -->
+        <div class="col-md-3 d-flex align-items-center">
+          <div class="w-100 text-center">
+            <img src="${user.profileImagePath != null ? user.profileImagePath : '/images/default.png'}"
+                 class="img-fluid profile-img border border-2 border-light rounded-3 shadow-sm"
+                 alt="Photo" style="max-height: 200px;">
+          </div>
+        </div>
+
+        <!-- Profile Info -->
+        <div class="col-md-9">
+          <div class="card-body py-2">
+            <div class="row mb-2">
+              <div class="col-md-6"><strong>पंजीयन क्रमांक:</strong> <span class="badge bg-light text-dark">${user.registrationNo}</span></div>
+              <div class="col-md-6"><strong>पिता का नाम:</strong> ${user.fatherName}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-6"><strong>गोत्र:</strong> ${user.gotra}</div>
+              <div class="col-md-6"><strong>पेशा:</strong> ${user.occupation}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-6"><strong>पता:</strong> ${user.address}, ${user.homeDistrict}</div>
+              <div class="col-md-6"><strong>मोबाइल:</strong> <a href="tel:${user.mobile}" class="text-decoration-none">${user.mobile}</a></div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-6"><strong>ईमेल:</strong> <a href="mailto:${user.email}" class="text-decoration-none">${user.email}</a></div>
+              <div class="col-md-6">
+                <strong>शर्तें स्वीकार:</strong>
+                <span class="badge bg-${user.agreeToTerms ? 'success' : 'danger'}">
+                  ${user.agreeToTerms ? "हाँ" : "नहीं"}
+                </span>
               </div>
             </div>
-
-            <!-- Profile Info -->
-            <div class="col-md-9">
-
-              <div class="card-body py-2">
-
-                <div class="row mb-2">
-                  <div class="col-md-6 filedt">
-                    <strong>पंजीयन क्रमांक:</strong> 
-                    <span class="badge  text-dark">${user.registrationNo}</span>
-                  </div>
-                  <div class="col-md-6 filedt">
-                    <strong>पिता का नाम:</strong> ${user.fatherName}
-                  </div>
-                </div>
-
-                <div class="row mb-2">
-                  <div class="col-md-6 filedt"><strong>गोत्र:</strong> ${user.gotra}</div>
-                  <div class="col-md-6 filedt"><strong>पेशा:</strong> ${user.occupation}</div>
-                </div>
-
-                <div class="row mb-2">
-                  <div class="col-md-6 filedt">
-                    <strong>पता:</strong> ${user.address}, ${user.homeDistrict}
-                  </div>
-                  <div class="col-md-6 filedt">
-                    <strong>मोबाइल:</strong> <a href="tel:${user.mobile}" class="text-decoration-none">${user.mobile}</a>
-                  </div>
-                </div>
-
-                <div class="row mb-2">
-                  <div class="col-md-6 filedt">
-                    <strong>ईमेल:</strong> <a href="mailto:${user.email}" class="text-decoration-none">${user.email}</a>
-                  </div>
-                  <div class="col-md-6 filedt">
-                    <strong>शर्तें स्वीकार:</strong> 
-                    <span class="badge bg-${user.agreeToTerms ? 'success' : 'danger'}">
-                      ${user.agreeToTerms ? "हाँ" : "नहीं"}
-                    </span>
-                  </div>
-                </div>
-
-                <div class="row mb-2">
-                  <div class="col-md-6 filedt">
-                    <strong>अंतिम वार्षिक भुगतान:</strong>
-                    <c:choose>
-                      <c:when test="${user.lastAnnualFeePaid != null}">
-                        ₹${user.lastAnnualFeeAmount} — <span class="text-muted">${user.lastAnnualFeePaid}</span>
-                      </c:when>
-                      <c:otherwise><span class="text-muted">--</span></c:otherwise>
-                    </c:choose>
-                  </div>
-                  <div class="col-md-6 filedt">
-                    <strong>देय शुल्क:</strong> 
-                    <span class="text-danger fw-bold">₹ ${user.annualFeeDue}</span>
-                  </div>
-                </div>
+            <div class="row mb-2">
+              <div class="col-md-6">
+                <strong>अंतिम वार्षिक भुगतान:</strong>
+                <c:choose>
+                  <c:when test="${user.lastAnnualFeePaid != null}">
+                    ₹${user.lastAnnualFeeAmount} — <span class="text-muted">${user.lastAnnualFeePaid}</span>
+                  </c:when>
+                  <c:otherwise><span class="text-muted">--</span></c:otherwise>
+                </c:choose>
+              </div>
+              <div class="col-md-6">
+                <strong>देय शुल्क:</strong> <span class="text-danger fw-bold">₹ ${user.annualFeeDue}</span>
+              </div>
+            </div>
 
                 <div class="row mb-2 align-items-center">
                   <div class="col-md-6 filedt">
                     <strong>स्थिति:</strong>
-                    <span class="badge ${user.approved ? 'bg-success' : 'bg-warning text-dark'}">
-                      ${user.approved ? "स्वीकृत" : "स्वीकृति लंबित"}
+                    <span class="badge ${user.approved == 'स्वीकृत'? 'bg-success' : 'bg-warning text-dark'}">
+                      ${user.approved}
                     </span>
                   </div>
 
@@ -214,11 +202,15 @@
           💼 अन्य शुल्क सत्यापित करें
         </button>
       </c:if>
-      <c:if test="${!user.approved}">
-        <button class="btn btnn btn-outline-primary btn-sm validate-profile-btn" data-user-id="${user.id}">
-          🧾 प्रोफाइल सत्यापित करें
-        </button>
-      </c:if>
+      <c:if test="${!(user.approved == 'स्वीकृत')}">
+  <button class="btn btn-outline-success btn-sm validate-profile-btn" data-user-id="${user.id}">
+    ✅ प्रोफाइल सत्यापित करें
+  </button>
+  <button class="btn btn-outline-danger btn-sm reject-profile-btn" data-user-id="${user.id}">
+    ❌ अस्वीकृत करें
+  </button>
+</c:if>
+
     </div>
   </div>
 </c:if>
@@ -229,6 +221,11 @@
           </div>
         </div>
       </c:forEach>
+      
+<!-- Page Info -->
+<c:if test="${totalPages > 0}">
+  <p class="text-center text-muted">पृष्ठ ${currentPage + 1} / ${totalPages}</p>
+</c:if>
       <!-- 📄 Pagination Bar -->
 <c:if test="${totalPages > 0}">
   <nav class="mt-4">
@@ -267,84 +264,7 @@
 </div>
 
   <!-- Script -->
-<script>
-  $(document).ready(function () {
-    $('#filterForm').on('submit', function (e) {
-      e.preventDefault();
-      fetchFilteredUsers(0); // reset to first page on filter
-    });
 
-    // Validate Buttons
-    $(document).on('click', '.validate-annual-btn', function () {
-  const userId = $(this).data('user-id');
-
-  // Show modal and loading message
-  $('#annualPaymentModal').modal('show');
-  $('#annualPaymentModalBody').html('<div class="text-center text-muted">लोड हो रहा है...</div>');
-
-  // Load payment details via AJAX
-  $.get('/admin/user/' + userId + '/annualPayments', function (html) {
-    $('#annualPaymentModalBody').html(html);
-  }).fail(function () {
-    $('#annualPaymentModalBody').html('<div class="text-danger text-center">डेटा लोड करने में त्रुटि हुई।</div>');
-  });
-});
-
-// Validate individual payment from modal
-$(document).on('click', '.validate-payment-btn', function () {
-  const paymentId = $(this).data('payment-id');
-  const $btn = $(this);
-  $btn.prop("disabled", true).text("⏳ सत्यापन...");
-
-  $.post('/admin/validatePayment/' + paymentId, function () {
-    alert('भुगतान सत्यापित हुआ');
-    $btn.closest('tr').find('td:eq(5) span')
-        .removeClass().addClass('badge bg-success').text('सत्यापित');
-    $btn.remove(); // hide button after validation
-  }).fail(function () {
-    alert('सत्यापन में त्रुटि!');
-    $btn.prop("disabled", false).text("✔️ सत्यापित करें");
-  });
-});
-
-    $(document).on('click', '.validate-other-btn', function () {
-      const userId = $(this).data('user-id');
-      $.post('/admin/validateOtherFee/' + userId, function () {
-        alert('अन्य शुल्क सत्यापित हुआ');
-        fetchFilteredUsers();
-      });
-    });
-
-    $(document).on('click', '.validate-profile-btn', function () {
-      const userId = $(this).data('user-id');
-      $.post('/admin/approveUser/' + userId, function () {
-        alert('प्रोफाइल सत्यापित (स्वीकृत) हुआ');
-        fetchFilteredUsers();
-      });
-    });
-
-    // Pagination click (memberListAdmin.jsp)
-    $(document).on('click', '.page-link-btn', function (e) {
-      e.preventDefault();
-      const page = $(this).data("page");
-      fetchFilteredUsers(page);
-    });
-  });
-
-  function fetchFilteredUsers(page = 0) {
-    const formData = $("#filterForm").serialize();
-    const size = $("select[name='size']").val() || 10;
-    $.ajax({
-      url: '/admin/users/filter?' + formData + '&page=' + page + '&size=' + size,
-      type: 'GET',
-      success: function (html) {
-        $('#userCardListContainer').html(html);
-      },
-      error: function () {
-        alert("डेटा लाने में त्रुटि!");
-      }
-    });
-  }
-</script>
+<script src="${pageContext.request.contextPath}/js/memberListAdmin.js"></script>
 </body>
 </html>

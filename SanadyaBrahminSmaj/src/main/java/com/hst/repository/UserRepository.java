@@ -29,7 +29,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE (:name IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) AND (:city IS NULL OR LOWER(u.homeDistrict) LIKE LOWER(CONCAT('%', :city, '%'))) AND (:approved IS NULL OR u.approved = :approved)")
      List<User> findFiltered(@Param("name") String name,
                              @Param("city") String city,
-                             @Param("approved") Boolean approved);
+                             @Param("approved") String approved);
     
     
 //    Page<User> findByFullNameContainingIgnoreCaseAndCityContainingIgnoreCaseAndApprovedAndFeeDue(
@@ -45,7 +45,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     	       "AND (:due IS NULL OR (:due = true AND u.annualFeeDue > 0) OR (:due = false AND u.annualFeeDue = 0))")
     	Page<User> filterUsers(@Param("name") String name,
     	                       @Param("city") String city,
-    	                       @Param("approved") Boolean approved,
+    	                       @Param("approved") String approved,
     	                       @Param("due") Boolean due,
     	                       Pageable pageable);
 

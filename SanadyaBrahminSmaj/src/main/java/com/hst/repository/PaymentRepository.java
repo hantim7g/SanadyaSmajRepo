@@ -14,11 +14,12 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     @Query("""
     	    SELECT p FROM Payment p
-    	    WHERE p.user.id = :userId AND p.status = 'Success' AND p.paymentMode = 'Annual Fee'
+    	    WHERE p.user.id = :userId AND p.status = 'Success' AND p.description = 'Annual Fee'
     	    ORDER BY p.paymentDate DESC
     	    LIMIT 1
     	""")
     	Payment findLastAnnualFeePaymentByUserId(@Param("userId") Long userId);
     Payment findTopByUserIdAndDescriptionOrderByPaymentDateDesc(Long userId, String description);
 
+    Payment findPaymentById(Long id); 
 }
