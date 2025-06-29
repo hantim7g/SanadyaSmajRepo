@@ -24,11 +24,11 @@ $(function() {
 				if (res.success) {
 					debugger;
 					// ✅ Store JWT
-				localStorage.setItem("authToken", res.data.token);
-				localStorage.setItem("userName", res.message);
-      if (isAdminUser(res.data.token)) {
-        document.getElementById("adminArea").classList.remove("d-none");
-      }
+					localStorage.setItem("authToken", res.data.token);
+					localStorage.setItem("userName", res.message);
+					if (isAdminUser(res.data.token)) {
+						document.getElementById("adminArea").classList.remove("d-none");
+					}
 
 					// ✅ Store user name (assuming backend sends name in token or decode it if needed)
 					const userName = res.message || "प्रयोगकर्ता"; // Or extract from token
@@ -46,15 +46,54 @@ $(function() {
 
 
 					$('#authModal').modal('hide');
+					const dialog = bootbox.alert({
+						title: "<h4 class='text-success text-center'>🔐 लॉगिन सफल!</h4>",
+						message: "<p class='text-center fs-5'>✅ आपको होम पेज पर भेजा जा रहा है...</p>",
+						centerVertical: true,
+						buttons: {
+							ok: {
+								label: 'रोकें',
+								className: 'btn btn-light'
+							}
+						}
+					});
+
+					setTimeout(() => {
+						dialog.modal('hide');
+						window.location.href = "/home"; // or your dashboard route
+					}, 3000);
+
 				} else {
-					$('#loginError').text(res.message || "लॉगिन विफल रहा");
+
+					const msg = res.message|| "लॉगिन असफल। कृपया विवरण जांचें।";
+				bootbox.alert({
+					title: "<h4 class='text-danger text-center'>⚠️ त्रुटि</h4>",
+					message: `<div class='text-center fs-5'>${msg}</div>`,
+					centerVertical: true,
+					buttons: {
+						ok: {
+							label: 'फिर से प्रयास करें',
+							className: 'btn btn-danger px-4'
+						}
+					}
+				});
 				}
 
 			},
 
 			error: function(xhr) {
-				const msg = xhr.responseJSON?.message || "लॉगिन असफल। कृपया विवरण जांचें।";
-				$('#loginError').text(msg);
+				const msg = xhr.responseJSON.message || "लॉगिन असफल। कृपया विवरण जांचें।";
+				bootbox.alert({
+					title: "<h4 class='text-danger text-center'>⚠️ त्रुटि</h4>",
+					message: `<div class='text-center fs-5'>${msg}</div>`,
+					centerVertical: true,
+					buttons: {
+						ok: {
+							label: 'फिर से प्रयास करें',
+							className: 'btn btn-danger px-4'
+						}
+					}
+				});
 			}
 		});
 	});
@@ -83,6 +122,7 @@ $(function() {
 			fullName: $('#fullName').val(),
 			fatherName: $('#fatherName').val(),
 			dateOfBirth: $('#dateOfBirth').val(),
+			gotra:$('#gotra').val(),
 			gender: $('#gender').val(),
 			address: $('#address').val(),
 			mobile: mobile,
@@ -107,8 +147,8 @@ $(function() {
 			contentType: 'application/json',
 			data: JSON.stringify(jsonData),
 			success: function(response) {
-				const userId = response.userId || response.id || null;
-
+				const userId = response.data.userId || response.data.id || null;
+debugger;
 				// 2. If image selected, send it separately using FormData
 				const fileInput = $('#profileImage')[0];
 				if (fileInput.files.length > 0 && userId) {
@@ -117,14 +157,32 @@ $(function() {
 					formData.append("userId", userId); // Optional
 
 					$.ajax({
-						url: `/api/upload-profile-image`,
+						url: `/api/auth/upload-profile-image`,
 						method: 'POST',
 						data: formData,
 						processData: false,
 						contentType: false,
 						success: function() {
-							alert("✅ पंजीकरण और छवि अपलोड सफल!");
-							resetForm();
+						
+							const dialog = bootbox.alert({
+						title: "<h4 class='text-success text-center'>पंजीकरण सफल!</h4>",
+						message: "<p class='text-center fs-5'>✅ पंजीकरण और छवि अपलोड सफल!</p>",
+						centerVertical: true,
+						buttons: {
+							ok: {
+								label: 'रोकें',
+								className: 'btn btn-light'
+							}
+						}
+					});
+
+					setTimeout(() => {
+						dialog.modal('hide');
+						window.location.href = "/home"; // or your dashboard route
+					}, 3000);
+						
+						
+						
 						},
 						error: function() {
 							alert("⚠️ पंजीकरण सफल, लेकिन छवि अपलोड विफल।");
@@ -132,13 +190,46 @@ $(function() {
 						}
 					});
 				} else {
-					alert("✅ पंजीकरण सफल!");
-					resetForm();
+					
+					
+					
+							const dialog = bootbox.alert({
+						title: "<h4 class='text-success text-center'>पंजीकरण सफल!</h4>",
+						message: "<p class='text-center fs-5'>✅ पंजीकरण सफल!</p>",
+						centerVertical: true,
+						buttons: {
+							ok: {
+								label: 'रोकें',
+								className: 'btn btn-light'
+							}
+						}
+					});
+
+					setTimeout(() => {
+						dialog.modal('hide');
+						window.location.href = "/home"; // or your dashboard route
+					}, 3000);
+						
+					
+					
+					
 				}
 			},
 			error: function(err) {
 				console.error(err);
-				showError("❌ पंजीकरण विफल रहा। कृपया विवरण जांचें।");
+				
+				const msg = err.responseJSON.message || "❌ पंजीकरण विफल रहा। कृपया विवरण जांचें।";
+				bootbox.alert({
+					title: "<h4 class='text-danger text-center'>⚠️ त्रुटि</h4>",
+					message: `<div class='text-center fs-5'>${msg}</div>`,
+					centerVertical: true,
+					buttons: {
+						ok: {
+							label: 'फिर से प्रयास करें',
+							className: 'btn btn-danger px-4'
+						}
+					}
+				});
 			}
 		});
 
@@ -158,28 +249,28 @@ $(function() {
 
 
 //$(document).on("click", "#logoutBtn", function () {
- // localStorage.removeItem("authToken");
-  //location.reload(); // Refresh to reflect logout state
+// localStorage.removeItem("authToken");
+//location.reload(); // Refresh to reflect logout state
 //});
-$(document).ready(function () {
-  const token = localStorage.getItem("authToken");
-  const userNameStore = localStorage.getItem("userName");
+$(document).ready(function() {
+	const token = localStorage.getItem("authToken");
+	const userNameStore = localStorage.getItem("userName");
 
-  if (token) {
-    let userName = "प्रयोगकर्ता";
+	if (token) {
+		let userName = "प्रयोगकर्ता";
 
-    try {
-      const payloadBase64 = token.split('.')[1];
-      const decodedPayload = atob(payloadBase64);
-      const payload = JSON.parse(decodedPayload);
+		try {
+			const payloadBase64 = token.split('.')[1];
+			const decodedPayload = atob(payloadBase64);
+			const payload = JSON.parse(decodedPayload);
 
-      // Try fields in order of preference
-      userName = userNameStore||payload.name || payload.sub || payload.mobile || "प्रयोगकर्ता";
-    } catch (e) {
-      console.warn("⚠️ Invalid JWT or payload:", e);
-    }
+			// Try fields in order of preference
+			userName = userNameStore || payload.name || payload.sub || payload.mobile || "प्रयोगकर्ता";
+		} catch (e) {
+			console.warn("⚠️ Invalid JWT or payload:", e);
+		}
 
-    $('#loginArea').html(`
+		$('#loginArea').html(`
       <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">${userName}</a>
       <ul class="dropdown-menu dropdown-menu-end">
   <a class="dropdown-item" href="/member/profile">👤 प्रोफ़ाइल देखें</a>
@@ -188,5 +279,5 @@ $(document).ready(function () {
 <li><a class="dropdown-item text-danger" href="#" onclick="handleLogout(event)">🚪 लॉगआउट</a></li>
       </ul>
     `);
-  }
+	}
 });

@@ -116,3 +116,7 @@ $(document).on('click', '.reject-profile-btn', function () {
       }
     });
   }
+$(document).on('click', '#resetBtn', function () {
+  $('#filterForm')[0].reset(); // Reset form fields
+  fetchFilteredUsers();        // Reload default data
+});

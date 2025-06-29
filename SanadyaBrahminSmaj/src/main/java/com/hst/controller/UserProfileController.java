@@ -99,7 +99,7 @@ public class UserProfileController {
 
 			return ResponseEntity.ok(Map.of("imagePath", publicUrl));
 		} catch (IOException e) {
-			return ResponseEntity.status(500).body("Failed to upload image");
+			return ResponseEntity.status(500).body("छवि अपलोड करने में विफल.कृपया प्रोफ़ाइल अनुभाग में अपडेट करें.");
 		}
 	}
 	@GetMapping("/payments")

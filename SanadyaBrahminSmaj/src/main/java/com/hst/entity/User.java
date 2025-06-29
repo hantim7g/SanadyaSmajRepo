@@ -10,22 +10,26 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	@Column(unique = true, nullable = false)
+	private String mobile;
+	private String approved = "प्रक्रिया में";
 
 	@Column(unique = true)
 	private String RegistrationNo;
 	private String fullName;
 	private String fatherName;
+	
 	private String gotra;
 
+	private LocalDate createdDate;
+	private LocalDate approvedRejectDate;
+	private String approveRejectBy;
 	private LocalDate dateOfBirth;
 	private String gender;
 	private String address;
 
 
-	private String approved = "प्रक्रिया में";
 
-	@Column(unique = true, nullable = false)
-	private String mobile;
 
 	private String email;
 
@@ -45,32 +49,26 @@ public class User {
 	private boolean agreeToTerms;
 	@Column(nullable = false)
 	private String role = "USER";
-	@Column(name = "annual_fee_due")
-	private Integer annualFeeDue = 1; // default: due
+	@Column(name = "annual_fee_Status")
+	private String annualFeeStatus="प्रतीक्षारत";  // default: due
 
 	@Column(name = "last_annual_fee_paid")
 	private LocalDate lastAnnualFeePaid;
 
 	@Column(name = "last_annual_fee_amount")
 	private Double lastAnnualFeeAmount;
-	@Column(name = "annual_fee_validated")
-	private String annualFeeValidated ="प्रक्रिया में"; 
+//	@Column(name = "annual_fee_validated")
+//	private String annualFeeValidated ="प्रतीक्षारत"; 
 
 	@Column(name = "other_fee_validated")
-	private String otherFeeValidated ="NA"; 
+	private String otherFeeValidated ="प्रतीक्षारत"; 
 	
 	
 	public Double getLastAnnualFeeAmount() {
 		return lastAnnualFeeAmount;
 	}
 
-	public Integer getAnnualFeeDue() {
-		return annualFeeDue;
-	}
 
-	public void setAnnualFeeDue(Integer annualFeeDue) {
-		this.annualFeeDue = annualFeeDue;
-	}
 
 	public LocalDate getLastAnnualFeePaid() {
 		return lastAnnualFeePaid;
@@ -265,13 +263,7 @@ public class User {
 	public User() {
 	}
 
-	public String getAnnualFeeValidated() {
-		return annualFeeValidated;
-	}
 
-	public void setAnnualFeeValidated(String annualFeeValidated) {
-		this.annualFeeValidated = annualFeeValidated;
-	}
 
 	public String getOtherFeeValidated() {
 		return otherFeeValidated;
@@ -288,4 +280,53 @@ public class User {
 	public void setApproved(String approved) {
 		this.approved = approved;
 	}
+
+
+
+	public String getAnnualFeeStatus() {
+		return annualFeeStatus;
+	}
+
+
+
+	public void setAnnualFeeStatus(String annualFeeStatus) {
+		this.annualFeeStatus = annualFeeStatus;
+	}
+
+
+
+	public LocalDate getCreatedDate() {
+		return createdDate;
+	}
+
+
+
+	public void setCreatedDate(LocalDate createdDate) {
+		this.createdDate = createdDate;
+	}
+
+
+
+	public LocalDate getApprovedRejectDate() {
+		return approvedRejectDate;
+	}
+
+
+
+	public void setApprovedRejectDate(LocalDate approvedRejectDate) {
+		this.approvedRejectDate = approvedRejectDate;
+	}
+
+
+
+	public String getApproveRejectBy() {
+		return approveRejectBy;
+	}
+
+
+
+	public void setApproveRejectBy(String approveRejectBy) {
+		this.approveRejectBy = approveRejectBy;
+	}
+
 }

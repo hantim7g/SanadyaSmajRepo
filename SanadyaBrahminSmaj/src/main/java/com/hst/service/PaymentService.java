@@ -39,4 +39,9 @@ public class PaymentService {
     public Payment addPayment(Payment payment) {
         return paymentRepository.save(payment);
     }
+
+
+	public Payment findPaymentById(Long Id) {
+		return paymentRepository.findPaymentById(Id);
+	}
 }

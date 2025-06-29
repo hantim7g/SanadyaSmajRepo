@@ -37,6 +37,10 @@ public class UserService {
 		return userRepo.findByMobile(mobile).orElseThrow(() -> new RuntimeException("User not found"));
 	}
 
+	public Long findUserIdByMobile(String mobile) {
+
+		return userRepo.findIdByMobile(mobile);
+				}
 	public void updateProfile(String mobile, User updated) {
 		User user = findByMobile(mobile);
 
@@ -54,53 +58,33 @@ public class UserService {
 		userRepo.save(user);
 	}
 
-	public Page<User> filterUsersPaginated(String name, String city, String approved, Boolean due, int page, int size) {
+	public Page<User> filterUsersPaginated(String name, String mobile, String approved, String annualFeeStatus, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size); // Optional: add Sort.by("fullName")
-		return userRepo.filterUsers(name, city, approved, due, pageable);
+		return userRepo.filterUsers(name, mobile, approved, annualFeeStatus, pageable);
 	}
 
 	public Page<User> getAllUsersWithPaymentInfo(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 		Page<User> users = userRepo.findAllByOrderByFullNameAsc(pageable);
 
-//        for (User user : users) {
-//            Payment lastAnnual = paymentRepo.findLastAnnualFeePaymentByUserId(user.getId());
-//
-//            LocalDate lastPaidDate = null;
-//            double lastPaidAmount = 0;
-//
-//            if (lastAnnual != null) {
-//                lastPaidDate = lastAnnual.getPaymentDate().toLocalDate();
-//                lastPaidAmount = lastAnnual.getAmount();
-//            }
-//
-//            // Due logic (one payment per year expected)
-//            int currentYear = LocalDate.now().getYear();
-//            int startYear = 2020;
-//            int expectedPayments = currentYear - startYear + 1;
-//
-//            // Simplified due logic
-//            int paidYears = (int) (lastPaidAmount / 100);
-//            int due = Math.max(0, (expectedPayments - paidYears) * 100);
-//
-//            user.setLastAnnualFeePaid(lastPaidDate);
-//            user.setLastAnnualFeeAmount(lastPaidAmount);
-//            user.setAnnualFeeDue(due);
-//        }
-//
+
 		return users;
 	}
 
-	public void approveUser(Long userId, String status) {
+	
+	
+	public void approveUser(Long userId, String status,String actionBy) {
 		User user = userRepo.findById(userId).orElseThrow();
+		user.setApprovedRejectDate(LocalDate.now());
+		user.setApproveRejectBy(actionBy);
 		user.setApproved(status);
 		userRepo.save(user);
 	}
 
-	public List<User> getAllUsers() {
-		List<User> users = userRepo.findAll();
-		return enrichUsers(users);
-	}
+//	public List<User> getAllUsers() {
+//		List<User> users = userRepo.findAll();
+//		return enrichUsers(users);
+//	}
 
 //    public List<User> filterUsers(String name, String city, Boolean approved, Boolean due) {
 //        List<User> users = userRepo.findFiltered(name, city, approved);
@@ -113,20 +97,20 @@ public class UserService {
 //        return enrichUsers(users);
 //    }
 
-	private List<User> enrichUsers(List<User> users) {
-		for (User user : users) {
-			Payment lastPayment = paymentRepo.findTopByUserIdAndDescriptionOrderByPaymentDateDesc(user.getId(),
-					"Annual Fee");
-			if (lastPayment != null) {
-				user.setLastAnnualFeePaid(lastPayment.getPaymentDate().toLocalDate());
-				user.setAnnualFeeDue(calculateAnnualFeeDue(user));
-				user.setLastAnnualFeeAmount(lastPayment.getAmount());
-			} else {
-				user.setAnnualFeeDue(calculateAnnualFeeDue(user));
-			}
-		}
-		return users;
-	}
+//	private List<User> enrichUsers(List<User> users) {
+//		for (User user : users) {
+//			Payment lastPayment = paymentRepo.findTopByUserIdAndDescriptionOrderByPaymentDateDesc(user.getId(),
+//					"Annual Fee");
+//			if (lastPayment != null) {
+//				user.setLastAnnualFeePaid(lastPayment.getPaymentDate().toLocalDate());
+//				user.setAnnualFeeDue(calculateAnnualFeeDue(user));
+//				user.setLastAnnualFeeAmount(lastPayment.getAmount());
+//			} else {
+//				user.setAnnualFeeDue(calculateAnnualFeeDue(user));
+//			}
+//		}
+//		return users;
+//	}
 
 	private int calculateAnnualFeeDue(User user) {
 		int currentYear = LocalDate.now().getYear();
@@ -154,4 +138,6 @@ public class UserService {
 		
 	}
     
+	
+	
 }

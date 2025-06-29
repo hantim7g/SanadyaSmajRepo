@@ -5,6 +5,7 @@ import com.hst.entity.Payment;
 import com.hst.entity.User;
 import com.hst.repository.UserRepository;
 import com.hst.service.PaymentService;
+import com.hst.service.UserService;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -17,6 +18,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.security.Principal;
+import java.sql.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -45,7 +48,9 @@ public class PaymentController {
 
 	@Autowired
 	private UserRepository userRepository;
-
+	@Autowired
+	private UserService userService;
+	
 	private final PaymentService paymentService;
 
 	public PaymentController(PaymentService paymentService) {
@@ -80,7 +85,10 @@ public class PaymentController {
 
 		// 🔗 user सेट करें
 		payment.setUser(user);
-
+		payment.setCrtBy(user.getId());
+		payment.setCrtDt(Date.valueOf(LocalDate.now()));
+		
+		
 		// 🖼️ Save receipt image if present
 		if (receiptImage != null && !receiptImage.isEmpty()) {
 			try {
@@ -96,16 +104,71 @@ public class PaymentController {
 
 		Payment saved = paymentService.addPayment(payment);
 
-		if (payment.getDescription() != null && payment.getDescription().toLowerCase().contains("membership")
+		if (payment.getDescription() != null && payment.getDescription().toLowerCase().contains("वार्षिक शुल्क")
 				&& payment.getPaymentDate().toLocalDate().getYear() == LocalDate.now().getYear()
-				&& "Success".equalsIgnoreCase(payment.getStatus())) {
+				&& "सफल".equalsIgnoreCase(payment.getStatus())) {
 
-			user.setAnnualFeeDue(2); // 0 = not due (paid) // 1 due // 2 yet to validate
+			user.setAnnualFeeStatus("प्रक्रिया में"); // 0 = not due (paid) // 1 due // 2 yet to validate
 			user.setLastAnnualFeePaid(payment.getPaymentDate().toLocalDate());
 			user.setLastAnnualFeeAmount(payment.getAmount());
-			user.setAnnualFeeValidated("प्रक्रिया में");
+			//user.setAnnualFeeValidated("प्रक्रिया में");
 			userRepository.save(user); // 💾 Save updated fee info
 		}
 		return ResponseEntity.ok(saved);
 	}
+	@PostMapping(value = "/member/payment/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<String> updatePayment(
+	        @RequestParam("Id") Long paymentId,
+	        @RequestParam("transactionId") String transactionId,
+	        @RequestParam("amount") double amount,
+	        @RequestParam("paymentMode") String paymentMode,
+	        @RequestParam("description") String description,
+	        @RequestParam("status") String status,
+	        @RequestParam("paymentDate") Date paymentDate,
+	        @RequestParam("reason") String reason,
+	        @RequestParam(value = "receiptImage", required = false) MultipartFile receiptImage,
+	        Principal principal) {
+
+	    Payment paymentDB = paymentService.findPaymentById(paymentId);
+	    if (!"प्रक्रिया में".equalsIgnoreCase(paymentDB.getValidated())) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	                .body("❌ Payment cannot be updated as it is already processed.");
+	    }
+
+	    User user = userService.findByMobile(principal.getName());
+
+	    paymentDB.setTransactionId(transactionId);
+	    paymentDB.setAmount(amount);
+	    paymentDB.setPaymentMode(paymentMode);
+	    paymentDB.setDescription(description);
+	    paymentDB.setStatus(status);
+	    paymentDB.setPaymentDate(paymentDate);
+	    paymentDB.setReason(reason);
+
+	    // ✅ If receipt image is provided, save it
+	    if (receiptImage != null && !receiptImage.isEmpty()) {
+	        try {
+	            String fileName = UUID.randomUUID() + "_" + receiptImage.getOriginalFilename();
+	            Path filePath = Paths.get(uploadDir+"/receiptImage/").resolve(fileName);
+	            Files.createDirectories(filePath.getParent());
+	            Files.write(filePath, receiptImage.getBytes());
+	            paymentDB.setReceiptImagePath("receiptImage/"+fileName); // ✅ Update image path
+	        } catch (IOException e) {
+	            return ResponseEntity.status(500).body("❌ Failed to save receipt image.");
+	        }
+	    }
+
+	    paymentDB.setLstUpBy(user.getId());
+	    paymentDB.setLstUpDt(Date.valueOf(LocalDate.now()));
+
+	    try {
+	        paymentService.savePayment(paymentDB);
+	        return ResponseEntity.ok("redirect:/member/profile");
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("❌ Failed to update payment. Please try again.");
+	    }
+	}
+
+
 }

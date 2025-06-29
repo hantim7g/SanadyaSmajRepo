@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import com.hst.entity.User;
+
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
@@ -14,7 +16,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     @Query("""
     	    SELECT p FROM Payment p
-    	    WHERE p.user.id = :userId AND p.status = 'Success' AND p.description = 'Annual Fee'
+    	    WHERE p.user.id = :userId AND p.status = 'सफल' AND p.description = 'वार्षिक शुल्क'
     	    ORDER BY p.paymentDate DESC
     	    LIMIT 1
     	""")
@@ -22,4 +24,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Payment findTopByUserIdAndDescriptionOrderByPaymentDateDesc(Long userId, String description);
 
     Payment findPaymentById(Long id); 
+    
+     List<Payment> findPaymentByTransactionIdAndUser(String transactionId, User user);
 }

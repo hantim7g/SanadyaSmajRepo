@@ -1,7 +1,9 @@
 package com.hst.ViewController;
 
+import com.hst.entity.PasswordResetRequest;
 import com.hst.entity.Payment;
 import com.hst.entity.User;
+import com.hst.service.PasswordResetRequestService;
 import com.hst.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,6 +29,8 @@ public class AdminUserController {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private 	PasswordResetRequestService passwordResetRequestService;
 	@GetMapping("/memberList")
 	public String listUsers(Model model, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) {
@@ -40,30 +44,31 @@ public class AdminUserController {
 
 	@PostMapping("/approveProfile/{id}")
 	@ResponseBody
-	public ResponseEntity<?> approveUser(@PathVariable Long id) {
-		userService.approveUser(id, "स्वीकृत");
+	public ResponseEntity<?> approveUser(@PathVariable Long id,Principal Principal ) {
+		userService.approveUser(id, "स्वीकृत",Principal.getName());
 		return ResponseEntity.ok().build();
 	}
 
 	@PostMapping("/rejectProfile/{id}")
-	public ResponseEntity<?> rejectProfile(@PathVariable Long id) {
-		userService.approveUser(id, "अस्वीकृत");
+	public ResponseEntity<?> rejectProfile(@PathVariable Long id ,Principal Principal ) {
+		userService.approveUser(id, "अस्वीकृत", Principal.getName() );
 		return ResponseEntity.ok().build();
 	}
 
 	@GetMapping("/users/filter")
-	public String filterUsers(@RequestParam(required = false) String name, @RequestParam(required = false) String city,
-			@RequestParam(required = false) String approved, @RequestParam(required = false) Boolean due,
+	public String filterUsers(@RequestParam(required = false) String name, @RequestParam(required = false) String mobile,
+			@RequestParam(required = false) String approved, @RequestParam(required = false) String annualFeeStatus,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size, Model model) {
 
-		if (StringUtils.isEmpty(city))
-			city = null;
+		if (StringUtils.isEmpty(mobile))
+			mobile = null;
 		if (StringUtils.isEmpty(name))
 			name = null;
 		if (StringUtils.isEmpty(approved))
 			approved = null;
-
-		Page<User> userPage = userService.filterUsersPaginated(name, city, approved, due, page, size);
+		if (StringUtils.isEmpty(annualFeeStatus))
+			annualFeeStatus = null;
+		Page<User> userPage = userService.filterUsersPaginated(name, mobile, approved, annualFeeStatus, page, size);
 		model.addAttribute("userList", userPage.getContent());
 		model.addAttribute("currentPage", page);
 		model.addAttribute("totalPages", userPage.getTotalPages());
@@ -102,6 +107,12 @@ public class AdminUserController {
 		    User user= userService.findByMobile(mobile);
 		userService.validateSinglePayment(paymentId,"अस्वीकृत", reason,user); // Implement this
 		return ResponseEntity.ok().build();
+	}
+	@GetMapping("/reset-requests")
+	public String showResetRequests(Model model) {
+	    List<PasswordResetRequest> requests = passwordResetRequestService.findByStatus("PENDING");
+	    model.addAttribute("resetRequests", requests);
+	    return "resetRequests"; // JSP name without .jsp
 	}
 
 }

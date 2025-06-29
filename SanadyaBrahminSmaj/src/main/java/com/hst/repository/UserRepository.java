@@ -17,7 +17,10 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     
 	Optional<User> findByMobile(String mobile);
-
+	
+	 @Query("SELECT u.id FROM User u WHERE u.mobile = :mobile")
+	Long findIdByMobile(String mobile) ;
+	
     boolean existsByMobile(String mobile);
     List<User> findByApprovedFalse();
     @Query("SELECT COUNT(u) FROM User u")
@@ -40,13 +43,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Optional field filters (AND logic)
     @Query("SELECT u FROM User u " +
     	       "WHERE (:name IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) " +
-    	       "AND (:city IS NULL OR LOWER(u.homeDistrict) LIKE LOWER(CONCAT('%', :city, '%'))) " +
+    	       "AND (:mobile IS NULL OR LOWER(u.mobile) LIKE LOWER(CONCAT('%', :mobile, '%'))) " +
     	       "AND (:approved IS NULL OR u.approved = :approved) " +
-    	       "AND (:due IS NULL OR (:due = true AND u.annualFeeDue > 0) OR (:due = false AND u.annualFeeDue = 0))")
+    	       "AND (:annualFeeStatus IS NULL OR u.annualFeeStatus =:annualFeeStatus)")
     	Page<User> filterUsers(@Param("name") String name,
-    	                       @Param("city") String city,
+    	                       @Param("mobile") String mobile,
     	                       @Param("approved") String approved,
-    	                       @Param("due") Boolean due,
+    	                       @Param("annualFeeStatus") String annualFeeStatus,
     	                       Pageable pageable);
 
 

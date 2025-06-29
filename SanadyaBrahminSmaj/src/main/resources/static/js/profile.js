@@ -87,7 +87,8 @@ debugger;
       paymentMode: form.paymentMode.value,
       description: form.description.value,
       status: form.status.value,
-      paymentDate: form.paymentDate.value
+      paymentDate: form.paymentDate.value,
+      reason:form.reason.value
     };
 
     // 🧾 Add JSON string

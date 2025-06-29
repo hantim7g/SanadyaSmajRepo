@@ -7,20 +7,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>सनाढ्य ब्राह्मण सभा</title>
+<!-- ✅ Fonts (Devanagari support) -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@600&display=swap" rel="stylesheet">
 
-  <!-- Bootstrap 5 CDN -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- ✅ Bootstrap CSS (Latest 5.3) -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- ✅ DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
 
+<!-- ✅ jQuery (Only Once, Latest Compatible) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- ✅ Bootstrap Bundle JS (includes Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@600&display=swap" rel="stylesheet">
+<!-- ✅ DataTables Core & Buttons -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
 
-
+<!-- ✅ Bootbox for Alerts -->
+<script src="https://cdn.jsdelivr.net/npm/bootbox@5.5.2/dist/bootbox.min.js"></script>
 
   <style>
      body {
@@ -95,21 +108,21 @@
       }
     }
 
-    @media (max-width: 576px) {
-      .navbar-custom .nav-link,
-      .navbar-custom .dropdown-item,
-      .navbar-custom .navbar-brand {
-        font-size: 12px;
-      }
+@media (max-width: 576px) {
+  .navbar-custom .nav-link,
+  .navbar-custom .dropdown-item,
+  .navbar-custom .navbar-brand {
+    font-size: 16px; /* Increased from 12px */
+  }
 
-      .navbar-brand {
-        font-size: 14px;
-      }
+  .navbar-brand {
+    font-size: 18px; /* Increased from 14px */
+  }
 
-      .dropdown-menu {
-        font-size: 12px;
-      }
-    }
+  .dropdown-menu {
+    font-size: 15px; /* Optional: make dropdown more readable */
+  }
+}
   </style>
 </head>
 <body>
@@ -207,6 +220,8 @@
               <a class="dropdown-item dropdown-toggle" href="#">👥 सदस्य प्रबंधन</a>
               <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="/admin/memberList">सभी सदस्य</a></li>
+                <li><a class="dropdown-item" href="/admin/reset-requests">🔑 पासवर्ड अनुरोध</a></li>
+
                 <li><a class="dropdown-item" href="/admin/registrations">पंजीकरण अनुरोध</a></li>
                 <li><a class="dropdown-item" href="/admin/verified">सत्यापित सदस्य</a></li>
               </ul>
