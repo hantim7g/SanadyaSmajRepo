@@ -125,3 +125,102 @@ debugger;
 
 });
 
+$(document).ready(function () {
+              $('#paymentTable').DataTable({
+                dom: 'Bfrtip',
+                buttons: [
+                  {
+                    extend: 'excelHtml5',
+                    title: 'भुगतान_इतिहास',
+                    text: '📥 Excel डाउनलोड करें'
+                  },
+                  {
+                    extend: 'csvHtml5',
+                    title: 'भुगतान_इतिहास',
+                    text: '📄 CSV डाउनलोड करें'
+                  },
+                  {
+                    extend: 'pdfHtml5',
+                    title: 'भुगतान_इतिहास',
+                    text: '📄 PDF डाउनलोड करें',
+                    orientation: 'landscape',
+                    pageSize: 'A4'
+                  },
+                  {
+                    extend: 'print',
+                    text: '🖨️ प्रिंट करें'
+                  }
+                ],
+                language: {
+                  search: "🔍 खोजें:",
+                  lengthMenu: "_MENU_ प्रविष्टियाँ दिखाएँ",
+                  info: "_TOTAL_ में से _START_ से _END_ तक दिखा रहे हैं",
+                  paginate: {
+                    first: "पहला",
+                    last: "अंतिम",
+                    next: "➡️",
+                    previous: "⬅️"
+                  },
+                  zeroRecords: "कोई मेल नहीं मिला",
+                  infoEmpty: "कोई डेटा उपलब्ध नहीं",
+                  infoFiltered: "(कुल _MAX_ से छाँटा गया)"
+                },
+                responsive: true
+              });
+              $('#editPaymentForm').submit(function (e) {
+      e.preventDefault(); // prevent default form submit
+
+      const form = $(this)[0];
+      const formData = new FormData(form);
+
+      $.ajax({
+        url: '/api/payment/member/payment/update',
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+          debugger;
+          if (res.includes("redirect:/")) {
+            // Extract redirect URL and redirect
+            const redirectUrl = res.replace("redirect:", "").trim();
+            window.location.href = redirectUrl;
+          } else {
+            // Unexpected success message — just show it
+            bootbox.alert("✅ " + res);
+          }
+        },
+        error: function (xhr) {
+           debugger;
+          let msg = "❌ भुगतान अपडेट नहीं हो सका। कृपया पुनः प्रयास करें।";
+          if (xhr.responseText) {
+            msg = xhr.responseText;
+          }
+          bootbox.alert({
+            title: "त्रुटि",
+            message: msg,
+            centerVertical: true
+          });
+        }
+      });
+    });
+            });
+            $(document).on('click', '.edit-payment-btn', function () {
+              $('#editPaymentId').val($(this).data('id'));
+              $('#editTransactionId').val($(this).data('txn'));
+              $('#editAmount').val($(this).data('amount'));
+              $('#editPaymentMode').val($(this).data('mode'));
+              $('#editDescription').val($(this).data('desc'));
+              $('#editStatus').val($(this).data('status'));
+              $('#editreason').val($(this).data('reason'));
+
+
+              const dateVal = new Date($(this).data('date')).toISOString().split('T')[0];
+              $('#editPaymentDate').val(dateVal);
+              const fromDateVal = new Date($(this).data('feefrom')).toISOString().split('T')[0];
+              $('#editFeeFrom').val(fromDateVal);
+              const toDateVal = new Date($(this).data('feeto')).toISOString().split('T')[0];
+              $('#editFeeTo').val(toDateVal);
+              const modal = new bootstrap.Modal(document.getElementById('editPaymentModal'));
+              modal.show();
+            });

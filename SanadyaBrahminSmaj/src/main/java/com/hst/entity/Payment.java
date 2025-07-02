@@ -33,7 +33,8 @@ public class Payment {
 	@Column(nullable = false)
 	private String status; // e.g., Success, Failed, Pending
 
-	
+	private Date feeFrom;
+	private Date feeTo;
 	private String description;
 	private  String validated="प्रक्रिया में";
 
@@ -46,6 +47,7 @@ public class Payment {
 	private Long lstUpBy;
 	
 	private String reason;
+	
 	
 	public String getReceiptImagePath() {
 		return receiptImagePath;
@@ -166,4 +168,22 @@ public class Payment {
 	public void setLstUpBy(Long lstUpBy) {
 		this.lstUpBy = lstUpBy;
 	}
+
+	public Date getFeeFrom() {
+		return feeFrom;
+	}
+
+	public void setFeeFrom(Date feeFrom) {
+		this.feeFrom = feeFrom;
+	}
+
+	public Date getFeeTo() {
+		return feeTo;
+	}
+
+	public void setFeeTo(Date feeTo) {
+		this.feeTo = feeTo;
+	}
+
+
 }

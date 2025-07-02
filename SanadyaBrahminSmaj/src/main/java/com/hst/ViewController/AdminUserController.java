@@ -78,18 +78,25 @@ public class AdminUserController {
 
 	@GetMapping("/user/{id}/annualPayments")
 	public String getAnnualPayments(@PathVariable Long id, Model model) {
-		List<Payment> payments = null;
-		Payment p = userService.getAnnualPaymentsByUserId(id);
-		if (p != null) {
-			payments = new ArrayList<Payment>();
-			payments.add(userService.getAnnualPaymentsByUserId(id));
-
-		}
+		
+		List<Payment> payments = userService.getAnnualPaymentsByUserId(id);
+		
 
 		model.addAttribute("paymentList", payments);
 		return "fragments/annual-payment-table";
 	}
 
+	@GetMapping("/user/{id}/otherPayments")
+	public String getOtherPaymentsByUserId(@PathVariable Long id, Model model) {
+		
+		List<Payment> payments = userService.getOtherPaymentsByUserId(id);
+		
+
+		model.addAttribute("paymentList", payments);
+		return "fragments/annual-payment-table";
+	}
+	
+	
 	@PostMapping("/validatePayment/{paymentId}/{reason}")
 	@ResponseBody
 	public ResponseEntity<?> validatePayment(@PathVariable Long paymentId, @PathVariable String reason , Principal principal)

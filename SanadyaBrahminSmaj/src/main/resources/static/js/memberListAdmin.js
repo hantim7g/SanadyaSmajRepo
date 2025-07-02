@@ -4,6 +4,31 @@
       fetchFilteredUsers(0); // reset to first page on filter
     });
 
+    // other fee Buttons
+    $(document).on('click', '.validate-other-btn', function () {
+  const userId = $(this).data('user-id');
+
+  // Show modal and loading message
+  $('#annualPaymentModal').modal('show');
+  $('#annualPaymentModalBody').html('<div class="text-center text-muted">लोड हो रहा है...</div>');
+
+  // Load payment details via AJAX
+  $.get('/admin/user/' + userId + '/otherPayments', function (html) {
+    $('#annualPaymentModalBody').html(html);
+  }).fail(function () {
+    $('#annualPaymentModalBody').html('<div class="text-danger text-center">डेटा लोड करने में त्रुटि हुई।</div>');
+  });
+});
+
+
+
+
+
+
+
+
+
+
     // Validate Buttons
     $(document).on('click', '.validate-annual-btn', function () {
   const userId = $(this).data('user-id');
@@ -65,14 +90,14 @@ $(document).on('click', '.reject-payment-btn', function () {
 });
 
 
-    $(document).on('click', '.validate-other-btn', function () {
+ /*   $(document).on('click', '.validate-other-btn', function () {
       const userId = $(this).data('user-id');
       $.post('/admin/validateOtherFee/' + userId, function () {
         alert('अन्य शुल्क सत्यापित हुआ');
         fetchFilteredUsers();
       });
     });
-
+*/
    // Approve profile
 $(document).on('click', '.validate-profile-btn', function () {
   const userId = $(this).data('user-id');

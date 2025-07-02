@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,15 +61,45 @@ public class UserService {
 
 	public Page<User> filterUsersPaginated(String name, String mobile, String approved, String annualFeeStatus, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size); // Optional: add Sort.by("fullName")
-		return userRepo.filterUsers(name, mobile, approved, annualFeeStatus, pageable);
+		Page<User> users =null;
+		users =userRepo.filterUsers(name, mobile, approved, annualFeeStatus, pageable);
+
+		
+		return users;
 	}
 
 	public Page<User> getAllUsersWithPaymentInfo(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 		Page<User> users = userRepo.findAllByOrderByFullNameAsc(pageable);
 
-
+		users.forEach(this::updateFeeStatusForUser);
+		
 		return users;
+	}
+
+	// Called inside your filterUsersPaginated logic or DTO population
+	public void updateFeeStatusForUser(User user) {
+	    List<Payment> payments = paymentRepo.findByUserId(user.getId());
+
+	    boolean hasPendingAnnual = payments.stream()
+	        .anyMatch(p ->"वार्षिक शुल्क".equalsIgnoreCase(p.getDescription()) && "प्रक्रिया में".equals(p.getValidated()));
+
+	    boolean hasPendingOther = payments.stream()
+	        .anyMatch(p ->!("वार्षिक शुल्क".equalsIgnoreCase(p.getDescription())) && "प्रक्रिया में".equals(p.getValidated()));
+
+	    //boolean hasPendingAnnual = payments.stream().max(null)
+	    
+	    user.setAnnualFeeStatus(hasPendingAnnual ? "प्रक्रिया में" : "सत्यापित");
+	    user.setOtherFeeValidated(hasPendingOther ? "प्रक्रिया में" : "सत्यापित");
+	    payments.stream()
+        .filter(p -> "वार्षिक शुल्क".equalsIgnoreCase(p.getDescription()) &&
+                     "सत्यापित".equals(p.getValidated()))
+        .max(Comparator.comparing(Payment::getPaymentDate))
+        .ifPresent(latest -> {
+            user.setLastAnnualFeePaid(latest.getPaymentDate().toLocalDate());
+            user.setLastAnnualFeeAmount(latest.getAmount());
+        });
+	
 	}
 
 	
@@ -120,11 +151,17 @@ public class UserService {
 		return currentYear - lastPaidYear;
 	}
 
-	public Payment getAnnualPaymentsByUserId(Long userId)
+	public List<Payment> getAnnualPaymentsByUserId(Long userId)
     {
     	return    	paymentRepo.findLastAnnualFeePaymentByUserId(userId);
     }
 
+	public List<Payment> getOtherPaymentsByUserId(Long userId)
+    {
+    	return    	paymentRepo.findLastOtherFeePaymentByUserId(userId);
+    }
+	
+	
 	public void   validateSinglePayment(Long paymentId,String response,String reason,User user)
 	{
 		Payment pmt = paymentRepo.findPaymentById(paymentId);

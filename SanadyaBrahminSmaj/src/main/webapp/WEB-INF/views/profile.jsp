@@ -210,9 +210,17 @@
                       <option value="विफल">विफल</option>
                     </select>
                   </div>
-                  <div class="col-md-4">
+                  <div class="col-md-2">
                     <label class="label-col">भुगतान तिथि</label>
                     <input type="date" class="form-control" name="paymentDate" required />
+                  </div>
+                  <div class="col-md-2">
+                    <label class="label-col">समय से</label>
+                    <input type="date" class="form-control" name="feeFrom" required />
+                  </div>
+                  <div class="col-md-2">
+                    <label class="label-col">समय तक</label>
+                    <input type="date" class="form-control" name="feeTo" required />
                   </div>
                   <div class="col-md-4">
                     <label class="label-col">रसीद पट्ट अपलोड करें</label>
@@ -243,7 +251,9 @@
                       <th>राशि (₹)</th>
                       <th>माध्यम</th>
                       <th>विवरण</th>
-                      <th>टिप्पणी</th>
+                      <th>समय से</th>
+                       <th>समय तक</th>
+                      <th>भुगतान का कारण</th>
                       <th>स्थिति</th>
                       <th>मान्य</th>
                       <th>रसीद</th>
@@ -265,6 +275,12 @@
                         </td>
                         <td>
                           <c:out value="${payment.description}" />
+                        </td>
+                                                <td>
+                          <fmt:formatDate value="${payment.feeFrom}" pattern="dd-MM-yyyy HH:mm" />
+                        </td>
+                                                <td>
+                          <fmt:formatDate value="${payment.feeTo}" pattern="dd-MM-yyyy HH:mm" />
                         </td>
                         <td>
                           <c:out value="${payment.reason}" />
@@ -301,6 +317,7 @@
                               data-txn="${payment.transactionId}" data-amount="${payment.amount}"
                               data-mode="${payment.paymentMode}" data-desc="${payment.description}"
                               data-status="${payment.status}" data-date="${payment.paymentDate}"
+                              data-feeFrom="${payment.feeFrom}" data-feeTo="${payment.feeTo}"
                               data-reason="${payment.reason}">
                               ✏️ संपादित करें
                             </button>
@@ -318,103 +335,7 @@
           </div>
                     <script src="${pageContext.request.contextPath}/js/profile.js"></script>
           <script>
-            $(document).ready(function () {
-              $('#paymentTable').DataTable({
-                dom: 'Bfrtip',
-                buttons: [
-                  {
-                    extend: 'excelHtml5',
-                    title: 'भुगतान_इतिहास',
-                    text: '📥 Excel डाउनलोड करें'
-                  },
-                  {
-                    extend: 'csvHtml5',
-                    title: 'भुगतान_इतिहास',
-                    text: '📄 CSV डाउनलोड करें'
-                  },
-                  {
-                    extend: 'pdfHtml5',
-                    title: 'भुगतान_इतिहास',
-                    text: '📄 PDF डाउनलोड करें',
-                    orientation: 'landscape',
-                    pageSize: 'A4'
-                  },
-                  {
-                    extend: 'print',
-                    text: '🖨️ प्रिंट करें'
-                  }
-                ],
-                language: {
-                  search: "🔍 खोजें:",
-                  lengthMenu: "_MENU_ प्रविष्टियाँ दिखाएँ",
-                  info: "_TOTAL_ में से _START_ से _END_ तक दिखा रहे हैं",
-                  paginate: {
-                    first: "पहला",
-                    last: "अंतिम",
-                    next: "➡️",
-                    previous: "⬅️"
-                  },
-                  zeroRecords: "कोई मेल नहीं मिला",
-                  infoEmpty: "कोई डेटा उपलब्ध नहीं",
-                  infoFiltered: "(कुल _MAX_ से छाँटा गया)"
-                },
-                responsive: true
-              });
-              $('#editPaymentForm').submit(function (e) {
-      e.preventDefault(); // prevent default form submit
-
-      const form = $(this)[0];
-      const formData = new FormData(form);
-
-      $.ajax({
-        url: '/api/payment/member/payment/update',
-        method: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function (res) {
-          debugger;
-          if (res.includes("redirect:/")) {
-            // Extract redirect URL and redirect
-            const redirectUrl = res.replace("redirect:", "").trim();
-            window.location.href = redirectUrl;
-          } else {
-            // Unexpected success message — just show it
-            bootbox.alert("✅ " + res);
-          }
-        },
-        error: function (xhr) {
-           debugger;
-          let msg = "❌ भुगतान अपडेट नहीं हो सका। कृपया पुनः प्रयास करें।";
-          if (xhr.responseText) {
-            msg = xhr.responseText;
-          }
-          bootbox.alert({
-            title: "त्रुटि",
-            message: msg,
-            centerVertical: true
-          });
-        }
-      });
-    });
-            });
-            $(document).on('click', '.edit-payment-btn', function () {
-              $('#editPaymentId').val($(this).data('id'));
-              $('#editTransactionId').val($(this).data('txn'));
-              $('#editAmount').val($(this).data('amount'));
-              $('#editPaymentMode').val($(this).data('mode'));
-              $('#editDescription').val($(this).data('desc'));
-              $('#editStatus').val($(this).data('status'));
-              $('#editreason').val($(this).data('reason'));
-
-
-              const dateVal = new Date($(this).data('date')).toISOString().split('T')[0];
-              $('#editPaymentDate').val(dateVal);
-
-              const modal = new bootstrap.Modal(document.getElementById('editPaymentModal'));
-              modal.show();
-            });
-
+            
           </script>
           <!-- ✏️ Edit Payment Modal -->
           <div class="modal fade" id="editPaymentModal" tabindex="-1" aria-labelledby="editPaymentLabel"
@@ -473,6 +394,14 @@
                       <div class="col-md-4">
                         <label>भुगतान तिथि</label>
                         <input type="date" class="form-control" name="paymentDate" id="editPaymentDate" required />
+                      </div>
+                      <div class="col-md-4">
+                        <label>समय से</label>
+                        <input type="date" class="form-control" name="feeFrom" id="editFeeFrom" required />
+                      </div>
+                      <div class="col-md-4">
+                        <label>समय तक</label>
+                        <input type="date" class="form-control" name="feeTo" id="editFeeTo" required />
                       </div>
                       <div class="col-md-4">
                         <label>रसीद अपलोड करें (यदि पुनः जरूरी हो)</label>

@@ -15,7 +15,7 @@
           <th>स्थिति</th>
           <th>मान्य</th>
           <th>रसीद</th>
-          <th>कार्य</th>
+          <th>भुगतान का कारण</th>
            <th>एक्शन</th>
         </tr>
       </thead>
@@ -28,7 +28,7 @@
             <td>${payment.description}</td>
             <td>
               <span class="badge 
-                ${payment.status == 'Success' ? 'bg-success' : 
+                ${payment.status == 'सफल' ? 'bg-success' : 
                   payment.status == 'Pending' ? 'bg-warning text-dark' : 
                   'bg-danger'}">
                 ${payment.status}
@@ -49,7 +49,7 @@
                 </a>
               </c:if>
             </td>
-            <td>
+             <td>${payment.reason}</td>
               <td>
   <c:if test="${payment.validated != 'सत्यापित'}">
     <button class="btn btn-sm btn-success validate-payment-btn" data-payment-id="${payment.id}">

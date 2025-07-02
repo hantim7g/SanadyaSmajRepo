@@ -125,6 +125,8 @@ public class PaymentController {
 	        @RequestParam("description") String description,
 	        @RequestParam("status") String status,
 	        @RequestParam("paymentDate") Date paymentDate,
+	        @RequestParam("feeFrom") Date feeFrom,
+	        @RequestParam("feeTo") Date feeTo,
 	        @RequestParam("reason") String reason,
 	        @RequestParam(value = "receiptImage", required = false) MultipartFile receiptImage,
 	        Principal principal) {
@@ -144,7 +146,8 @@ public class PaymentController {
 	    paymentDB.setStatus(status);
 	    paymentDB.setPaymentDate(paymentDate);
 	    paymentDB.setReason(reason);
-
+	    paymentDB.setFeeFrom(feeFrom);
+	    paymentDB.setFeeTo(feeTo);
 	    // ✅ If receipt image is provided, save it
 	    if (receiptImage != null && !receiptImage.isEmpty()) {
 	        try {
