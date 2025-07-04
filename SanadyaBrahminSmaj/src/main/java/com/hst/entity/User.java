@@ -57,8 +57,8 @@ public class User {
 
 	@Column(name = "last_annual_fee_amount")
 	private Double lastAnnualFeeAmount;
-//	@Column(name = "annual_fee_validated")
-//	private String annualFeeValidated ="प्रतीक्षारत"; 
+	@Transient
+	private String annualFeeValidated ="प्रतीक्षारत"; 
 
 	@Column(name = "other_fee_validated")
 	private String otherFeeValidated ="प्रतीक्षारत"; 
@@ -327,6 +327,18 @@ public class User {
 
 	public void setApproveRejectBy(String approveRejectBy) {
 		this.approveRejectBy = approveRejectBy;
+	}
+
+
+
+	public String getAnnualFeeValidated() {
+		return annualFeeValidated;
+	}
+
+
+
+	public void setAnnualFeeValidated(String annualFeeValidated) {
+		this.annualFeeValidated = annualFeeValidated;
 	}
 
 }

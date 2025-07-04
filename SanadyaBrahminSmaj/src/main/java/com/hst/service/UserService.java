@@ -5,11 +5,16 @@ import com.hst.entity.User;
 import com.hst.repository.UserRepository;
 import com.hst.repository.PaymentRepository;
 import com.hst.service.UserService;
+
+import io.swagger.v3.oas.models.media.IntegerSchema;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.Year;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -59,37 +64,62 @@ public class UserService {
 		userRepo.save(user);
 	}
 
-	public Page<User> filterUsersPaginated(String name, String mobile, String approved, String annualFeeStatus, int page, int size) {
+	public Page<User> filterUsersPaginated(String name, String mobile, String approved, String annualFeeStatus, int page, int size,List<Integer> years) {
 		Pageable pageable = PageRequest.of(page, size); // Optional: add Sort.by("fullName")
 		Page<User> users =null;
 		users =userRepo.filterUsers(name, mobile, approved, annualFeeStatus, pageable);
-
+//		users.forEach(this::updateFeeStatusForUser);
 		
+
+		for(User user :users) {
+			updateFeeStatusForUser(user,years);
+		}
 		return users;
 	}
 
-	public Page<User> getAllUsersWithPaymentInfo(int page, int size) {
+	public Page<User> getAllUsersWithPaymentInfo(int page, int size,List<Integer> years) {
 		Pageable pageable = PageRequest.of(page, size);
 		Page<User> users = userRepo.findAllByOrderByFullNameAsc(pageable);
 
-		users.forEach(this::updateFeeStatusForUser);
+//		users.forEach(this::updateFeeStatusForUser);
+		
+		for(User user :users) {
+			updateFeeStatusForUser(user,years);
+		}
 		
 		return users;
 	}
 
 	// Called inside your filterUsersPaginated logic or DTO population
-	public void updateFeeStatusForUser(User user) {
+	public void updateFeeStatusForUser(User user,List<Integer> years) {
 	    List<Payment> payments = paymentRepo.findByUserId(user.getId());
-
+	     
+	    
+	    
 	    boolean hasPendingAnnual = payments.stream()
-	        .anyMatch(p ->"वार्षिक शुल्क".equalsIgnoreCase(p.getDescription()) && "प्रक्रिया में".equals(p.getValidated()));
+	    	    .anyMatch(p ->
+	    	        "वार्षिक शुल्क".equalsIgnoreCase(p.getDescription())
+	    	        && ("सत्यापित".equals(p.getValidated()) || "प्रक्रिया में".equals(p.getValidated()))
+	    	        && years.stream().anyMatch(y -> {
+	    	        	LocalDate from = p.getFeeFrom().toLocalDate();
+	    	        	LocalDate to = p.getFeeTo().toLocalDate();
+	    	            return y >= from.getYear() && y <= to.getYear();
+	    	        })
+	    	    );
 
+	    boolean hasPendingValidateAnnual = payments.stream()
+	    	    .anyMatch(p ->
+	    	        "वार्षिक शुल्क".equalsIgnoreCase(p.getDescription())
+	    	        && "प्रक्रिया में".equals(p.getValidated())
+	    	    );
+
+	    
 	    boolean hasPendingOther = payments.stream()
 	        .anyMatch(p ->!("वार्षिक शुल्क".equalsIgnoreCase(p.getDescription())) && "प्रक्रिया में".equals(p.getValidated()));
 
 	    //boolean hasPendingAnnual = payments.stream().max(null)
-	    
-	    user.setAnnualFeeStatus(hasPendingAnnual ? "प्रक्रिया में" : "सत्यापित");
+	    user.setAnnualFeeValidated(hasPendingValidateAnnual? "प्रक्रिया में" : "प्रतीक्षारत");
+	    user.setAnnualFeeStatus(hasPendingAnnual ? "सत्यापित/प्रक्रिया में" : "प्रतीक्षारत");
 	    user.setOtherFeeValidated(hasPendingOther ? "प्रक्रिया में" : "सत्यापित");
 	    payments.stream()
         .filter(p -> "वार्षिक शुल्क".equalsIgnoreCase(p.getDescription()) &&

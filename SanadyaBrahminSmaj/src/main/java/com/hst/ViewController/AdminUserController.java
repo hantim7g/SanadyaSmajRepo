@@ -18,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +35,9 @@ public class AdminUserController {
 	@GetMapping("/memberList")
 	public String listUsers(Model model, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) {
-		Page<User> userList = userService.getAllUsersWithPaymentInfo(page, size);
+		List<Integer> years= new ArrayList<Integer>();
+		years.add(LocalDate.now().getYear());
+		Page<User> userList = userService.getAllUsersWithPaymentInfo(page, size,years);
 		model.addAttribute("userList", userList.getContent());
 		model.addAttribute("currentPage", page);
 		model.addAttribute("totalPages", userList.getTotalPages());
@@ -58,7 +61,7 @@ public class AdminUserController {
 	@GetMapping("/users/filter")
 	public String filterUsers(@RequestParam(required = false) String name, @RequestParam(required = false) String mobile,
 			@RequestParam(required = false) String approved, @RequestParam(required = false) String annualFeeStatus,
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size, Model model) {
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,@RequestParam(required = true)String yearDropdown, Model model) {
 
 		if (StringUtils.isEmpty(mobile))
 			mobile = null;
@@ -68,7 +71,24 @@ public class AdminUserController {
 			approved = null;
 		if (StringUtils.isEmpty(annualFeeStatus))
 			annualFeeStatus = null;
-		Page<User> userPage = userService.filterUsersPaginated(name, mobile, approved, annualFeeStatus, page, size);
+		
+		
+		
+		List<Integer> years = new ArrayList<>();
+
+        if (yearDropdown.startsWith("last")) {
+            // Extract the number after "last"
+            int yearsBack = Integer.parseInt(yearDropdown.replace("last", "").replace("years", "").trim());
+
+            int currentYear = java.time.Year.now().getValue();
+            for (int i = 0; i < yearsBack; i++) {
+                years.add(currentYear - i);
+            }
+        } else {
+            // If it is just a specific year (e.g., "2023")
+            years.add(Integer.parseInt(yearDropdown));
+        }
+		Page<User> userPage = userService.filterUsersPaginated(name, mobile, approved, annualFeeStatus, page, size,years);
 		model.addAttribute("userList", userPage.getContent());
 		model.addAttribute("currentPage", page);
 		model.addAttribute("totalPages", userPage.getTotalPages());

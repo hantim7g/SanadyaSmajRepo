@@ -106,6 +106,17 @@
                   <option value="अस्वीकृत">अस्वीकृत</option>
                 </select>
               </div>
+              <div class="col-md-2">
+                <select  class="form-select" name="yearDropdown">
+                  <option value="2025">2025</option>
+                  <option value="2024">2024</option>
+                  <option value="2023">2023</option>
+                  <option value="2022">2022</option>
+                  <option value="2021">2021</option>
+                  <option value="2020">2020</option>
+                </select>
+              </div>
+
 
               <div class="col-md-1 d-grid">
                 <button type="submit" class="btn btn-primary">🔍 खोजें</button>
@@ -199,10 +210,10 @@
                         </div>
 
                         <c:if
-                          test="${user.approved=='प्रक्रिया में' || user.annualFeeStatus=='प्रक्रिया में' || user.otherFeeValidated=='प्रक्रिया में'}">
+                          test="${user.approved=='प्रक्रिया में' || user.annualFeeValidated=='प्रक्रिया में' || user.otherFeeValidated=='प्रक्रिया में'}">
                           <div class="row mt-2">
                             <div class="col-md-12 d-flex justify-content-start gap-2 flex-wrap">
-                              <c:if test="${user.annualFeeStatus=='प्रक्रिया में'}">
+                              <c:if test="${user.annualFeeValidated=='प्रक्रिया में'}">
                                 <button class="btn btnn btn-outline-success validate-annual-btn"
                                   data-user-id="${user.id}">
                                   ✔️ वार्षिक शुल्क सत्यापित करें

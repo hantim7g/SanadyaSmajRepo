@@ -131,7 +131,7 @@ $(document).on('click', '.reject-profile-btn', function () {
     const formData = $("#filterForm").serialize();
     const size = $("select[name='size']").val() || 10;
     $.ajax({
-      url: '/admin/users/filter?' + formData + '&page=' + page + '&size=' + size,
+      url: '/admin/users/filter?' + formData + '&page=' + page + '&size=' + size ,
       type: 'GET',
       success: function (html) {
         $('#userCardListContainer').html(html);
