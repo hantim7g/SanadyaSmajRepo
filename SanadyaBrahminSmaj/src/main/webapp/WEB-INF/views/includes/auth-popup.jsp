@@ -179,12 +179,12 @@
           return;
         }
 
-const result = validatePassword(password.value);
+const result = validatePassword(newPassword);
 
 if (result.valid) {
   console.log("पासवर्ड मान्य है ✅");
 } else {
-  console.log("पासवर्ड अमान्य ❌:");
+  bootbox.alert("पासवर्ड अमान्य ❌:");
   result.errors.forEach(err => console.log("- " + err));
   return;
 }

@@ -125,6 +125,7 @@ if (result.valid) {
 } else {
   console.log("पासवर्ड अमान्य ❌:");
   result.errors.forEach(err => console.log("- " + err));
+  return showError("पासवर्ड अमान्य ❌:");
 }
 
 
