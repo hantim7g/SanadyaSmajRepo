@@ -44,12 +44,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u " +
     	       "WHERE (:name IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) " +
     	       "AND (:mobile IS NULL OR LOWER(u.mobile) LIKE LOWER(CONCAT('%', :mobile, '%'))) " +
-    	       "AND (:approved IS NULL OR u.approved = :approved) " +
-    	       "AND (:annualFeeStatus IS NULL OR u.annualFeeStatus =:annualFeeStatus)")
+    	       "AND (:approved IS NULL OR u.approved = :approved) ")
     	Page<User> filterUsers(@Param("name") String name,
     	                       @Param("mobile") String mobile,
     	                       @Param("approved") String approved,
-    	                       @Param("annualFeeStatus") String annualFeeStatus,
     	                       Pageable pageable);
 
 

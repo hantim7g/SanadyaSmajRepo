@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -67,14 +68,23 @@ public class UserService {
 	public Page<User> filterUsersPaginated(String name, String mobile, String approved, String annualFeeStatus, int page, int size,List<Integer> years) {
 		Pageable pageable = PageRequest.of(page, size); // Optional: add Sort.by("fullName")
 		Page<User> users =null;
-		users =userRepo.filterUsers(name, mobile, approved, annualFeeStatus, pageable);
+		users =userRepo.filterUsers(name, mobile, approved, pageable);
 //		users.forEach(this::updateFeeStatusForUser);
 		
 
 		for(User user :users) {
 			updateFeeStatusForUser(user,years);
 		}
-		return users;
+		
+		List<User> filteredList= users.stream()
+				.filter(user->user.getAnnualFeeStatus().contains(annualFeeStatus))
+				.collect(Collectors.toList());
+	
+		
+		int pgSize = Math.max(1, filteredList.size()); // size must be >= 1
+		return     new PageImpl<>(filteredList, PageRequest.of(0, pgSize), filteredList.size());
+
+		
 	}
 
 	public Page<User> getAllUsersWithPaymentInfo(int page, int size,List<Integer> years) {

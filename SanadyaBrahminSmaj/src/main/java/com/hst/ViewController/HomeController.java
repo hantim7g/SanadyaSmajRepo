@@ -25,7 +25,7 @@ public class HomeController {
     private  PaymentService paymentService;
 
     // Map both / and /home
-    @GetMapping({"/", "/home"})
+    @GetMapping({"/","/home"})
     public String home() {
         return "home"; // home.jsp
     }

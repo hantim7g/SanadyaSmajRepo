@@ -69,9 +69,6 @@ public class AdminUserController {
 			name = null;
 		if (StringUtils.isEmpty(approved))
 			approved = null;
-		if (StringUtils.isEmpty(annualFeeStatus))
-			annualFeeStatus = null;
-		
 		
 		
 		List<Integer> years = new ArrayList<>();

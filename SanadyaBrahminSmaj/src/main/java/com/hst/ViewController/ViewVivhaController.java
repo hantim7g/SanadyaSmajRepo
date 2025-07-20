@@ -131,7 +131,7 @@ public class ViewVivhaController {
         model.addAttribute("profiles", profiles);
 
         boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(auth -> auth.getAuthority().equals("ADMIN"));
         model.addAttribute("isAdmin", isAdmin);
 
         return "matrimony/my-profiles";

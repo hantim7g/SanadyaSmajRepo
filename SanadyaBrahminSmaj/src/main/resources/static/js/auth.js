@@ -114,9 +114,19 @@ $(function() {
 			return showError("मोबाइल नंबर 10 अंकों का होना चाहिए");
 		}
 
-		if (password.length < 6) {
+		/*if (password.length < 6) {
 			return showError("पासवर्ड कम से कम 6 अक्षरों का होना चाहिए");
-		}
+		}*/
+
+const result = validatePassword(password);
+
+if (result.valid) {
+  console.log("पासवर्ड मान्य है ✅");
+} else {
+  console.log("पासवर्ड अमान्य ❌:");
+  result.errors.forEach(err => console.log("- " + err));
+}
+
 
 		const jsonData = {
 			fullName: $('#fullName').val(),
@@ -281,3 +291,59 @@ $(document).ready(function() {
     `);
 	}
 });
+function validatePassword(password) {
+	  const pwd = String(password || ""); // avoid null/undefined issues
+
+  const minLength = 8;
+  const commonPasswords = ["123456", "password", "12345678", "qwerty", "abc123", "111111"];
+
+  const errors = [];
+
+  if (password.length < minLength) {
+    errors.push("कम से कम 8 अक्षरों का पासवर्ड होना चाहिए।");
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    errors.push("कम से कम एक बड़ा अक्षर होना चाहिए।");
+  }
+
+  if (!/[a-z]/.test(password)) {
+    errors.push("कम से कम एक छोटा अक्षर होना चाहिए।");
+  }
+
+  if (!/[0-9]/.test(password)) {
+    errors.push("कम से कम एक अंक होना चाहिए।");
+  }
+
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    errors.push("कम से कम एक विशेष अक्षर होना चाहिए (जैसे !@#$%^&*)।");
+  }
+
+  if (commonPasswords.includes(password.toLowerCase())) {
+    errors.push("यह पासवर्ड बहुत आम है, कृपया एक मजबूत पासवर्ड चुनें।");
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors: errors
+  };
+}
+
+function passwordCheck() {
+		const psd= $("#password").val()
+    const result = validatePassword(psd);
+    const $errorBox = $('#password-errors');
+    $errorBox.empty();
+    if (!result.valid) {
+      result.errors.forEach(error => $errorBox.append(`<div>• ${error}</div>`));
+    }
+  };
+  function modalPasswordCheck() {
+	const psd= $("#fpNewPassword").val()
+    const result = validatePassword(psd);
+    const $errorBox = $('#password-errors-modal');
+    $errorBox.empty();
+    if (!result.valid) {
+      result.errors.forEach(error => $errorBox.append(`<div>• ${error}</div>`));
+    }
+  };

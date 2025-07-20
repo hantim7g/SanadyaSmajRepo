@@ -82,8 +82,9 @@
                           class="form-control" required></div>
                       <div class="col-md-6 mb-3"><label>ईमेल</label><input id="email" type="email" class="form-control">
                       </div>
-                      <div class="col-md-6 mb-3"><label>पासवर्ड *</label><input id="password" type="password"
+                      <div class="col-md-6 mb-3"><label>पासवर्ड *</label><input id="password" onkeyup="passwordCheck()" type="password"
                           class="form-control" required></div>
+<div id="password-errors" style="color: red;"></div>
 
                       <!-- Optional Fields -->
                       <div class="col-md-6 mb-3"><label>शैक्षणिक योग्यता</label><input id="education" type="text"
@@ -151,7 +152,9 @@
               </div>
               <div class="mb-3">
                 <label>नया पासवर्ड *</label>
-                <input type="password" id="fpNewPassword" class="form-control" required>
+                <input type="password" id="fpNewPassword" onkeyup="modalPasswordCheck()" class="form-control" required>
+              <div id="password-errors-modal" style="color: red;"></div>
+
               </div>
               <div class="mb-3">
                 <label>कारण (वैकल्पिक)</label>
@@ -172,10 +175,19 @@
         const reason = $('#fpReason').val().trim();
 
         if (!/^\d{10}$/.test(mobile)) {
-          alert("मान्य 10 अंकों का मोबाइल नंबर दर्ज करें");
+          bootbox.alert("मान्य 10 अंकों का मोबाइल नंबर दर्ज करें");
           return;
         }
 
+const result = validatePassword(password.value);
+
+if (result.valid) {
+  console.log("पासवर्ड मान्य है ✅");
+} else {
+  console.log("पासवर्ड अमान्य ❌:");
+  result.errors.forEach(err => console.log("- " + err));
+  return;
+}
         $.post("/api/auth/forgot-password", {
           mobile,
           newPassword,

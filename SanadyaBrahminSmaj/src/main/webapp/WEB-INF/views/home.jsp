@@ -174,7 +174,7 @@
                     </div>
                     <div class="carousel-item">
                         <a href="/events/2" style="text-decoration: none;">
-                            <img src="/images/corosal1.jpg" class="d-block w-100" alt="Event 2">
+                            <img src="/images/ads/ad2.png" class="d-block w-100" alt="Event 2">
                             <div class="carousel-caption-custom">
                                 <div class="carousel-title">स्वास्थ्य जांच शिविर</div>
                                 <div class="carousel-subtitle">नि:शुल्क स्वास्थ्य जांच - अनुभवी डॉक्टर्स द्वारा</div>

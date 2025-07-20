@@ -88,6 +88,8 @@ debugger;
       description: form.description.value,
       status: form.status.value,
       paymentDate: form.paymentDate.value,
+      feeFrom:form.feeFrom.value,
+      feeTo:form.feeTo.value,
       reason:form.reason.value
     };
 

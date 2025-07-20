@@ -33,7 +33,7 @@
             <!-- Slide 1 -->
             <div class="carousel-item active">
                 <a href="https://your-ad-link-1.com" target="_blank">
-                    <img src="/images/ads/ad1.jpg" class="d-block w-100" alt="Ad 1">
+                    <img src="/images/ads/ad2.png" height="30" alt="Ad 1">
                 </a>
                
             </div>
@@ -41,7 +41,7 @@
             <!-- Slide 2 -->
             <div class="carousel-item">
                 <a href="https://your-ad-link-2.com" target="_blank">
-                    <img src="/images/ads/ad1.jpg" class="d-block w-100" alt="Ad 2">
+                    <img src="/images/ads/ad2.png" class="d-block w-100" height="30" alt="Ad 2">
                 </a>
                 
             </div>
@@ -49,7 +49,7 @@
             <!-- Slide 3 -->
             <div class="carousel-item">
                 <a href="https://your-ad-link-3.com" target="_blank">
-                    <img src="/images/ads/ad1.jpg" class="d-block w-100" alt="Ad 3">
+                    <img src="/images/ads/ad2.png" class="d-block w-100" height="30"alt="Ad 3">
                 </a>
                
             </div>

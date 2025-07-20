@@ -108,12 +108,12 @@
               </div>
               <div class="col-md-2">
                 <select  class="form-select" name="yearDropdown">
-                  <option value="2025">2025</option>
-                  <option value="2024">2024</option>
-                  <option value="2023">2023</option>
-                  <option value="2022">2022</option>
-                  <option value="2021">2021</option>
-                  <option value="2020">2020</option>
+                  <option value="2025">शुल्क स्थिति 2025</option>
+                  <option value="2024">शुल्क स्थिति 2024</option>
+                  <option value="2023">शुल्क स्थिति 2023</option>
+                  <option value="2022">शुल्क स्थिति 2022</option>
+                  <option value="2021">शुल्क स्थिति 2021</option>
+                  <option value="2020">शुल्क स्थिति 2020</option>
                 </select>
               </div>
 
