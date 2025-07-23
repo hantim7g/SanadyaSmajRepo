@@ -12,7 +12,7 @@
                 <span class="text-muted fw-light">कुल परिणाम: ${totalItems}</span>
               </div>
             </div>
-            <c:forEach var="user" items="${userList}">
+             <c:forEach var="user" items="${userList}">
               <div class="card profile-card border-0 shadow-sm hover-shadow mb-4">
                 <div class="name-banner">${user.fullName}</div>
 
@@ -78,10 +78,10 @@
                         </div>
 
                         <c:if
-                          test="${user.approved=='प्रक्रिया में' || user.annualFeeStatus=='प्रक्रिया में' || user.otherFeeValidated=='प्रक्रिया में'}">
+                          test="${user.approved=='प्रक्रिया में' || user.annualFeeValidated=='प्रक्रिया में' || user.otherFeeValidated=='प्रक्रिया में'}">
                           <div class="row mt-2">
                             <div class="col-md-12 d-flex justify-content-start gap-2 flex-wrap">
-                              <c:if test="${user.annualFeeStatus=='प्रक्रिया में'}">
+                              <c:if test="${user.annualFeeValidated=='प्रक्रिया में'}">
                                 <button class="btn btnn btn-outline-success validate-annual-btn"
                                   data-user-id="${user.id}">
                                   ✔️ वार्षिक शुल्क सत्यापित करें

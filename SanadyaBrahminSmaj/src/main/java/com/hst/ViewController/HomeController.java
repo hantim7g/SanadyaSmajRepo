@@ -1,7 +1,9 @@
 package com.hst.ViewController;
 
+import com.hst.entity.Event;
 import com.hst.entity.User;
 import com.hst.repository.UserRepository;
+import com.hst.service.EventService;
 import com.hst.service.PaymentService;
 
 import jakarta.servlet.http.Cookie;
@@ -15,6 +17,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.sql.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -23,11 +27,19 @@ public class HomeController {
     private  UserRepository userRepository;
 @Autowired
     private  PaymentService paymentService;
+@Autowired
+	private EventService eventService;
+
 
     // Map both / and /home
     @GetMapping({"/","/home"})
-    public String home() {
-        return "home"; // home.jsp
+    public String home(Model model) {
+        List<Event> carouselEvents = eventService.findByIsCorosalTrueAndEventStatusTrue();
+        model.addAttribute("carouselEvents", carouselEvents);
+        List<Event> upcomingEvents = eventService.findByEventStatusTrueAndEventDateAfter(new Date(System.currentTimeMillis()));
+        model.addAttribute("upcomingEvents", upcomingEvents);
+        // other logic...
+        return "home";
     }
 
     @GetMapping("/member/profile")

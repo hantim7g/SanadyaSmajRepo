@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.hst.entity.Event;
 import com.hst.repository.EventRepository;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -95,5 +96,13 @@ public class EventService  {
             return predicate;
         };
         return eventRepository.findAll(spec, pageable);
+    }
+
+    public List<Event> findByIsCorosalTrueAndEventStatusTrue(){
+    	 return eventRepository.findByIsCorosalTrueAndEventStatusTrue();
+    }
+    
+   public List<Event> findByEventStatusTrueAndEventDateAfter(Date today){
+    	return eventRepository.findByEventStatusTrueAndEventDateAfter( today);
     }
 }

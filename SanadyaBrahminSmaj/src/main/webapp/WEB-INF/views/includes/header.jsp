@@ -232,7 +232,7 @@
               <a class="dropdown-item dropdown-toggle" href="#">📅 कार्यक्रम</a>
               <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="/admin/events">सभी कार्यक्रम</a></li>
-                <li><a class="dropdown-item" href="/admin/events/create">कार्यक्रम जोड़ें</a></li>
+                <li><a class="dropdown-item" href="/admin/event-form">कार्यक्रम जोड़ें</a></li>
               </ul>
             </li>
 

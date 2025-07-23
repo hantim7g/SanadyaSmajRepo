@@ -12,11 +12,11 @@
                     
                     <meta name="viewport" content="width=device-width, initial-scale=1">
                     
-                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+                    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
                         rel="stylesheet" />
                     
                     <link rel="stylesheet"
-                        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+                        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"> -->
                      <style>
                         body {
                             background: #fffaf0;
@@ -245,14 +245,7 @@
                                                         </span>
                                                                  </div>
                                                              <div class="mb-1">
-                                                                  <i
-                                                            class="bi bi-calendar-week text-warning"></i>
-                                                                  <span class="me-2">शुरू:
-                                                            <c:out value="${ev.startDate}" />
-                                                        </span>
-                                                                  <span class="me-2">पूर्ण:
-                                                            <c:out value="${ev.endDate}" />
-                                                        </span>
+                                                                  
                                                                   <c:if test="${not empty ev.eventUrl}">
                                                                        <span>
                                                                             <a href="${ev.eventUrl}"
@@ -294,7 +287,7 @@
                               </c:choose>
                          </div>
                     
-                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
                 </body>
 
                 </html>

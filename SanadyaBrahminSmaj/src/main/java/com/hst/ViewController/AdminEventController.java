@@ -1,5 +1,6 @@
 package com.hst.ViewController;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -31,114 +32,151 @@ import com.hst.entity.EventImage;
 import com.hst.repository.EventRepository;
 import com.hst.service.EventService;
 
+
 import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminEventController {
 
-	@Autowired
-	private EventService eventService;
+    @Autowired
+    private EventService eventService;
 
-	@GetMapping("/events")
-	public String listEvents(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
-			@RequestParam(required = false) String search, // search term
-			@RequestParam(required = false) String author, // author filter
-			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate publishDate, // single
-																													// date
-			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate publishDateStart, // range
-																														// start
-			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate publishDateEnd, // range
-																														// end
-			@RequestParam(required = false) String isCorosal, @RequestParam(required = false) String eventStatus,
-			Model model) {
-		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "publishDate"));
-		// You can use publishDate (exact) or publishDateStart / publishDateEnd (range)
-		Page<Event> eventPage = eventService.getEventsPagedFiltered(search, author, publishDate, publishDateStart,
-				publishDateEnd, isCorosal, eventStatus, pageable);
-		model.addAttribute("isCorosal", isCorosal);
-		model.addAttribute("eventStatus", eventStatus);
+    @GetMapping("/events")
+    public String listEvents(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String search,           // search term
+        @RequestParam(required = false) String author,           // author filter
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate publishDate,  // single date
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate publishDateStart, // range start
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate publishDateEnd,   // range end
+        @RequestParam(required = false) String isCorosal,
+        @RequestParam(required = false) String eventStatus,
+        Model model
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "publishDate"));
+        // You can use publishDate (exact) or publishDateStart / publishDateEnd (range)
+        Page<Event> eventPage = eventService.getEventsPagedFiltered(
+        	    search, author, publishDate, publishDateStart, publishDateEnd, isCorosal, eventStatus, pageable
+        	);
+        	model.addAttribute("isCorosal", isCorosal);
+        	model.addAttribute("eventStatus", eventStatus);
 
-		model.addAttribute("eventPage", eventPage);
-		model.addAttribute("search", search);
-		model.addAttribute("author", author);
-		model.addAttribute("publishDate", publishDate);
-		model.addAttribute("publishDateStart", publishDateStart);
-		model.addAttribute("publishDateEnd", publishDateEnd);
-		model.addAttribute("page", page);
-		model.addAttribute("size", size);
-		return "event/adminEventList";
-	}
+        model.addAttribute("eventPage", eventPage);
+        model.addAttribute("search", search);
+        model.addAttribute("author", author);
+        model.addAttribute("publishDate", publishDate);
+        model.addAttribute("publishDateStart", publishDateStart);
+        model.addAttribute("publishDateEnd", publishDateEnd);
+        model.addAttribute("page", page);
+        model.addAttribute("size", size);
+        return "event/adminEventList";
+    }
 
-	@GetMapping("/event-form")
-	public String showForm(@RequestParam(required = false) Long id, Model model) {
-		model.addAttribute("event", id != null ? eventService.getEvent(id).orElse(new Event()) : new Event());
-		return "event/event-form";
-	}
+    @GetMapping("/event-form")
+    public String showForm(@RequestParam(required = false) Long id, Model model) {
+    	model.addAttribute("event", id != null ? eventService.getEvent(id).orElse(new Event()) : new Event());
+        return "event/event-form";
+    }
 
-	@PostMapping(value = "/event/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	@ResponseBody
-	public ResponseEntity<String> saveEvent(
-			@RequestParam(value = "mainImage", required = false) MultipartFile mainImage,
-			@RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFiles,
-			@ModelAttribute Event event, HttpServletRequest req) throws IOException {
+    @PostMapping(value="/event/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String saveEvent(
+        @RequestParam(value = "mainImage", required = false) MultipartFile mainImage,
+        @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFiles,
+        @ModelAttribute Event event,
+        @RequestParam(value = "corosal", required = false) String corosalBox,
+        @RequestParam(value = "eventStatus", required = false) String eventStatusBox,
+        HttpServletRequest req,
+        Model model
+    ) throws IOException {
 
-		String uploadDir = req.getServletContext().getRealPath("/uploads/");
-		File dir = new File(uploadDir);
-		if (!dir.exists())
-			dir.mkdirs();
+        // Directory for uploads
+        String uploadDir = req.getServletContext().getRealPath("/uploads/");
+        File dir = new File(uploadDir);
+        if (!dir.exists()) dir.mkdirs();
 
-		// MAIN IMAGE
-		if (mainImage != null && !mainImage.isEmpty()) {
-			String mainName = UUID.randomUUID() + "_" + mainImage.getOriginalFilename();
-			mainImage.transferTo(new File(uploadDir, mainName));
-			event.setMainImageUrl(req.getContextPath() + "/uploads/" + mainName);
-		}
+        // --- Fetch existing event from DB if update ---
+        Event existingEvent = (event.getId() != null) ? eventService.getEvent(event.getId()).orElse(null) : null;
 
-		// GALLERY
-		List<EventImage> images = event.getImages();
-		if (images != null) {
-			for (int i = 0; i < images.size(); i++) {
-				EventImage img = images.get(i);
-				img.setEvent(event);
+        // --- MAIN IMAGE handling ---
+        if (mainImage != null && !mainImage.isEmpty()) {
+            String mainName = UUID.randomUUID() + "_" + mainImage.getOriginalFilename();
+            mainImage.transferTo(new File(uploadDir, mainName));
+            event.setMainImageUrl(req.getContextPath() + "/uploads/" + mainName);
+        } else if (existingEvent != null) {
+            event.setMainImageUrl(existingEvent.getMainImageUrl());
+        }
 
-				if (imageFiles != null && i < imageFiles.size() && !imageFiles.get(i).isEmpty()) {
-					MultipartFile file = imageFiles.get(i);
-					String imgName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-					file.transferTo(new File(uploadDir, imgName));
-					img.setUrl(req.getContextPath() + "/uploads/" + imgName);
-				}
-			}
-		}
+        // --- GALLERY IMAGES handling ---
+        List<EventImage> images = event.getImages();
+        List<EventImage> existingImages = (existingEvent != null && existingEvent.getImages() != null) 
+            ? existingEvent.getImages() : java.util.Collections.emptyList();
 
-		eventService.saveEvent(event);
-		return ResponseEntity.ok("Event saved");
-	}
+        if (images != null) {
+            for (int i = 0; i < images.size(); i++) {
+                EventImage img = images.get(i);
+                img.setEvent(event);
 
-	@PostMapping("/event-toggle-status")
-	public String toggleEventStatus(@RequestParam("id") Long eventId, RedirectAttributes redirectAttributes) {
-		Event event = eventService.getEventById(eventId).orElse(null);
-		if (event != null) {
-			event.setEventStatus(!event.isEventStatus());
-			eventService.saveEvent(event);
-			redirectAttributes.addFlashAttribute("msg", "Status updated!");
-		} else {
-			redirectAttributes.addFlashAttribute("error", "Event not found.");
-		}
-		return "redirect:/admin/events";
-	}
+                // If file uploaded, update url
+                if (imageFiles != null && i < imageFiles.size() && imageFiles.get(i) != null && !imageFiles.get(i).isEmpty()) {
+                    MultipartFile file = imageFiles.get(i);
+                    String imgName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+                    file.transferTo(new File(uploadDir, imgName));
+                    img.setUrl(req.getContextPath() + "/uploads/" + imgName);
+                } else if (img.getId() != null) {
+                    // No file uploaded: preserve the url from DB
+                    EventImage oldImg = existingImages.stream()
+                        .filter(ei -> img.getId().equals(ei.getId()))
+                        .findFirst().orElse(null);
+                    if (oldImg != null) {
+                        img.setUrl(oldImg.getUrl());
+                    }
+                }
+                // caption and altText come from form (always present if row exists)
+            }
+        }
 
-	@PostMapping("/event-toggle-corosal")
-	public String toggleCorosal(@RequestParam("id") Long eventId, RedirectAttributes redirectAttributes) {
-		Event event = eventService.getEventById(eventId).orElse(null);
-		if (event != null) {
-			event.setCorosal(!event.isCorosal());
-			eventService.saveEvent(event);
-			redirectAttributes.addFlashAttribute("msg", "Corosal स्थिति अपडेट हो गई!");
-		} else {
-			redirectAttributes.addFlashAttribute("error", "Event नहीं मिला।");
-		}
-		return "redirect:/admin/events";
-	}
+        // Checkbox handling
+        event.setCorosal(corosalBox != null && (corosalBox.equals("true") || corosalBox.equals("on")));
+        event.setEventStatus(eventStatusBox != null && (eventStatusBox.equals("true") || eventStatusBox.equals("on")));
+
+        eventService.saveEvent(event);
+        model.addAttribute("success", "Event saved!");
+        return "redirect:/admin/events";
+    }
+
+    // DELETE
+    @PostMapping("/event/delete")
+    public String deleteEvent(@RequestParam("id") Long id, Model model) {
+        eventService.deleteEventById(id);
+        model.addAttribute("success", "Event deleted!");
+        return "redirect:/admin/events";
+    }
+
+    @PostMapping("/event-toggle-status")
+    public String toggleEventStatus(@RequestParam("id") Long eventId, RedirectAttributes redirectAttributes) {
+        Event event = eventService.getEventById(eventId).orElse(null);
+        if (event != null) {
+            event.setEventStatus(!event.isEventStatus());
+            eventService.saveEvent(event);
+            redirectAttributes.addFlashAttribute("msg", "Status updated!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Event not found.");
+        }
+        return "redirect:/admin/events";
+    }
+    @PostMapping("/event-toggle-corosal")
+    public String toggleCorosal(@RequestParam("id") Long eventId, RedirectAttributes redirectAttributes) {
+        Event event = eventService.getEventById(eventId).orElse(null);
+        if (event != null) {
+            event.setCorosal(!event.isCorosal());
+            eventService.saveEvent(event);
+            redirectAttributes.addFlashAttribute("msg", "Corosal स्थिति अपडेट हो गई!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Event नहीं मिला।");
+        }
+        return "redirect:/admin/events";
+    }
 
 }

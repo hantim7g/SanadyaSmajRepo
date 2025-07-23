@@ -76,14 +76,18 @@ public class UserService {
 			updateFeeStatusForUser(user,years);
 		}
 		
+		if(!annualFeeStatus.isEmpty()) {
 		List<User> filteredList= users.stream()
 				.filter(user->user.getAnnualFeeStatus().contains(annualFeeStatus))
 				.collect(Collectors.toList());
-	
+		
 		
 		int pgSize = Math.max(1, filteredList.size()); // size must be >= 1
 		return     new PageImpl<>(filteredList, PageRequest.of(0, pgSize), filteredList.size());
-
+		}
+		else {
+			return users;
+		}
 		
 	}
 
