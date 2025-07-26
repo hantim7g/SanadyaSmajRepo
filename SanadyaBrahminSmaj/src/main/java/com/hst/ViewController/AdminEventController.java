@@ -79,73 +79,103 @@ public class AdminEventController {
     	model.addAttribute("event", id != null ? eventService.getEvent(id).orElse(new Event()) : new Event());
         return "event/event-form";
     }
-
-    @PostMapping(value="/event/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/event/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String saveEvent(
-        @RequestParam(value = "mainImage", required = false) MultipartFile mainImage,
-        @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFiles,
-        @ModelAttribute Event event,
-        @RequestParam(value = "corosal", required = false) String corosalBox,
-        @RequestParam(value = "eventStatus", required = false) String eventStatusBox,
-        HttpServletRequest req,
-        Model model
+            @RequestParam(value = "mainImage",  required = false) MultipartFile mainImage,
+            @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFiles,
+            @ModelAttribute Event eventDto,                         // ← DTO sent by the form
+            @RequestParam(value = "corosal",      required = false) String corosalBox,
+            @RequestParam(value = "eventStatus",  required = false) String eventStatusBox,
+            HttpServletRequest request,
+            Model model
     ) throws IOException {
 
-        // Directory for uploads
-        String uploadDir = req.getServletContext().getRealPath("/uploads/");
+        /* ---------------------------------------------------------
+         * 1.  Resolve upload directory (create once if missing)
+         * --------------------------------------------------------- */
+        String uploadDir = request.getServletContext().getRealPath("/uploads/");
         File dir = new File(uploadDir);
-        if (!dir.exists()) dir.mkdirs();
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
 
-        // --- Fetch existing event from DB if update ---
-        Event existingEvent = (event.getId() != null) ? eventService.getEvent(event.getId()).orElse(null) : null;
+        /* ---------------------------------------------------------
+         * 2.  Load the MANAGED entity (or use new one for inserts)
+         * --------------------------------------------------------- */
+        Event target = (eventDto.getId() != null)
+                ? eventService.getEvent(eventDto.getId())
+                             .orElseThrow(() -> new IllegalArgumentException("Event not found"))
+                : eventDto;   // brand-new event; still detached but will be saved for the first time
 
-        // --- MAIN IMAGE handling ---
+        /* ---------------------------------------------------------
+         * 3.  Copy scalar fields from the DTO to the managed entity
+         *     (repeat for every simple property you expose on the form)
+         * --------------------------------------------------------- */
+        target.setTitle(eventDto.getTitle());
+        target.setContent(eventDto.getContent());
+        target.setEventDate(eventDto.getEventDate());
+        target.setPublishDate(eventDto.getPublishDate());
+        // … add the rest of your scalar setters here …
+
+        /* ---------------------------------------------------------
+         * 4.  Main image
+         * --------------------------------------------------------- */
         if (mainImage != null && !mainImage.isEmpty()) {
-            String mainName = UUID.randomUUID() + "_" + mainImage.getOriginalFilename();
-            mainImage.transferTo(new File(uploadDir, mainName));
-            event.setMainImageUrl(req.getContextPath() + "/uploads/" + mainName);
-        } else if (existingEvent != null) {
-            event.setMainImageUrl(existingEvent.getMainImageUrl());
+            String storedName = UUID.randomUUID() + "_" + mainImage.getOriginalFilename();
+            mainImage.transferTo(new File(uploadDir, storedName));
+            target.setMainImageUrl(request.getContextPath() + "/uploads/" + storedName);
         }
 
-        // --- GALLERY IMAGES handling ---
-        List<EventImage> images = event.getImages();
-        List<EventImage> existingImages = (existingEvent != null && existingEvent.getImages() != null) 
-            ? existingEvent.getImages() : java.util.Collections.emptyList();
+        /* ---------------------------------------------------------
+         * 5.  Gallery images (orphanRemoval=true)
+         * --------------------------------------------------------- */
+        List<EventImage> incomingImages = (eventDto.getImages() == null)
+                ? java.util.Collections.emptyList()
+                : eventDto.getImages();
 
-        if (images != null) {
-            for (int i = 0; i < images.size(); i++) {
-                EventImage img = images.get(i);
-                img.setEvent(event);
+        // Keep the SAME collection instance to avoid “collection was no longer referenced” error
+        target.getImages().clear();
+        for (int i = 0; i < incomingImages.size(); i++) {
+            EventImage img = incomingImages.get(i);
+            img.setEvent(target);                // maintain owning side
 
-                // If file uploaded, update url
-                if (imageFiles != null && i < imageFiles.size() && imageFiles.get(i) != null && !imageFiles.get(i).isEmpty()) {
-                    MultipartFile file = imageFiles.get(i);
-                    String imgName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-                    file.transferTo(new File(uploadDir, imgName));
-                    img.setUrl(req.getContextPath() + "/uploads/" + imgName);
-                } else if (img.getId() != null) {
-                    // No file uploaded: preserve the url from DB
-                    EventImage oldImg = existingImages.stream()
-                        .filter(ei -> img.getId().equals(ei.getId()))
-                        .findFirst().orElse(null);
-                    if (oldImg != null) {
-                        img.setUrl(oldImg.getUrl());
-                    }
-                }
-                // caption and altText come from form (always present if row exists)
-            }
+            // Upload/keep the file behind this row
+            MultipartFile file = (imageFiles != null && i < imageFiles.size()) ? imageFiles.get(i) : null;
+            handleGalleryFile(img, file, uploadDir, request);
+
+            target.getImages().add(img);
         }
 
-        // Checkbox handling
-        event.setCorosal(corosalBox != null && (corosalBox.equals("true") || corosalBox.equals("on")));
-        event.setEventStatus(eventStatusBox != null && (eventStatusBox.equals("true") || eventStatusBox.equals("on")));
+        /* ---------------------------------------------------------
+         * 6.  Checkbox values
+         * --------------------------------------------------------- */
+        target.setCorosal("true".equalsIgnoreCase(corosalBox) || "on".equalsIgnoreCase(corosalBox));
+        target.setEventStatus("true".equalsIgnoreCase(eventStatusBox) || "on".equalsIgnoreCase(eventStatusBox));
 
-        eventService.saveEvent(event);
+        /* ---------------------------------------------------------
+         * 7.  Persist and redirect
+         * --------------------------------------------------------- */
+        eventService.saveEvent(target);
         model.addAttribute("success", "Event saved!");
         return "redirect:/admin/events";
     }
 
+    private void handleGalleryFile(EventImage img,
+            MultipartFile file,
+            String uploadDir,
+            HttpServletRequest request) throws IOException {
+
+if (file != null && !file.isEmpty()) {
+String storedName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+file.transferTo(new File(uploadDir, storedName));
+img.setUrl(request.getContextPath() + "/uploads/" + storedName);
+} else if (img.getId() != null) {
+/* The row already exists in DB and no new file was uploaded:
+leave the URL untouched (it was loaded in 'img' by Spring). */
+}  // for brand-new rows with no file: keep URL null or validate accordingly
+}
+
+    
     // DELETE
     @PostMapping("/event/delete")
     public String deleteEvent(@RequestParam("id") Long id, Model model) {
@@ -155,7 +185,7 @@ public class AdminEventController {
     }
 
     @PostMapping("/event-toggle-status")
-    public String toggleEventStatus(@RequestParam("id") Long eventId, RedirectAttributes redirectAttributes) {
+        public String toggleEventStatus(@RequestParam("id") Long eventId, RedirectAttributes redirectAttributes) {
         Event event = eventService.getEventById(eventId).orElse(null);
         if (event != null) {
             event.setEventStatus(!event.isEventStatus());

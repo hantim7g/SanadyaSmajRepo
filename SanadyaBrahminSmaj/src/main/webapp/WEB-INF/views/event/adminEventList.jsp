@@ -178,7 +178,7 @@
           <script>
             function confirmDelete(eventId) {
               if (confirm("क्या आप वाकई इस कार्यक्रम को हटाना चाहते हैं? (This cannot be undone)"))
-                window.location.href = '/admin/event-delete?id=' + eventId;
+                window.location.href = '/admin/event/delete?id=' + eventId;
             }
           </script>
         </head>

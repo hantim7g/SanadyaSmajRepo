@@ -198,7 +198,7 @@
               <div class="row image-row mb-2 align-items-center">
                 <input type="hidden" name="images[${status.index}].id" value="${img.id}" />
                 <div class="col-sm-4 col-12 mb-1 mb-sm-0">
-                  <input type="file" name="imageFiles[${status.index}]" class="form-control image-input" />
+                  <input type="file" name="imageFiles" class="form-control image-input" />
                   <c:if test="${not empty img.url}">
                     <img src="${img.url}" class="image-preview mt-2" />
                   </c:if>
@@ -221,6 +221,7 @@
           <div class="mb-2">
             <button type="button" class="btn btn-secondary" id="addImageBtn">नई इमेज जोड़ें</button>
           </div>
+          <input type="hidden" id="imageIndex" value="${ event.images != null ? event.images.size() : 0 }" />
           <div class="text-end mt-4">
             <button type="submit" class="btn btn-primary">सबमिट करें</button>
           </div>
@@ -229,26 +230,26 @@
     </div>
   </div>
 <script>
-  let imageIndex = ${ event.images != null ? event.images.size() : 0};
+  let imageIndex = $('#imageIndex').val() || 0;
   $('#addImageBtn').click(function () {
     $('#image-section').append(`
       <div class="row image-row mb-2 align-items-center">
         <div class="col-sm-4 col-12 mb-1 mb-sm-0">
-          <input type="file" name="imageFiles[${imageIndex}]" class="form-control image-input" />
+          <input type="file" name="imageFiles"  class="form-control image-input" />
           <img class="image-preview mt-2" style="display:none;" />
         </div>
         <div class="col-sm-3 col-12 mb-1 mb-sm-0">
-          <input type="text" name="images[${imageIndex}].caption" class="form-control" placeholder="कैप्शन" />
+          <input type="text" name="images[`+imageIndex+`].caption" class="form-control" placeholder="कैप्शन" />
         </div>
         <div class="col-sm-3 col-12 mb-1 mb-sm-0">
-          <input type="text" name="images[${imageIndex}].altText" class="form-control" placeholder="वैकल्पिक पाठ" />
+          <input type="text" name="images[`+imageIndex+`].altText" class="form-control" placeholder="वैकल्पिक पाठ" />
         </div>
         <div class="col-sm-2 col-12 text-sm-center text-left mt-1 mt-sm-0">
           <button type="button" class="btn btn-danger remove-image">हटाएं</button>
         </div>
       </div>
     `);
-    imageIndex++;
+    $('#imageIndex').val(imageIndex++);
   });
 
   $(document).on('click', '.remove-image', function () {

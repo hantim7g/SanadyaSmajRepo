@@ -132,23 +132,6 @@ $(document).ready(function () {
                 dom: 'Bfrtip',
                 buttons: [
                   {
-                    extend: 'excelHtml5',
-                    title: 'भुगतान_इतिहास',
-                    text: '📥 Excel डाउनलोड करें'
-                  },
-                  {
-                    extend: 'csvHtml5',
-                    title: 'भुगतान_इतिहास',
-                    text: '📄 CSV डाउनलोड करें'
-                  },
-                  {
-                    extend: 'pdfHtml5',
-                    title: 'भुगतान_इतिहास',
-                    text: '📄 PDF डाउनलोड करें',
-                    orientation: 'landscape',
-                    pageSize: 'A4'
-                  },
-                  {
                     extend: 'print',
                     text: '🖨️ प्रिंट करें'
                   }

@@ -195,19 +195,19 @@
                 <select name="annualFeeStatus" class="form-select">
                   <option value="">वार्षिक शुल्क स्थिति</option>
                   <option value="प्रतीक्षारत">प्रतीक्षारत</option>
-                  <option value="प्रक्रिया में">प्रक्रिया में</option>
-                  <option value="सत्यापित">सत्यापित</option>
+                  <option value="प्रक्रिया में">सत्यापित/प्रक्रिया में</option>
+                  <!-- <option value="सत्यापित">सत्यापित/प्रक्रिया में</option> -->
                   <option value="अस्वीकृत">अस्वीकृत</option>
                 </select>
               </div>
               <div class="col-md-2">
                 <select  class="form-select" name="yearDropdown">
-                  <option value="2025">शुल्क स्थिति 2025</option>
-                  <option value="2024">शुल्क स्थिति 2024</option>
-                  <option value="2023">शुल्क स्थिति 2023</option>
-                  <option value="2022">शुल्क स्थिति 2022</option>
-                  <option value="2021">शुल्क स्थिति 2021</option>
-                  <option value="2020">शुल्क स्थिति 2020</option>
+                  <option value="2025">वार्षिक शुल्क स्थिति 2025</option>
+                  <option value="2024">वार्षिक शुल्क स्थिति 2024</option>
+                  <option value="2023">वार्षिक शुल्क स्थिति 2023</option>
+                  <option value="2022">वार्षिक शुल्क स्थिति 2022</option>
+                  <option value="2021">वार्षिक शुल्क स्थिति 2021</option>
+                  <option value="2020">वार्षिक शुल्क स्थिति 2020</option>
                 </select>
               </div>
 

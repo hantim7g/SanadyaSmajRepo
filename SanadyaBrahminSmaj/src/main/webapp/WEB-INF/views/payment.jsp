@@ -100,7 +100,7 @@
           <div class="container">
 
             <!-- प्रोफ़ाइल कार्ड -->
-            <div class="profile-card">
+            <div class="d-none profile-card">
               <h3 class="mb-4">🙍‍♂️ आपकी प्रोफ़ाइल जानकारी</h3>
               <div class="row">
                 <div class="col-md-4 text-center mb-4 image-upload-wrapper">
@@ -170,7 +170,7 @@
             </div>
 
             <!-- 💳 भुगतान जोड़ें -->
-            <div class="d-none profile-card">
+            <div class="profile-card">
               <h4 class="mb-3">➕ नया भुगतान जोडें</h4>
               <form id="addPaymentForm" enctype="multipart/form-data">
                 <div class="row g-3">
@@ -241,7 +241,7 @@
             </div>
 
             <!-- 🧾 भुगतान इतिहास -->
-            <div class="d-none profile-card mt-5">
+            <div class="profile-card mt-5">
               <h4 class="mb-3">🧾 भुगतान इतिहास</h4>
               <div class="table-responsive">
                 <table id="paymentTable" class="table table-bordered table-hover display nowrap" style="width:100%">
