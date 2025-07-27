@@ -292,10 +292,12 @@ debugger;
 
       // Update dropdown menu
       const dropdownMenu = document.getElementById("loginDropdownMenu").innerHTML = `
-        <li><a class="dropdown-item" href="/member/profile">👤 प्रोफ़ाइल देखें</a></li>
-        <li><a class="dropdown-item" href="/member/list">📜 सदस्य निर्देशिका</a></li>
+        <li><a class="dropdown-item" href="/member/profile">प्रोफ़ाइल</a></li>
+               <li><a class="dropdown-item" href="/member/payment">भुगतान</a></li>
+        
+        <li><a class="dropdown-item" href="/member/list">सदस्य निर्देशिका</a></li>
         <li><hr class="dropdown-divider"></li>
-<li><a class="dropdown-item text-danger" href="#" onclick="handleLogout(event)">🚪 लॉगआउट</a></li>
+<li><a class="dropdown-item text-danger" href="#" onclick="handleLogout(event)">लॉगआउट</a></li>
       `;
 
       if (isAdminUser(token)) {
@@ -334,6 +336,52 @@ function handleLogout(e) {
   localStorage.removeItem("userName");
   window.location.href = "/logout";
 }
+
+
+$(document).ready(function() {
+    const token = localStorage.getItem('authToken'); // or your token key
+
+    if (token!=null && isTokenExpired(token)) {
+        console.log('Token expired on page load');
+
+        // Clear stored auth data
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userName'); // if stored
+
+        // Optionally show alert and redirect to login
+        bootbox.alert({
+            title: "सेशन समाप्त",
+            message: "आपका सेशन समाप्त हो गया है। कृपया पुनः लॉगिन करें।",
+            callback: function() {
+                window.location.href = "/"; // your login page
+            }
+        });
+    } else {
+        console.log('Token valid on page load');
+        // You can call a function here to update UI for logged-in user
+        // e.g., AuthManager.updateUI({isAuthenticated:true, ...})
+    }
+});
+
+function isTokenExpired(token) {
+    if (!token) return true; // No token means expired/not logged in
+    try {
+        // Decode the JWT payload (base64)
+        const payloadBase64 = token.split('.')[1];
+        const decodedPayload = atob(payloadBase64);
+        const payload = JSON.parse(decodedPayload);
+
+        // exp is in seconds since epoch
+        const currentTime = Math.floor(Date.now() / 1000);
+
+        // Token is expired if current time > exp claim
+        return currentTime > payload.exp;
+    } catch (e) {
+        console.error("JWT decoding failed:", e);
+        return true; // Treat as expired if any error occurs
+    }
+}
+
 
 </script>
 

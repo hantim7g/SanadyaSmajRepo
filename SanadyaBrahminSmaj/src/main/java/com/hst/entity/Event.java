@@ -2,6 +2,7 @@ package com.hst.entity;
 
 import jakarta.persistence.*;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -17,9 +18,9 @@ public class Event {
     private String author;
     
     private String mainImageUrl;
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<EventImage> images;
 
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EventImage> images = new ArrayList<>();
     private Date publishDate;
     private String eventUrl;
     private boolean isCorosal;

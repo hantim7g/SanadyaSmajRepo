@@ -37,10 +37,11 @@ $(function() {
 					$('#loginArea').html(`
       <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">${userName}</a>
       <ul class="dropdown-menu dropdown-menu-end">
-  <a class="dropdown-item" href="/member/profile">👤 प्रोफ़ाइल देखें</a>
-            <li><a class="dropdown-item" href="/member/doc">📜 सदस्य निर्देशिका</a></li>
+  <a class="dropdown-item" href="/member/profile">प्रोफ़ाइल देखें</a>
+     <li><a class="dropdown-item" href="/member/payment">भुगतान</a></li>
+            <li><a class="dropdown-item" href="/member/doc">सदस्य निर्देशिका</a></li>
 
-<li><a class="dropdown-item text-danger" href="#" onclick="handleLogout(event)">🚪 लॉगआउट</a></li>
+<li><a class="dropdown-item text-danger" href="#" onclick="handleLogout(event)">लॉगआउट</a></li>
       </ul>
     `);
 
@@ -284,10 +285,11 @@ $(document).ready(function() {
 		$('#loginArea').html(`
       <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">${userName}</a>
       <ul class="dropdown-menu dropdown-menu-end">
-  <a class="dropdown-item" href="/member/profile">👤 प्रोफ़ाइल देखें</a>
-            <li><a class="dropdown-item" href="/member/doc">📜 सदस्य निर्देशिका</a></li>
+  <a class="dropdown-item" href="/member/profile">प्रोफ़ाइल देखें</a>
+     <li><a class="dropdown-item" href="/member/payment">भुगतान</a></li>
+            <li><a class="dropdown-item" href="/member/doc">सदस्य निर्देशिका</a></li>
 
-<li><a class="dropdown-item text-danger" href="#" onclick="handleLogout(event)">🚪 लॉगआउट</a></li>
+<li><a class="dropdown-item text-danger" href="#" onclick="handleLogout(event)">लॉगआउट</a></li>
       </ul>
     `);
 	}

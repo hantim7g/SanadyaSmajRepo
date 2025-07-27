@@ -73,5 +73,24 @@ public class HomeController {
 
         // 🔁 Redirect to home page ("/")
         return "redirect:/";    }
+    @GetMapping("/member/payment")
+    public String memberPayment(Model model, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/home";
+        }
+
+        String mobile = authentication.getName();
+        Optional<User> userOpt = userRepository.findByMobile(mobile);
+
+        if (userOpt.isPresent()) {
+            model.addAttribute("user", userOpt.get());
+            model.addAttribute("paymentList", paymentService.getPaymentsByMobile(mobile));
+            return "payment"; // member-profile.jsp
+        } else {
+            model.addAttribute("error", "यूज़र प्रोफ़ाइल नहीं मिली।");
+            return "error";
+        }
+    }
+
 
 }

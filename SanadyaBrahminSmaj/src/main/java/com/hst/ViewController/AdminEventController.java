@@ -5,9 +5,14 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +45,8 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequestMapping("/admin")
 public class AdminEventController {
 
+	@Value("${upload.image.dir}")
+	private String uploadDir;
     @Autowired
     private EventService eventService;
 
@@ -93,8 +101,8 @@ public class AdminEventController {
         /* ---------------------------------------------------------
          * 1.  Resolve upload directory (create once if missing)
          * --------------------------------------------------------- */
-        String uploadDir = request.getServletContext().getRealPath("/uploads/");
-        File dir = new File(uploadDir);
+      //  String uploadDir = uploadDir;//request.getServletContext().getRealPath("/uploads/");
+        File dir = new File(uploadDir+"/events/");
         if (!dir.exists()) {
             dir.mkdirs();
         }
@@ -122,8 +130,8 @@ public class AdminEventController {
          * --------------------------------------------------------- */
         if (mainImage != null && !mainImage.isEmpty()) {
             String storedName = UUID.randomUUID() + "_" + mainImage.getOriginalFilename();
-            mainImage.transferTo(new File(uploadDir, storedName));
-            target.setMainImageUrl(request.getContextPath() + "/uploads/" + storedName);
+            mainImage.transferTo(new File(uploadDir+"/events/" , storedName));
+            target.setMainImageUrl("/images/events/" + storedName);
         }
 
         /* ---------------------------------------------------------
@@ -133,17 +141,55 @@ public class AdminEventController {
                 ? java.util.Collections.emptyList()
                 : eventDto.getImages();
 
+     // Extract IDs of images provided by the client
+        Set<Long> incomingImgIds = incomingImages.stream()
+            .filter(img -> img.getId() != null)
+            .map(EventImage::getId)
+            .collect(Collectors.toSet());
+
+        // Remove images from the managed entity that aren’t in the incoming IDs
+        target.getImages().removeIf(storedImg -> 
+            storedImg.getId() != null && !incomingImgIds.contains(storedImg.getId())
+        );
+        
+        
         // Keep the SAME collection instance to avoid “collection was no longer referenced” error
-        target.getImages().clear();
+      //  target.getImages().clear();
         for (int i = 0; i < incomingImages.size(); i++) {
             EventImage img = incomingImages.get(i);
-            img.setEvent(target);                // maintain owning side
 
-            // Upload/keep the file behind this row
-            MultipartFile file = (imageFiles != null && i < imageFiles.size()) ? imageFiles.get(i) : null;
-            handleGalleryFile(img, file, uploadDir, request);
+            // If the image is existing, find it in the target's image list
+            EventImage managedImage = null;
+            if (img.getId() != null) {
+                for (EventImage t : target.getImages()) {
+                    if (Objects.equals(t.getId(), img.getId())) {
+                        managedImage = t;
+                        break;
+                    }
+                }
+            }
 
-            target.getImages().add(img);
+            if (managedImage != null) {
+                // Existing managed image: update its fields
+                managedImage.setCaption(img.getCaption());
+                managedImage.setAltText(img.getAltText());
+                managedImage.setEvent(target);
+
+                MultipartFile file = (imageFiles != null && i < imageFiles.size()) ? imageFiles.get(i) : null;
+                handleGalleryFile(managedImage, file, uploadDir, request);
+                
+                if (managedImage.getUrl() == null && img.getUrl() != null) {
+                    managedImage.setUrl(img.getUrl());
+                }
+
+                // Do NOT add managedImage again to target.getImages(): it’s already there
+            } else {
+                // New image: set relation and fields, then add to collection
+                img.setEvent(target);
+                MultipartFile file = (imageFiles != null && i < imageFiles.size()) ? imageFiles.get(i) : null;
+                handleGalleryFile(img, file, uploadDir, request);
+                target.getImages().add(img);
+            }
         }
 
         /* ---------------------------------------------------------
@@ -167,8 +213,8 @@ public class AdminEventController {
 
 if (file != null && !file.isEmpty()) {
 String storedName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-file.transferTo(new File(uploadDir, storedName));
-img.setUrl(request.getContextPath() + "/uploads/" + storedName);
+file.transferTo(new File(uploadDir+"/events/", storedName));
+img.setUrl("/images/events/" + storedName);
 } else if (img.getId() != null) {
 /* The row already exists in DB and no new file was uploaded:
 leave the URL untouched (it was loaded in 'img' by Spring). */

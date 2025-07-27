@@ -18,7 +18,6 @@ public class EventImage {
     private Event event;
 
     // Getters and Setters
-
     public Long getId() {
         return id;
     }
