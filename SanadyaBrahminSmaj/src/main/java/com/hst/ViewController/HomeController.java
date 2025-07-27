@@ -1,10 +1,12 @@
 package com.hst.ViewController;
 
 import com.hst.entity.Event;
+import com.hst.entity.Testimonial;
 import com.hst.entity.User;
 import com.hst.repository.UserRepository;
 import com.hst.service.EventService;
 import com.hst.service.PaymentService;
+import com.hst.service.TestimonialService;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,17 +32,24 @@ public class HomeController {
 @Autowired
 	private EventService eventService;
 
+@Autowired
+private  TestimonialService testimonialService;
 
     // Map both / and /home
-    @GetMapping({"/","/home"})
-    public String home(Model model) {
-        List<Event> carouselEvents = eventService.findByIsCorosalTrueAndEventStatusTrue();
-        model.addAttribute("carouselEvents", carouselEvents);
-        List<Event> upcomingEvents = eventService.findByEventStatusTrueAndEventDateAfter(new Date(System.currentTimeMillis()));
-        model.addAttribute("upcomingEvents", upcomingEvents);
-        // other logic...
-        return "home";
-    }
+@GetMapping({"/","/home"})
+public String home(Model model) {
+    List<Event> carouselEvents = eventService.findByIsCorosalTrueAndEventStatusTrue();
+    model.addAttribute("carouselEvents", carouselEvents);
+    
+    List<Event> upcomingEvents = eventService.findByEventStatusTrueAndEventDateAfter(new Date(System.currentTimeMillis()));
+    model.addAttribute("upcomingEvents", upcomingEvents);
+    
+    // Add testimonials
+    List<Testimonial> testimonials = testimonialService.getApprovedTestimonials();
+    model.addAttribute("testimonials", testimonials);
+    
+    return "home";
+}
 
     @GetMapping("/member/profile")
     public String memberProfile(Model model, Authentication authentication) {

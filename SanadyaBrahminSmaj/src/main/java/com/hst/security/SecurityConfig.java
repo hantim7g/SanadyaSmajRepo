@@ -48,9 +48,12 @@ public class SecurityConfig {
                     "/swagger-ui.html"
                 ).permitAll() // 🔓 Public routes
 
-                .requestMatchers("/matrimony/my-profiles").hasAnyAuthority("USER", "ADMIN") 
-                .requestMatchers("/admin/**").hasAuthority("ADMIN")// 🔐 Protected by role
-                .requestMatchers("/matrimony/**").authenticated() // All other matrimony routes need login
+//                .requestMatchers("/matrimony/my-profiles").hasAnyAuthority("USER", "ADMIN") 
+//                .requestMatchers("/admin/**").hasAuthority("ADMIN")// 🔐 Protected by role
+//                .requestMatchers("/matrimony/**").authenticated() // All other matrimony routes need login
+//                .requestMatchers("/member/add-testimonial", "/member/save-testimonial").hasAnyAuthority("USER", "ADMIN")
+//                .requestMatchers("/admin/testimonials", "/admin/testimonial/**").hasAuthority("ADMIN")
+//                .requestMatchers("/testimonials").permitAll()
 
                 .anyRequest().permitAll() // Everything else is public
             )

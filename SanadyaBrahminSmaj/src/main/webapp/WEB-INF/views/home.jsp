@@ -251,7 +251,12 @@
                                     <jsp:include page="/WEB-INF/views/upcoming-events.jsp" />
                                 </div>
                                 <div class="col-md-12 ">
-                                    <jsp:include page="/WEB-INF/views/adds.jsp" />
+                               <!-- Include testimonials section -->
+<c:if test="${not empty testimonials}">
+    <%@ include file="/WEB-INF/views/testimonial/testimonial-carousel.jsp" %>
+</c:if>
+
+                               
                                 </div>
 
                             </div>
