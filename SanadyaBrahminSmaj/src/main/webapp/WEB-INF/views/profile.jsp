@@ -98,6 +98,14 @@
         <body>
 
           <div class="container">
+<c:if test="${not empty error}">
+  <div class="alert alert-warning alert-dismissible fade show" role="alert"
+       style="letter-spacing:.3px;">
+    ${error}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"
+            aria-label="Close"></button>
+  </div>
+</c:if>
 
             <!-- प्रोफ़ाइल कार्ड -->
             <div class="profile-card">

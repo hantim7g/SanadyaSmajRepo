@@ -223,7 +223,7 @@ leave the URL untouched (it was loaded in 'img' by Spring). */
 
     
     // DELETE
-    @PostMapping("/event/delete")
+    @GetMapping("/event/delete")
     public String deleteEvent(@RequestParam("id") Long id, Model model) {
         eventService.deleteEventById(id);
         model.addAttribute("success", "Event deleted!");

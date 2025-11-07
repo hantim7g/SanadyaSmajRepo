@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Controller
 public class HomeController {
@@ -44,12 +46,15 @@ public String home(Model model) {
     List<Event> upcomingEvents = eventService.findByEventStatusTrueAndEventDateAfter(new Date(System.currentTimeMillis()));
     model.addAttribute("upcomingEvents", upcomingEvents);
     
-    // Add testimonials
+    // Add testimonials for home page
     List<Testimonial> testimonials = testimonialService.getApprovedTestimonials();
-    model.addAttribute("testimonials", testimonials);
+    List<Testimonial> testimonialActive=  testimonials.stream().filter(t->t.isActive()).collect(Collectors.toList());
+    
+    model.addAttribute("testimonials", testimonialActive);
     
     return "home";
 }
+
 
     @GetMapping("/member/profile")
     public String memberProfile(Model model, Authentication authentication) {

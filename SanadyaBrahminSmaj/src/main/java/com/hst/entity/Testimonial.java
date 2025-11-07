@@ -1,11 +1,8 @@
 package com.hst.entity;
 
 import jakarta.persistence.*;
-
-import java.sql.Date;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "testimonials")
@@ -23,20 +20,55 @@ public class Testimonial {
     private String message;
 
     @Column(length = 100)
-    private String designation; // Can override user's occupation
+    private String designation;
 
     private String status = "प्रक्रिया में"; // "प्रक्रिया में", "स्वीकृत", "अस्वीकृत"
 
-    private Date createdDate;
-    private Date approvedDate;
+    private LocalDateTime createdDate;
+    private LocalDateTime updatedDate;
+    private LocalDateTime approvedDate;
     private String approvedBy;
 
-    private boolean isActive = true; // For display control
-    private int displayOrder = 0; // For ordering testimonials
+    private boolean isActive = true;
+    private int displayOrder = 0;
 
     // Constructors
     public Testimonial() {
-        this.createdDate = Date.valueOf(LocalDate.now());
+        this.createdDate = LocalDateTime.now();
+    }
+
+    // Helper methods for formatted dates
+    @Transient
+    public String getFormattedCreatedDate() {
+        if (createdDate != null) {
+            return createdDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        }
+        return "";
+    }
+
+    @Transient
+    public String getFormattedUpdatedDate() {
+        if (updatedDate != null) {
+            return updatedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        }
+        return "";
+    }
+
+    @Transient
+    public String getFormattedApprovedDate() {
+        if (approvedDate != null) {
+            return approvedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        }
+        return "";
+    }
+
+    @Transient
+    public boolean canBeEditedBy(User currentUser) {
+        if (currentUser.getRole().equals("ADMIN")) {
+            return true;
+        }
+        return this.user.getId().equals(currentUser.getId()) && 
+               "प्रक्रिया में".equals(this.status);
     }
 
     // Getters and Setters
@@ -55,11 +87,14 @@ public class Testimonial {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public Date getCreatedDate() { return createdDate; }
-    public void setCreatedDate(Date createdDate) { this.createdDate = createdDate; }
+    public LocalDateTime getCreatedDate() { return createdDate; }
+    public void setCreatedDate(LocalDateTime createdDate) { this.createdDate = createdDate; }
 
-    public Date getApprovedDate() { return approvedDate; }
-    public void setApprovedDate(Date approvedDate) { this.approvedDate = approvedDate; }
+    public LocalDateTime getUpdatedDate() { return updatedDate; }
+    public void setUpdatedDate(LocalDateTime updatedDate) { this.updatedDate = updatedDate; }
+
+    public LocalDateTime getApprovedDate() { return approvedDate; }
+    public void setApprovedDate(LocalDateTime approvedDate) { this.approvedDate = approvedDate; }
 
     public String getApprovedBy() { return approvedBy; }
     public void setApprovedBy(String approvedBy) { this.approvedBy = approvedBy; }

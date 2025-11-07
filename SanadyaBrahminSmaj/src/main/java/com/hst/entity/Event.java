@@ -23,7 +23,7 @@ public class Event {
     private List<EventImage> images = new ArrayList<>();
     private Date publishDate;
     private String eventUrl;
-    private boolean isCorosal;
+    private boolean isCorosal =false;
     private Date eventDate;
     private boolean eventStatus = true; // true = show, false = hide (default show)
 

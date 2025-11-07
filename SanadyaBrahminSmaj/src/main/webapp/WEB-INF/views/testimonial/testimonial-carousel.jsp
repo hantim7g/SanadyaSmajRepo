@@ -13,7 +13,6 @@
                         <div class="carousel-item ${status.index == 0 ? 'active' : ''}">
                             <div class="testimonial-card p-4 bg-white rounded">
                                 <div class="d-flex align-items-start">
-                                    <!-- Profile Image -->
                                     <div class="testimonial-image me-3">
                                         <c:choose>
                                             <c:when test="${not empty testimonial.user.profileImagePath}">
@@ -29,7 +28,6 @@
                                         </c:choose>
                                     </div>
                                     
-                                    <!-- Content -->
                                     <div class="testimonial-content flex-grow-1">
                                         <div class="testimonial-header mb-2">
                                             <h5 class="testimonial-name mb-1">${testimonial.user.fullName}</h5>
@@ -60,7 +58,6 @@
                     </c:forEach>
                 </div>
 
-                <!-- Controls -->
                 <c:if test="${fn:length(testimonials) > 1}">
                     <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon"></span>
@@ -70,10 +67,7 @@
                         <span class="carousel-control-next-icon"></span>
                         <span class="visually-hidden">Next</span>
                     </button>
-                </c:if>
 
-                <!-- Indicators -->
-                <c:if test="${fn:length(testimonials) > 1}">
                     <div class="carousel-indicators">
                         <c:forEach var="testimonial" items="${testimonials}" varStatus="status">
                             <button type="button" data-bs-target="#testimonialCarousel" 

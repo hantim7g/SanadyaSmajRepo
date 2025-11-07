@@ -1,8 +1,17 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="/WEB-INF/views/includes/header.jsp" %>
+<style>
+  /* Optional clamp for table cell previews */
+  #pendingTestimonialsTable .message-preview,
+  #approvedTestimonialsTable .message-preview {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
 
 <div class="container-fluid py-4">
     <h2 class="mb-4">प्रशंसापत्र प्रबंधन</h2>
@@ -80,9 +89,7 @@
                                                 </c:choose>
                                             </div>
                                         </td>
-                                        <td>
-                                            <fmt:formatDate value="${testimonial.createdDate}" pattern="dd/MM/yyyy HH:mm"/>
-                                        </td>
+                                        <td>${testimonial.formattedCreatedDate}</td>
                                         <td>
                                             <div class="btn-group" role="group">
                                                 <button class="btn btn-success btn-sm approve-btn" 
@@ -184,9 +191,7 @@
                                                 </c:choose>
                                             </div>
                                         </td>
-                                        <td>
-                                            <fmt:formatDate value="${testimonial.approvedDate}" pattern="dd/MM/yyyy HH:mm"/>
-                                        </td>
+                                        <td>${testimonial.formattedApprovedDate}</td>
                                         <td>
                                             <span class="badge ${testimonial.active ? 'bg-success' : 'bg-secondary'}" id="status-badge-${testimonial.id}">
                                                 ${testimonial.active ? 'सक्रिय' : 'निष्क्रिय'}
@@ -216,57 +221,13 @@
     </div>
 </div>
 
-<!-- Loading Modal -->
-<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-body text-center py-4">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <div class="mt-2">कृपया प्रतीक्षा करें...</div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
 $(document).ready(function() {
     
-    // Get auth token from localStorage
     function getAuthToken() {
         return localStorage.getItem('authToken');
     }
     
-    // Show loading modal
-    function showLoading() {
-        $('#loadingModal').modal('show');
-    }
-    
-    // Hide loading modal
-    function hideLoading() {
-        $('#loadingModal').modal('hide');
-    }
-    
-    // Success notification
-    function showSuccess(message) {
-        bootbox.alert({
-            title: "सफलता",
-            message: message,
-            className: "success-modal"
-        });
-    }
-    
-    // Error notification
-    function showError(message) {
-        bootbox.alert({
-            title: "त्रुटि",
-            message: message,
-            className: "error-modal"
-        });
-    }
-
-    // Expand/Collapse message functionality
     $(document).on('click', '.expand-btn', function() {
         const preview = $(this).prev('.message-preview');
         const full = $(this).next('.message-full');
@@ -282,7 +243,6 @@ $(document).ready(function() {
         }
     });
 
-    // Approve testimonial
     $(document).on('click', '.approve-btn', function() {
         const testimonialId = $(this).data('id');
         const $row = $('#testimonial-' + testimonialId);
@@ -302,8 +262,6 @@ $(document).ready(function() {
             },
             callback: function (result) {
                 if (result) {
-                    showLoading();
-                    
                     $.ajax({
                         url: '/admin/testimonial/approve/' + testimonialId,
                         type: 'POST',
@@ -313,39 +271,22 @@ $(document).ready(function() {
                             'Content-Type': 'application/json'
                         },
                         success: function(response) {
-                            hideLoading();
-                            showSuccess(response.message || 'प्रशंसापत्र सफलतापूर्वक स्वीकृत किया गया।');
-                            
-                            // Remove row with animation
+                            bootbox.alert(response.message || 'प्रशंसापत्र सफलतापूर्वक स्वीकृत किया गया।');
                             $row.fadeOut(500, function() {
                                 $(this).remove();
-                                
-                                // Update count
                                 const remainingCount = $('#pendingTestimonialsTable tbody tr').length - 1;
-                                $('.card-header .mb-0').html('<i class="fas fa-clock"></i> अनुमोदन की प्रतीक्षा में (' + remainingCount + ')');
-                                
-                                // Show empty message if no pending testimonials
+                                $('.card-header .mb-0').first().html('<i class="fas fa-clock"></i> अनुमोदन की प्रतीक्षा में (' + remainingCount + ')');
                                 if (remainingCount === 0) {
-                                    $('#pendingTestimonialsTable').parent().html(
-                                        '<div class="text-center py-4"><p class="text-muted">कोई प्रशंसापत्र अनुमोदन की प्रतीक्षा में नहीं है।</p></div>'
-                                    );
+                                    $('#pendingTestimonialsTable').parent().html('<div class="text-center py-4"><p class="text-muted">कोई प्रशंसापत्र अनुमोदन की प्रतीक्षा में नहीं है।</p></div>');
                                 }
                             });
                         },
                         error: function(xhr, status, error) {
-                            hideLoading();
-                            console.error('Error approving testimonial:', error);
-                            
                             let errorMessage = 'कोई त्रुटि हुई। कृपया पुनः प्रयास करें।';
                             if (xhr.responseJSON && xhr.responseJSON.message) {
                                 errorMessage = xhr.responseJSON.message;
-                            } else if (xhr.status === 401) {
-                                errorMessage = 'आपका सेशन समाप्त हो गया है। कृपया पुनः लॉगिन करें।';
-                            } else if (xhr.status === 403) {
-                                errorMessage = 'आपको यह कार्य करने की अनुमति नहीं है।';
                             }
-                            
-                            showError(errorMessage);
+                            bootbox.alert(errorMessage);
                         }
                     });
                 }
@@ -353,7 +294,6 @@ $(document).ready(function() {
         });
     });
 
-    // Reject testimonial
     $(document).on('click', '.reject-btn', function() {
         const testimonialId = $(this).data('id');
         const $row = $('#testimonial-' + testimonialId);
@@ -373,8 +313,6 @@ $(document).ready(function() {
             },
             callback: function (result) {
                 if (result) {
-                    showLoading();
-                    
                     $.ajax({
                         url: '/admin/testimonial/reject/' + testimonialId,
                         type: 'POST',
@@ -384,39 +322,22 @@ $(document).ready(function() {
                             'Content-Type': 'application/json'
                         },
                         success: function(response) {
-                            hideLoading();
-                            showSuccess(response.message || 'प्रशंसापत्र सफलतापूर्वक अस्वीकृत किया गया।');
-                            
-                            // Remove row with animation
+                            bootbox.alert(response.message || 'प्रशंसापत्र सफलतापूर्वक अस्वीकृت किया गया।');
                             $row.fadeOut(500, function() {
                                 $(this).remove();
-                                
-                                // Update count
                                 const remainingCount = $('#pendingTestimonialsTable tbody tr').length - 1;
-                                $('.card-header .mb-0').html('<i class="fas fa-clock"></i> अनुमोदन की प्रतीक्षा में (' + remainingCount + ')');
-                                
-                                // Show empty message if no pending testimonials
+                                $('.card-header .mb-0').first().html('<i class="fas fa-clock"></i> अनुमोदन की प्रतीक्षा में (' + remainingCount + ')');
                                 if (remainingCount === 0) {
-                                    $('#pendingTestimonialsTable').parent().html(
-                                        '<div class="text-center py-4"><p class="text-muted">कोई प्रशंसापत्र अनुमोदन की प्रतीक्षा में नहीं है।</p></div>'
-                                    );
+                                    $('#pendingTestimonialsTable').parent().html('<div class="text-center py-4"><p class="text-muted">कोई प्रशंसापत्र अनुमोदन की प्रतीक्षा में नहीं है।</p></div>');
                                 }
                             });
                         },
                         error: function(xhr, status, error) {
-                            hideLoading();
-                            console.error('Error rejecting testimonial:', error);
-                            
                             let errorMessage = 'कोई त्रुटि हुई। कृपया पुनः प्रयास करें।';
                             if (xhr.responseJSON && xhr.responseJSON.message) {
                                 errorMessage = xhr.responseJSON.message;
-                            } else if (xhr.status === 401) {
-                                errorMessage = 'आपका सेशन समाप्त हो गया है। कृपया पुनः लॉगिन करें।';
-                            } else if (xhr.status === 403) {
-                                errorMessage = 'आपको यह कार्य करने की अनुमति नहीं है।';
                             }
-                            
-                            showError(errorMessage);
+                            bootbox.alert(errorMessage);
                         }
                     });
                 }
@@ -424,7 +345,6 @@ $(document).ready(function() {
         });
     });
 
-    // Toggle active status
     $(document).on('click', '.toggle-btn', function() {
         const testimonialId = $(this).data('id');
         const isActive = $(this).data('active');
@@ -450,8 +370,6 @@ $(document).ready(function() {
             },
             callback: function (result) {
                 if (result) {
-                    showLoading();
-                    
                     $.ajax({
                         url: '/admin/testimonial/toggle/' + testimonialId,
                         type: 'POST',
@@ -461,10 +379,7 @@ $(document).ready(function() {
                             'Content-Type': 'application/json'
                         },
                         success: function(response) {
-                            hideLoading();
-                            showSuccess(response.message || 'स्थिति सफलतापूर्वक अपडेट की गई।');
-                            
-                            // Update UI elements
+                            bootbox.alert(response.message || 'स्थिति सफलतापूर्वक अपडेट की गई।');
                             const newActive = !isActive;
                             $button.data('active', newActive);
                             
@@ -479,19 +394,11 @@ $(document).ready(function() {
                             }
                         },
                         error: function(xhr, status, error) {
-                            hideLoading();
-                            console.error('Error toggling testimonial:', error);
-                            
                             let errorMessage = 'कोई त्रुटि हुई। कृपया पुनः प्रयास करें।';
                             if (xhr.responseJSON && xhr.responseJSON.message) {
                                 errorMessage = xhr.responseJSON.message;
-                            } else if (xhr.status === 401) {
-                                errorMessage = 'आपका सेशन समाप्त हो गया है। कृपया पुनः लॉगिन करें।';
-                            } else if (xhr.status === 403) {
-                                errorMessage = 'आपको यह कार्य करने की अनुमति नहीं है।';
                             }
-                            
-                            showError(errorMessage);
+                            bootbox.alert(errorMessage);
                         }
                     });
                 }
@@ -500,53 +407,58 @@ $(document).ready(function() {
     });
 });
 </script>
+<script>
+$(document).ready(function() {
+  // If DataTables is already initialized by re-render, destroy and re-init safely
+  function ensureTable(tableSelector, options) {
+    const $t = $(tableSelector);
+    if (!$t.length) return null;
+    if ($.fn.DataTable.isDataTable($t)) {
+      $t.DataTable().destroy();
+    }
+    return $t.DataTable(options);
+  }
 
-<style>
-.success-modal .modal-header {
-    background-color: #d4edda;
-    border-color: #c3e6cb;
-}
+  const commonOpts = {
+    responsive: true,
+    pageLength: 10,
+    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'सभी']],
+    order: [], // no initial sort; let user decide
+    language: {
+      search: 'खोजें:',
+      lengthMenu: 'प्रति पृष्ठ _MENU_',
+      info: 'कुल _TOTAL_ में से _START_–_END_ दिखा रहे हैं',
+      infoEmpty: 'कोई प्रविष्टि नहीं',
+      infoFiltered: '(फ़िल्टर किया गया _MAX_ से)',
+      zeroRecords: 'कोई मेल नहीं मिला',
+      paginate: { first: 'पहला', last: 'अंतिम', next: 'अगला', previous: 'पिछला' }
+    },
+    dom: 'Bfrtip',
+    buttons: [
+      { extend: 'csvHtml5', text: 'CSV', title: 'testimonials' },
+      { extend: 'pdfHtml5', text: 'PDF', title: 'testimonials', orientation: 'portrait', pageSize: 'A4' },
+      { extend: 'print', text: 'प्रिंट' }
+    ],
+    columnDefs: [
+      // Member column (avatar+name) not sortable
+      { targets: 0, orderable: false },
+      // Message column: allow sorting but it’s long text; keep as is
+      // Actions column not sortable
+      { targets: -1, orderable: false }
+    ]
+  };
 
-.error-modal .modal-header {
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
-}
+  // Pending table
+  ensureTable('#pendingTestimonialsTable', $.extend(true, {}, commonOpts, {
+    // e.g., default sort by Date desc (column index 3)
+    order: [[3, 'desc']]
+  }));
 
-.table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-}
-
-.btn-group .btn {
-    margin-right: 5px;
-}
-
-.btn-group .btn:last-child {
-    margin-right: 0;
-}
-
-.message-preview, .message-full {
-    line-height: 1.4;
-}
-
-.expand-btn {
-    color: #007bff;
-    text-decoration: none;
-    font-size: 0.875rem;
-}
-
-.expand-btn:hover {
-    text-decoration: underline;
-}
-
-.spinner-border {
-    width: 3rem;
-    height: 3rem;
-}
-
-.fade-out {
-    opacity: 0;
-    transition: opacity 0.5s ease-out;
-}
-</style>
+  // Approved table
+  ensureTable('#approvedTestimonialsTable', $.extend(true, {}, commonOpts, {
+    // default sort by Approved Date desc (column index 3)
+    order: [[3, 'desc']]
+  }));
+});
+</script>
 
