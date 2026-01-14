@@ -18,6 +18,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminController.class);
+
     @Autowired
     private  UserRepository userRepository;
     @Autowired

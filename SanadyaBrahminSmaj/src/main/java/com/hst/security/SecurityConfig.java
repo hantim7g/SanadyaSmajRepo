@@ -19,6 +19,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
@@ -38,26 +43,37 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+            .cors(cors -> {}) // enable CORS with the configuration from corsConfigurationSource()
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 🔒 Stateless
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/api/auth/**",
-                    "/swagger-ui/**",
-                    "/v3/api-docs/**",
-                    "/swagger-ui.html"
-                ).permitAll() // 🔓 Public routes
-
-                .requestMatchers("/matrimony/my-profiles").hasAnyAuthority("USER", "ADMIN") 
-                .requestMatchers("/admin/**").hasAuthority("ADMIN")// 🔐 Protected by role
-                .requestMatchers("/matrimony/**").authenticated() // All other matrimony routes need login
-                .requestMatchers("/testimonials").permitAll()
-                .requestMatchers("/member/add-testimonial", "/member/save-testimonial", 
-                                "/member/edit-testimonial/**", "/member/update-testimonial/**", 
-                                "/testimonial/my-testimonials", "/member/testimonial/delete/**").hasAnyAuthority("USER", "ADMIN")
-                .requestMatchers("/admin/testimonials", "/admin/testimonial/**").hasAuthority("ADMIN")
-
-                .anyRequest().permitAll() // Everything else is public
+//                .requestMatchers(
+//                    "/api/auth/**",
+//                    "/swagger-ui/**",
+//                    "/v3/api-docs/**",
+//                    "/swagger-ui.html"
+//                ).permitAll() // 🔓 Public routes
+//                .requestMatchers(
+//                			"/",
+//                        "/home",
+//                        "/index",
+//                        "/index.html",
+//                        "/css/**",
+//                        "/js/**",
+//                        "/images/**",
+//                        "/favicon.ico"
+//                    ).permitAll()
+//                .requestMatchers("/h2-console/**").hasAuthority("ADMIN") // 🔐 H2 console restricted to ADMIN
+//                .requestMatchers("/matrimony/my-profiles").hasAnyAuthority("USER", "ADMIN") 
+//                .requestMatchers("/admin/**").hasAuthority("ADMIN")// 🔐 Protected by role
+//                .requestMatchers("/matrimony/**").authenticated() // All other matrimony routes need login
+//                .requestMatchers("/testimonials").permitAll()
+//                .requestMatchers("/member/add-testimonial", "/member/save-testimonial", 
+//                                "/member/edit-testimonial/**", "/member/update-testimonial/**", 
+//                                "/testimonial/my-testimonials", "/member/testimonial/delete/**").hasAnyAuthority("USER", "ADMIN")
+//                .requestMatchers("/admin/testimonials", "/admin/testimonial/**").hasAuthority("ADMIN")
+                .anyRequest().permitAll() 
+//                .anyRequest().authenticated() // Everything else requires authentication
             )
             .logout(logout -> logout.disable())
             .exceptionHandling(ex -> ex
@@ -71,6 +87,7 @@ public class SecurityConfig {
             )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+            .headers(headers -> headers.frameOptions().sameOrigin()) // allow frames for H2 console
             .build();
     }
 
@@ -90,5 +107,20 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
+    }
+
+    // CORS configuration: allow Authorization header and cookies (credentials).
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        // TODO: replace '*' with explicit origins in production
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000")); // 🔒 Restrict to specific origin
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
+        configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(List.of("Set-Cookie"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

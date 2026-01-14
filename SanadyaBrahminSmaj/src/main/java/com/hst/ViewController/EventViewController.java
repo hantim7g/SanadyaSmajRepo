@@ -34,8 +34,19 @@ public class EventViewController {
 	        Model model) {
 
 	    Pageable pageable = PageRequest.of(page, size, Sort.by("publishDate").descending());
-	    Page<Event> eventPage = eventService.getPaginatedEvent(pageable);
-	    model.addAttribute("eventPage", eventPage);
+//	    Page<Event> eventPage = eventService.getPaginatedEvent(pageable);
+	    Page<Event> eventPageFiltered = eventService.getEventsPagedFiltered(
+	            null, // search
+	            null, // author
+	            null, // publishDate
+	            null, // publishDateStart
+	            null, // publishDateEnd
+	            null, // isCorosal
+	            "true", // eventStatus
+	            pageable
+	    );
+	    
+	    model.addAttribute("eventPage", eventPageFiltered);
 	    return "event/eventList";
 	}
 	@GetMapping("/{id}")

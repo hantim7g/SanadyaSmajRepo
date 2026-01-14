@@ -318,22 +318,22 @@
                             </c:if>
                           </div>
                           <div class="d-flex justify-content-end flex-wrap gap-2 admin-actions mt-2">
-                            <form method="post" action="/admin/event-toggle-status" style="display:inline;">
+                           <!-- <form method="post" action="/admin/event-toggle-status" style="display:inline;">
                               <input type="hidden" name="id" value="${ev.id}">
                               <button type="submit"
                                 class="btn ${ev.eventStatus ? 'btn-success' : 'btn-danger'} fw-bold btn-sm"
                                 title="${ev.eventStatus ? 'Hide on Site' : 'Show on Site'}"
                                 onclick="return confirm('क्या आप इस कार्यक्रम की स्थिति बदलना चाहते हैं?');">
-                                ${ev.eventStatus ? 'कार्यक्रम दिखाएँ' : 'कार्यक्रम छुपाएँ'}
+                                ${ev.eventStatus ?  'कार्यक्रम छुपाएँ':'कार्यक्रम दिखाएँ'}
                               </button>
-                            </form>
+                            </form>-->
                             <form method="post" action="/admin/event-toggle-corosal" style="display:inline;">
                               <input type="hidden" name="id" value="${ev.id}">
                               <button type="submit"
                                 class="btn ${ev.corosal ? 'btn-success' : 'btn-danger'} fw-bold btn-sm"
                                 title="${ev.corosal ? 'स्लाइडर में दिखाएँ' : 'स्लाइडर से छुपाएँ'}"
                                 onclick="return confirm('क्या आप इसे होमपेज स्लाइडर की स्थिति बदलना चाहते हैं?');">
-                                ${ev.corosal ? 'होमपेज पर दिखाएँ' : 'होमपेज से छुपाएँ'}
+                                ${ev.corosal ?   'होमपेज से छुपाएँ':'होमपेज पर दिखाएँ'}
                               </button>
                             </form>
                             <a href="/admin/event-form?id=${ev.id}" class="btn btn-outline-danger fw-bold btn-sm">

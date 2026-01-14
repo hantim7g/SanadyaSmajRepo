@@ -1,6 +1,7 @@
 package com.hst.controller;
 
 import com.hst.dto.LoginRequest;
+import com.hst.dto.RegistrationRequest; // Import the new DTO
 import com.hst.entity.PasswordResetRequest;
 import com.hst.entity.User;
 import com.hst.repository.UserRepository;
@@ -9,16 +10,22 @@ import com.hst.security.JwtTokenProvider;
 import com.hst.service.PasswordResetRequestService;
 import com.hst.service.RegistrationNumberService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -58,7 +65,7 @@ public class AuthController {
 
 	@PostMapping("/login")
 	public ResponseEntity<ApiResponse<Map<String, String>>> login(@RequestBody LoginRequest request,
-			HttpServletResponse response) {
+			HttpServletResponse response, HttpServletRequest httpRequest) {
 		Optional<User> optionalUser = userRepository.findByMobile(request.getMobile());
 		if (optionalUser.isEmpty()) {
 			return ResponseEntity.badRequest().body(new ApiResponse<>(false, "मोबाइल नंबर पंजीकृत नहीं है।", null));
@@ -73,28 +80,49 @@ public class AuthController {
 			authenticationManager
 					.authenticate(new UsernamePasswordAuthenticationToken(request.getMobile(), request.getPassword()));
 		} catch (BadCredentialsException e) {
-			// TODO: handle exceptionreturn ResponseEntity.badRequest()
+//			return ResponseEntity.() 401
+//					.body(new ApiResponse<>(false, "लॉगिन करने में विफल . यूजरनेम पासवर्ड गलत है।", null));
+//			
+			
 			return ResponseEntity.badRequest()
 					.body(new ApiResponse<>(false, "लॉगिन करने में विफल . यूजरनेम पासवर्ड गलत है।", null));
 		}
 
-		String token = jwtTokenProvider.generateToken(request.getMobile(), user.getRole());
+		String token = jwtTokenProvider.generateToken(request.getMobile(), List.of(user.getRole()));
 
-		Cookie cookie = new Cookie("authToken", token);
-		cookie.setHttpOnly(true);
-		cookie.setPath("/");
-		cookie.setMaxAge(7 * 24 * 60 * 60);
-//		cookie.setMaxAge(1 * 60);
+		// Create secure HttpOnly cookie with SameSite attribute using ResponseCookie
+		ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie.from("authToken", token)
+				.httpOnly(true)
+				.path("/")
+				.maxAge(7 * 24 * 60 * 60);
 
-		response.addCookie(cookie);
+		// Use Secure flag when request is secure
+		if (httpRequest.isSecure()) {
+			cookieBuilder.secure(true);
+		}
+		// Prefer Strict to mitigate CSRF when using cookies for auth
+		// Use Lax for better browser compatibility while still providing CSRF mitigation
+		cookieBuilder.sameSite("Lax");
 
-		return ResponseEntity.ok(new ApiResponse<>(true, user.getFullName(), Map.of("token", token)));
+		ResponseCookie responseCookie = cookieBuilder.build();
+		response.addHeader("Set-Cookie", responseCookie.toString());
+
+//		return ResponseEntity.ok(new ApiResponse<>(true, user.getFullName(), Map.of("token", token)));
+		return ResponseEntity.ok(new ApiResponse<>(true, user.getFullName(), null));
+		
 	}
 
 	@PostMapping("/register")
-	public ResponseEntity<ApiResponse<Map<String, Object>>> register(@RequestBody User req) {
+	public ResponseEntity<ApiResponse<Map<String, Object>>> register(@Valid @RequestBody RegistrationRequest req, BindingResult bindingResult) {
+		// Handle validation errors
+		if (bindingResult.hasErrors()) {
+			Map<String, Object> errors = new HashMap<>();
+			bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+			return ResponseEntity.badRequest().body(new ApiResponse<Map<String, Object>>(false, errors.toString() ,errors));
+		}
+
 		if (userRepository.existsByMobile(req.getMobile())) {
-			return ResponseEntity.badRequest().body(new ApiResponse<>(false, "मोबाइल नंबर पहले से पंजीकृत है।", null));
+			return ResponseEntity.badRequest().body(new ApiResponse<Map<String, Object>>(false, "मोबाइल नंबर पहले से पंजीकृत है।", null));
 		}
 
 		User user = new User();
@@ -213,4 +241,27 @@ public class AuthController {
             return ResponseEntity.status(404).body("यूज़र नहीं मिला।");
         }
     }
+	@GetMapping("/me")
+	public ResponseEntity<ApiResponse<Map<String, Object>>> me(Authentication authentication) {
+
+	    if (authentication == null || !authentication.isAuthenticated()) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+	                .body(new ApiResponse<>(false, "Not authenticated", null));
+	    }
+
+	    String mobile = authentication.getName();
+
+	    User user = userRepository.findByMobile(mobile)
+	            .orElseThrow(() -> new RuntimeException("User not found"));
+
+	    Map<String, Object> data = new HashMap<>();
+	    data.put("mobile", user.getMobile());
+	    data.put("fullName", user.getFullName());
+	    data.put("role", user.getRole());
+
+	    return ResponseEntity.ok(
+	            new ApiResponse<>(true, "User info", data)
+	    );
+	}
+
 }

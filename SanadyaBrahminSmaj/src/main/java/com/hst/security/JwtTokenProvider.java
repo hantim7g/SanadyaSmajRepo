@@ -1,18 +1,27 @@
 package com.hst.security;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
+
+    private static final Logger log = LoggerFactory.getLogger(JwtTokenProvider.class);
+
+    private static final String TOKEN_COOKIE_NAME = "authToken";
+    private static final String ISSUER = "hst-api";
+    private static final String AUDIENCE = "hst-client";
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -20,72 +29,113 @@ public class JwtTokenProvider {
     @Value("${jwt.expiration}")
     private long jwtExpiration;
 
-    public String generateToken(String mobile, String role) {
+    /* =========================
+       Signing Key
+       ========================= */
+    private Key getSigningKey() {
+        byte[] keyBytes;
+        try {
+            keyBytes = Base64.getDecoder().decode(jwtSecret);
+        } catch (IllegalArgumentException ex) {
+            keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
+        }
+
+        if (keyBytes.length < 32) {
+            throw new IllegalStateException("JWT secret must be at least 256 bits (32 bytes)");
+        }
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    /* =========================
+       Token Generation
+       ========================= */
+    public String generateToken(String username, Collection<String> roles) {
+
         Map<String, Object> claims = new HashMap<>();
-        
-        // Store role in claims (you can store as List if needed)
-        claims.put("roles", List.of(role)); // ✅ convert single role to list for consistency
+        claims.put("roles", roles);
+
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + jwtExpiration);
 
         return Jwts.builder()
-                .setClaims(claims)             // ✅ First add your claims
-                .setSubject(mobile)           // ✅ THEN add subject
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(SignatureAlgorithm.HS256, jwtSecret)
+                .setClaims(claims)
+                .setSubject(username)
+                .setIssuer(ISSUER)
+                .setAudience(AUDIENCE)
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-
+    /* =========================
+       Token Parsing
+       ========================= */
     public String getUsernameFromToken(String token) {
-        try {
-            String subject = Jwts.parser()
-                    .setSigningKey(jwtSecret)
-                    .parseClaimsJws(token)
-                    .getBody()
-                    .getSubject();
-            System.out.println("✅ Extracted subject from JWT: " + subject);
-            return subject;
-        } catch (Exception e) {
-            System.out.println("❌ Failed to extract username: " + e.getMessage());
-            return null;
-        }
+        return getAllClaims(token).getSubject();
     }
 
-
-    // ✅ New method to extract roles
     public List<String> getRolesFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(jwtSecret)
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.get("roles", List.class);
-    }
+        Object rolesObj = getAllClaims(token).get("roles");
 
-    public String resolveToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+        if (rolesObj instanceof List<?>) {
+            return ((List<?>) rolesObj)
+                    .stream()
+                    .map(Object::toString)
+                    .collect(Collectors.toList());
         }
-        return null;
+
+        return Collections.emptyList();
     }
 
+    /* =========================
+       Token Validation
+       ========================= */
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
+            getAllClaims(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            log.warn("JWT expired");
         } catch (JwtException | IllegalArgumentException e) {
-            return false;
+            log.warn("Invalid JWT: {}", e.getMessage());
         }
+        return false;
+    }
+
+    /* =========================
+       Token Extraction
+       ========================= */
+    public String getJwtFromHeader(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            return header.substring(7);
+        }
+        return null;
     }
 
     public String getJwtFromCookies(HttpServletRequest request) {
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if ("authToken".equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
+        if (request.getCookies() == null) {
+            return null;
+        }
+        for (Cookie cookie : request.getCookies()) {
+            if (TOKEN_COOKIE_NAME.equals(cookie.getName())) {
+                return cookie.getValue();
             }
         }
         return null;
+    }
+
+    /* =========================
+       Internal Claims Parser
+       ========================= */
+    private Claims getAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .requireIssuer(ISSUER)
+                .requireAudience(AUDIENCE)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

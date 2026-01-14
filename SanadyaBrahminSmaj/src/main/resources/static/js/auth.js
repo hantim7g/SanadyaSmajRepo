@@ -1,103 +1,80 @@
-$(function() {
-	// Login form submit handler
-	$('#loginForm').submit(function(e) {
-		e.preventDefault();
+$(function () {
 
-		const mobile = $('#loginMobile').val().trim();
-		const password = $('#loginPassword').val().trim();
+  $('#loginForm').submit(function (e) {
+    e.preventDefault();
 
-		if (!/^\d{10}$/.test(mobile)) {
-			$('#loginError').text("मान्य मोबाइल नंबर दर्ज करें");
-			return;
-		}
-		if (password.length < 4) {
-			$('#loginError').text("पासवर्ड मान्य नहीं है");
-			return;
-		}
+    const mobile = $('#loginMobile').val().trim();
+    const password = $('#loginPassword').val().trim();
 
-		$.ajax({
-			url: '/api/auth/login',
-			type: 'POST',
-			contentType: 'application/json',
-			data: JSON.stringify({ mobile, password }),
-			success: function(res) {
-				if (res.success) {
-					debugger;
-					// ✅ Store JWT
-					localStorage.setItem("authToken", res.data.token);
-					localStorage.setItem("userName", res.message);
-					if (isAdminUser(res.data.token)) {
-						document.getElementById("adminArea").classList.remove("d-none");
-					}
+    if (!/^\d{10}$/.test(mobile)) {
+      $('#loginError').text("मान्य मोबाइल नंबर दर्ज करें");
+      return;
+    }
 
-					// ✅ Store user name (assuming backend sends name in token or decode it if needed)
-					const userName = res.message || "प्रयोगकर्ता"; // Or extract from token
+    if (password.length < 4) {
+      $('#loginError').text("पासवर्ड मान्य नहीं है");
+      return;
+    }
 
-					// ✅ Replace login button with user dropdown
-					$('#loginArea').html(`
-      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">${userName}</a>
-      <ul class="dropdown-menu dropdown-menu-end">
-  <a class="dropdown-item" href="/member/profile">प्रोफ़ाइल देखें</a>
-     <li><a class="dropdown-item" href="/member/payment">भुगतान</a></li>
-            <li><a class="dropdown-item" href="/member/doc">सदस्य निर्देशिका</a></li>
+    $.ajax({
+      url: '/api/auth/login',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ mobile, password }),
+      xhrFields: { withCredentials: true }, // 🔐 HttpOnly cookie
+      success: function (res) {
 
-<li><a class="dropdown-item text-danger" href="#" onclick="handleLogout(event)">लॉगआउट</a></li>
-      </ul>
-    `);
+        if (!res.success) {
+          showError(res.message || "लॉगिन असफल");
+          return;
+        }
 
+		$('#authModal').modal('hide');
+						const dialog = bootbox.alert({
+							title: "<h4 class='text-success text-center'>🔐 लॉगिन सफल!</h4>",
+							message: "<p class='text-center fs-5'>✅ आपको होम पेज पर भेजा जा रहा है...</p>",
+							centerVertical: true,
+							buttons: {
+								ok: {
+									label: 'रोकें',
+									className: 'btn btn-light'
+								}
+							}
+						});
 
-					$('#authModal').modal('hide');
-					const dialog = bootbox.alert({
-						title: "<h4 class='text-success text-center'>🔐 लॉगिन सफल!</h4>",
-						message: "<p class='text-center fs-5'>✅ आपको होम पेज पर भेजा जा रहा है...</p>",
+						setTimeout(() => {
+							dialog.modal('hide');
+							window.location.href = "/home"; // or your dashboard route
+						}, 3000);
+
+					      },
+      error: function (xhr) {
+       // showError(xhr.responseJSON?.message || "लॉगिन असफल");
+		const msg = xhr.responseJSON?.message || "लॉगिन असफल";
+					bootbox.alert({
+						title: "<h4 class='text-danger text-center'>⚠️ त्रुटि</h4>",
+						message: `<div class='text-center fs-5'>${msg}</div>`,
 						centerVertical: true,
 						buttons: {
 							ok: {
-								label: 'रोकें',
-								className: 'btn btn-light'
+								
+								label: 'फिर से प्रयास करें',
+								className: 'btn btn-danger px-4'
 							}
 						}
 					});
+		
+		
+      }
+    });
+  });
 
-					setTimeout(() => {
-						dialog.modal('hide');
-						window.location.href = "/home"; // or your dashboard route
-					}, 3000);
-
-				} else {
-
-					const msg = res.message|| "लॉगिन असफल। कृपया विवरण जांचें।";
-				bootbox.alert({
-					title: "<h4 class='text-danger text-center'>⚠️ त्रुटि</h4>",
-					message: `<div class='text-center fs-5'>${msg}</div>`,
-					centerVertical: true,
-					buttons: {
-						ok: {
-							label: 'फिर से प्रयास करें',
-							className: 'btn btn-danger px-4'
-						}
-					}
-				});
-				}
-
-			},
-
-			error: function(xhr) {
-				const msg = xhr.responseJSON.message || "लॉगिन असफल। कृपया विवरण जांचें।";
-				bootbox.alert({
-					title: "<h4 class='text-danger text-center'>⚠️ त्रुटि</h4>",
-					message: `<div class='text-center fs-5'>${msg}</div>`,
-					centerVertical: true,
-					buttons: {
-						ok: {
-							label: 'फिर से प्रयास करें',
-							className: 'btn btn-danger px-4'
-						}
-					}
-				});
-			}
-		});
-	});
+  function showError(msg) {
+    bootbox.alert({
+      title: "⚠️ त्रुटि",
+      message: msg
+    });
+  }
 });
 
 
@@ -287,7 +264,7 @@ $(document).ready(function() {
       <ul class="dropdown-menu dropdown-menu-end">
   <a class="dropdown-item" href="/member/profile">प्रोफ़ाइल देखें</a>
      <li><a class="dropdown-item" href="/member/payment">भुगतान</a></li>
-            <li><a class="dropdown-item" href="/member/doc">सदस्य निर्देशिका</a></li>
+            <li><a class="dropdown-item" href="/member/doc/admin">सदस्य निर्देशिका</a></li>
 
 <li><a class="dropdown-item text-danger" href="#" onclick="handleLogout(event)">लॉगआउट</a></li>
       </ul>

@@ -161,10 +161,10 @@
             </div>
           </div>
 
-          <div class="form-group mb-3">
+          <!--<div class="form-group mb-3">
             <label for="eventUrl" class="form-label">कार्यक्रम यूआरएल</label>
             <input type="text" name="eventUrl" id="eventUrl" class="form-control" value="${event.eventUrl}" />
-          </div>
+          </div>-->
 
           <div class="row mb-3">
             <div class="col-md-6">

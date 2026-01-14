@@ -32,7 +32,7 @@ public class Message {
     @Column(name = "title", length = 200, nullable = false)
     private String title;
 
-    @Column(name = "lead", length = 1000)
+    @Column(name = "leads", length = 1000)
     private String lead;
 
     // Use TEXT/CLOB for larger content

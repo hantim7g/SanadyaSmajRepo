@@ -18,9 +18,9 @@ $('#profileForm').submit(function (e) {
     type: 'POST',
     contentType: 'application/json',
     data: JSON.stringify(formData),
-    headers: {
+    /*headers: {
       Authorization: 'Bearer ' + localStorage.getItem("authToken")
-    },
+    },*/
     success: function () {
       $('#updateMsg').text("प्रोफ़ाइल सफलतापूर्वक अपडेट हो गई।").removeClass("text-danger").addClass("text-success");
     },
@@ -55,9 +55,9 @@ $('#uploadImageBtn').click(function () {
     data: formData,
     processData: false,
     contentType: false,
-    headers: {
+    /*headers: {
       Authorization: 'Bearer ' + localStorage.getItem("authToken")
-    },
+    },*/
     success: function (res) {
       latestImagePath = res.imagePath; // Save latest path
       $('#profilePic').attr("src", latestImagePath);

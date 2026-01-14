@@ -48,6 +48,8 @@
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
 
   <style>
+	
+	
     body {
       background-color: #fffaf0;
       font-family: 'Segoe UI', 'Noto Sans Devanagari', sans-serif;
@@ -268,6 +270,30 @@
       outline: 2px solid #ffc107;
       outline-offset: 2px;
     }
+	/* =========================
+	   LOGIN USER DISPLAY FIX
+	========================= */
+	#loginArea .nav-link {
+	  display: flex;
+	  align-items: center;
+	  gap: 8px;
+	  color: #fff !important;
+	  white-space: nowrap;
+	}
+
+	#loginArea .login-username {
+	  color: #fff !important;
+	  font-weight: 600;
+	  max-width: 140px;
+	  overflow: hidden;
+	  text-overflow: ellipsis;
+	}
+
+	#loginArea i {
+	  color: #fff;
+	}
+
+	
   </style>
 </head>
 <body>
@@ -425,7 +451,8 @@
           </a>
           <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item" href="/admin/dashboard"><i class="fas fa-chart-bar"></i> डैशबोर्ड</a></li>
-
+			<li><a class="dropdown-item" href="/member/doc/admin"><i class="fas fa-chart-bar"></i> सदस्य निर्देशिक</a></li>
+			
             <li class="dropdown-submenu dropend">
               <a class="dropdown-item dropdown-toggle" href="#"><i class="fas fa-users"></i> सदस्य प्रबंधन</a>
               <ul class="dropdown-menu">
@@ -443,22 +470,31 @@
             </li>
 
             <li><a class="dropdown-item" href="/admin/hall-bookings"><i class="fas fa-building"></i> हॉल बुकिंग्स</a></li>
-            <li><a class="dropdown-item" href="/admin/approvals"><i class="fas fa-check"></i> अनुमोदन</a></li>
           </ul>
         </li>
 
         <!-- 👤 Login / Member -->
-        <li class="nav-item dropdown" id="loginArea">
-          <a class="nav-link dropdown-toggle position-relative" href="#" role="button" id="loginDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="fas fa-user"></i> 
-            <span class="d-none d-lg-inline">लॉगिन / सदस्यता</span>
-            <span class="user-status d-none" id="userOnlineStatus"></span>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="loginDropdown" id="loginDropdownMenu">
-            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#authModal"><i class="fas fa-sign-in-alt"></i> लॉगिन / सदस्य बनें</a></li>
-            <li><a class="dropdown-item" href="/member/doc"><i class="fas fa-address-book"></i> सदस्य निर्देशिका</a></li>
-          </ul>
-        </li>
+		<li class="nav-item dropdown" id="loginArea">
+		  <a class="nav-link dropdown-toggle d-flex align-items-center"
+		     href="#"
+		     id="loginDropdown"
+		     data-bs-toggle="dropdown"
+		     aria-expanded="false">
+
+		    <i class="fas fa-user-circle me-2"></i>
+		    <span class="login-username d-none d-lg-inline">लॉगिन / सदस्यता</span>
+		    <span class="user-status d-none ms-2"></span>
+		  </a>
+
+		  <ul class="dropdown-menu dropdown-menu-end" id="loginDropdownMenu">
+		    <li>
+		      <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#authModal">
+		        लॉगिन / सदस्य बनें
+		      </a>
+		    </li>
+		  </ul>
+		</li>
+
 
       </ul>
     </div>
@@ -469,333 +505,161 @@
 
 <!-- 🔧 Enhanced JS Logic for Auth/Admin/Testimonial Handling -->
 <script>
-  // Global variables
-  let currentUser = null;
-  let testimonialNotificationCount = 0;
-  let adminNotificationCount = 0;
+/* =========================
+   GLOBAL STATE
+========================= */
+let currentUser = null;
+let testimonialNotificationCount = 0;
+let adminNotificationCount = 0;
 
-  // Utility Functions
-  function showLoading(message = 'लोड हो रहा है...') {
-    const overlay = document.getElementById("loadingOverlay");
-    const messageDiv = overlay.querySelector('.loading-spinner div:last-child div:first-child');
-    if (messageDiv) messageDiv.textContent = message;
-    overlay.style.display = "flex";
-  }
+/* =========================
+   UI UTILITIES (UNCHANGED)
+========================= */
+function showLoading(message = 'लोड हो रहा है...') {
+  const overlay = document.getElementById("loadingOverlay");
+  const messageDiv = overlay.querySelector('.loading-spinner div:last-child div:first-child');
+  if (messageDiv) messageDiv.textContent = message;
+  overlay.style.display = "flex";
+}
 
-  function hideLoading() {
-    document.getElementById("loadingOverlay").style.display = "none";
-  }
+function hideLoading() {
+  document.getElementById("loadingOverlay").style.display = "none";
+}
 
-  function showToast(message, type = 'info', duration = 5000) {
-    const toastContainer = document.getElementById('toastContainer');
-    const toastId = 'toast-' + Date.now();
-    
-    const bgClass = type === 'success' ? 'bg-success' : 
-                   type === 'error' ? 'bg-danger' : 
-                   type === 'warning' ? 'bg-warning' : 'bg-info';
-    
-    const iconClass = type === 'success' ? 'fa-check-circle' :
-                     type === 'error' ? 'fa-exclamation-triangle' :
-                     type === 'warning' ? 'fa-exclamation-circle' : 'fa-info-circle';
-    
-    const toast = document.createElement('div');
-    toast.id = toastId;
-    toast.className = `toast align-items-center text-white ${bgClass} border-0`;
-    toast.setAttribute('role', 'alert');
-    toast.setAttribute('aria-live', 'assertive');
-    toast.setAttribute('aria-atomic', 'true');
-    
-    toast.innerHTML = `
-      <div class="d-flex">
-        <div class="toast-body">
-          <i class="fas ${iconClass} me-2"></i>${message}
-        </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+function showToast(message, type = 'info', duration = 5000) {
+  const toastContainer = document.getElementById('toastContainer');
+  const toastId = 'toast-' + Date.now();
+
+  const bgClass =
+    type === 'success' ? 'bg-success' :
+    type === 'error' ? 'bg-danger' :
+    type === 'warning' ? 'bg-warning' : 'bg-info';
+
+  const iconClass =
+    type === 'success' ? 'fa-check-circle' :
+    type === 'error' ? 'fa-exclamation-triangle' :
+    type === 'warning' ? 'fa-exclamation-circle' : 'fa-info-circle';
+
+  const toast = document.createElement('div');
+  toast.id = toastId;
+  toast.className = `toast align-items-center text-white ${bgClass} border-0`;
+  toast.setAttribute('role', 'alert');
+
+  toast.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="fas ${iconClass} me-2"></i>${message}
       </div>
-    `;
-    
-    toastContainer.appendChild(toast);
-    
-    const bsToast = new bootstrap.Toast(toast, { delay: duration });
-    bsToast.show();
-    
-    // Auto remove after toast is hidden
-    toast.addEventListener('hidden.bs.toast', () => {
-      toast.remove();
-    });
-  }
+      <button type="button" class="btn-close btn-close-white me-2 m-auto"
+              data-bs-dismiss="toast"></button>
+    </div>
+  `;
 
-  function isAdminUser(token) {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload && payload.roles && payload.roles.includes('ADMIN');
-    } catch (e) {
-      console.warn("Invalid token", e);
-      return false;
-    }
-  }
+  toastContainer.appendChild(toast);
+  new bootstrap.Toast(toast, { delay: duration }).show();
+}
 
-  function isTokenExpired(token) {
-    if (!token) return true;
-    try {
-      const payloadBase64 = token.split('.')[1];
-      const decodedPayload = atob(payloadBase64);
-      const payload = JSON.parse(decodedPayload);
-      const currentTime = Math.floor(Date.now() / 1000);
-      return currentTime > payload.exp;
-    } catch (e) {
-      console.error("JWT decoding failed:", e);
-      return true;
-    }
-  }
+/* =========================
+   AUTH: LOAD USER FROM BACKEND
+========================= */
+document.addEventListener("DOMContentLoaded", function () {
 
-  function getUserFromToken(token) {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return {
-        username: payload.username || payload.sub,
-        roles: payload.roles || [],
-        exp: payload.exp
-      };
-    } catch (e) {
-      console.error("Error parsing token:", e);
-      return null;
-    }
-  }
+  fetch('/api/auth/me', { credentials: 'include' })
+    .then(res => res.status === 401 ? null : res.json())
+    .then(res => {
+      if (!res || !res.success) return;
 
-  function updateNotificationBadge(elementId, count) {
-    const badge = document.getElementById(elementId);
-    if (badge) {
-      if (count > 0) {
-        badge.textContent = count > 99 ? '99+' : count;
-        badge.classList.remove('d-none');
-      } else {
-        badge.classList.add('d-none');
-      }
-    }
-  }
+      const name = res.data.fullName;
+      const role = res.data.role;
 
-  function fetchNotificationCounts() {
-    const token = localStorage.getItem('authToken');
-    if (!token || !isAdminUser(token)) return;
+      // ✅ SAFE updates
+      document.querySelector('.login-username').textContent = name;
+      document.querySelector('.user-status').classList.remove('d-none');
 
-    // Fetch pending testimonials count for admin
-    $.ajax({
-      url: '/api/admin/testimonials/pending/count',
-      type: 'GET',
-      headers: {
-        'Authorization': 'Bearer ' + token
-      },
-      success: function(data) {
-        testimonialNotificationCount = data.count || 0;
-        updateNotificationBadge('testimonialNotification', testimonialNotificationCount);
-        updateNotificationBadge('adminTestimonialCount', testimonialNotificationCount);
-        
-        // Update total admin notifications
-        adminNotificationCount = testimonialNotificationCount; // Add other notification types here
-        updateNotificationBadge('adminNotification', adminNotificationCount);
-      },
-      error: function(xhr) {
-        if (xhr.status !== 404) {
-          console.warn('Could not fetch notification counts');
-        }
-      }
-    });
-  }
-
-  function handleLogout(e) {
-    if (e) e.preventDefault();
-    
-    showLoading('लॉगआउट हो रहे हैं...');
-    
-    // Clear local storage
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userName");
-    currentUser = null;
-    
-    // Make logout request to backend
-    fetch('/logout', {
-      method: 'GET',
-      credentials: 'include'
-    }).then(() => {
-      hideLoading();
-      showToast('सफलतापूर्वक लॉगआउट हो गए।', 'success');
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1000);
-    }).catch(error => {
-      console.error('Logout error:', error);
-      hideLoading();
-      showToast('लॉगआउट में त्रुटि हुई।', 'error');
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 2000);
-    });
-  }
-
-  // Authentication Management
-  document.addEventListener("DOMContentLoaded", function () {
-    const token = localStorage.getItem("authToken");
-    const username = localStorage.getItem("userName") || "प्रयोगकर्ता";
-
-    // Check token expiry on page load
-    if (token && isTokenExpired(token)) {
-      console.log('Token expired on page load');
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userName');
-      currentUser = null;
-      
-      showToast('आपका सेशन समाप्त हो गया है। कृपया पुनः लॉगिन करें।', 'warning');
-      return;
-    }
-
-    if (token) {
-      currentUser = getUserFromToken(token);
-      let usernameStore = currentUser ? currentUser.username : "प्रयोगकर्ता";
-
-      // Update dropdown button
-      const loginDropdown = document.getElementById("loginDropdown");
-      loginDropdown.innerHTML = `
-        <i class="fas fa-user-circle"></i> 
-        <span class="d-none d-lg-inline">${usernameStore}</span>
-        <span class="user-status" id="userOnlineStatus"></span>
+      // Replace menu items ONLY
+      document.getElementById('loginDropdownMenu').innerHTML = `
+        <li><a class="dropdown-item" href="/member/profile">प्रोफ़ाइल</a></li>
+        <li><a class="dropdown-item" href="/member/payment">भुगतान</a></li>
+        <li><a class="dropdown-item" href="/member/doc">सदस्य निर्देशिका</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+          <a class="dropdown-item text-danger" href="#" onclick="logout(event)">
+            लॉगआउट
+          </a>
+        </li>
       `;
 
-      // Update dropdown menu
-      document.getElementById("loginDropdownMenu").innerHTML = `
-        <li><h6 class="dropdown-header"><i class="fas fa-user"></i> ${usernameStore}</h6></li>
-        <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item" href="/member/profile"><i class="fas fa-id-card"></i> प्रोफ़ाइल</a></li>
-        <li><a class="dropdown-item" href="/member/payment"><i class="fas fa-credit-card"></i> भुगतान</a></li>
-        <li><a class="dropdown-item" href="/testimonial/my-testimonials"><i class="fas fa-quote-right"></i> मेरे प्रशंसापत्र</a></li>
-        <li><a class="dropdown-item" href="/member/list"><i class="fas fa-list"></i> सदस्य निर्देशिका</a></li>
-        <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item text-danger" href="#" onclick="handleLogout(event)"><i class="fas fa-sign-out-alt"></i> लॉगआउट</a></li>
-      `;
-
-      // ✅ Show member testimonial options for authenticated users
-      document.getElementById("memberTestimonialOptions").classList.remove("d-none");
-      document.getElementById("memberTestimonialViewOptions").classList.remove("d-none");
-      document.getElementById("testimonialDivider").classList.remove("d-none");
-
-      // ✅ Show admin areas for admin users
-      if (isAdminUser(token)) {
-        document.getElementById("adminArea").classList.remove("d-none");
-        document.getElementById("adminTestimonialOptions").classList.remove("d-none");
-        
-        // Fetch notification counts for admin
-      //  fetchNotificationCounts();
-        
-        // Set up periodic notification updates
-       // setInterval(fetchNotificationCounts, 30000); // Update every 30 seconds
+      if (role === 'ADMIN') {
+        document.getElementById('adminArea')?.classList.remove('d-none');
       }
-
-      // Show online status
-      document.getElementById("userOnlineStatus").classList.remove("d-none");
-    }
-  });
-
-  // Handle nested dropdown toggle
-  document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.dropdown-submenu > a').forEach(function (element) {
-      element.addEventListener('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        let submenu = this.nextElementSibling;
-        if (submenu && submenu.classList.contains('dropdown-menu')) {
-          submenu.classList.toggle('show');
-        }
-      });
     });
+});
 
-    // Hide all nested when main dropdown closes
-    document.querySelectorAll('.dropdown').forEach(function (dropdown) {
-      dropdown.addEventListener('hide.bs.dropdown', function () {
-        this.querySelectorAll('.dropdown-menu.show').forEach(function (submenu) {
-          submenu.classList.remove('show');
-        });
-      });
+
+/* =========================
+   LOGOUT (COOKIE BASED)
+========================= */
+function logout(e) {
+  e.preventDefault();
+  showLoading('लॉगआउट हो रहे हैं...');
+
+  fetch('/logout', {
+    method: 'POST',
+    credentials: 'include'
+  }).then(() => {
+    hideLoading();
+    window.location.href = "/";
+  }).catch(() => {
+    hideLoading();
+    showToast('लॉगआउट में त्रुटि हुई।', 'error');
+  });
+}
+
+/* =========================
+   DROPDOWN BEHAVIOR (UNCHANGED)
+========================= */
+document.addEventListener('DOMContentLoaded', function () {
+
+  document.querySelectorAll('.dropdown-submenu > a').forEach(el => {
+    el.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.nextElementSibling?.classList.toggle('show');
     });
   });
 
-  // Token expiry check on page load
-  $(document).ready(function() {
-    const token = localStorage.getItem('authToken');
-
-    if (token != null && isTokenExpired(token)) {
-      console.log('Token expired on page load');
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userName');
-      currentUser = null;
-      
-      bootbox.alert({
-        title: "सेशन समाप्त",
-        message: "आपका सेशन समाप्त हो गया है। कृपया पुनः लॉगिन करें।",
-        callback: function() {
-          window.location.href = "/";
-        }
-      });
-    } else if (token) {
-      console.log('Token valid on page load');
-    }
+  document.querySelectorAll('.dropdown').forEach(dropdown => {
+    dropdown.addEventListener('hide.bs.dropdown', function () {
+      this.querySelectorAll('.dropdown-menu.show')
+        .forEach(menu => menu.classList.remove('show'));
+    });
   });
+});
 
-  // Global error handler for AJAX requests
-  $(document).ajaxError(function(event, xhr, settings, thrownError) {
-    if (xhr.status === 401) {
-      showToast('आपका सेशन समाप्त हो गया है। कृपया पुनः लॉगिन करें।', 'error');
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userName');
-      currentUser = null;
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 2000);
-    } else if (xhr.status === 403) {
-      showToast('आपको इस कार्य की अनुमति नहीं है।', 'error');
-    } else if (xhr.status >= 500) {
-      showToast('सर्वर में त्रुटि हुई है। कृपया बाद में पुनः प्रयास करें।', 'error');
-    }
-  });
+/* =========================
+   GLOBAL AJAX ERROR HANDLING
+========================= */
+$(document).ajaxError(function (event, xhr) {
+  if (xhr.status === 401) {
+    showToast('सेशन समाप्त हो गया है। कृपया पुनः लॉगिन करें।', 'error');
+    setTimeout(() => window.location.href = "/", 2000);
+  }
+  if (xhr.status === 403) {
+    showToast('आपको इस कार्य की अनुमति नहीं है।', 'error');
+  }
+});
 
-  // Add authorization header to all AJAX requests
-  $.ajaxSetup({
-    beforeSend: function(xhr) {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-      }
-    }
-  });
-
-  // Keyboard navigation support
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      // Close all open dropdowns
-      document.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
-        bootstrap.Dropdown.getInstance(menu.previousElementSibling)?.hide();
-      });
-    }
-  });
-
-  // Add click tracking for analytics (optional)
-  document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('dropdown-item')) {
-      const action = e.target.textContent.trim();
-      const href = e.target.getAttribute('href');
-      console.log('Navigation:', { action, href });
-      // Send to analytics service if needed
-    }
-  });
-
-  // Network status monitoring
-  window.addEventListener('online', function() {
-    showToast('इंटरनेट कनेक्शन बहाल हो गया।', 'success');
-  });
-
-  window.addEventListener('offline', function() {
-    showToast('इंटरनेट कनेक्शन बंद हो गया।', 'warning');
-  });
+/* =========================
+   NETWORK STATUS
+========================= */
+window.addEventListener('online', () =>
+  showToast('इंटरनेट कनेक्शन बहाल हो गया।', 'success')
+);
+window.addEventListener('offline', () =>
+  showToast('इंटरनेट कनेक्शन बंद हो गया।', 'warning')
+);
 </script>
+
 
 </body>
 </html>

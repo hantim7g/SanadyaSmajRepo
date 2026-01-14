@@ -53,17 +53,16 @@ public class UserProfileController {
 
 	@GetMapping("/profile")
 	public User getProfile(HttpServletRequest request) {
-		String token = jwtTokenProvider.resolveToken(request);
+		String token = jwtTokenProvider.getJwtFromCookies(request);
 		String mobile = jwtTokenProvider.getUsernameFromToken(token);
 		return userRepository.findByMobile(mobile).orElse(null);
 	}
 
 	@PostMapping("/update")
-	public ResponseEntity<ApiResponse<String>> updateProfile(@RequestHeader("Authorization") String authHeader,
+	public ResponseEntity<ApiResponse<String>> updateProfile(HttpServletRequest request,
 			@RequestBody User user) {
-		String token = authHeader.replace("Bearer ", "");
+		String token = jwtTokenProvider.getJwtFromCookies(request);
 		String mobile = jwtTokenProvider.getUsernameFromToken(token);
-
 		User existingUser = userRepository.findByMobile(mobile).orElseThrow();
 
 		// Update editable fields only

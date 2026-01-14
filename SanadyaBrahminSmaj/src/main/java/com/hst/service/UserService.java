@@ -129,7 +129,7 @@ public class UserService {
 
 	    
 	    boolean hasPendingOther = payments.stream()
-	        .anyMatch(p ->!("वार्षिक शुल्क".equalsIgnoreCase(p.getDescription())) && "प्रक्रिया में".equals(p.getValidated()));
+	        .anyMatch(p ->!("वार्षिक शुल्क".equalsIgnoreCase(p.getDescription())) && "प्रक्रिया में".equals(p.getValidated())  && "सफल".equals(p.getStatus()));
 
 	    //boolean hasPendingAnnual = payments.stream().max(null)
 	    user.setAnnualFeeValidated(hasPendingValidateAnnual? "प्रक्रिया में" : "प्रतीक्षारत");
