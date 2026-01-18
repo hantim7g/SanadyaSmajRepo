@@ -32,11 +32,25 @@ public class GuidanceController {
     @Autowired
     private GuidanceRepository repo;
 
+    @GetMapping("/smajHistory")
+    public String smajHistory() {
+       
+        return "samaj-itihas";
+    }
+    @GetMapping("/smajUddeshLakshya")
+    public String smajUddeshLakshya() {
+       
+        return "samaj-uddesh-lakshya";
+    }
+    
+   
+    
+    
     /* PUBLIC VIEW */
     @GetMapping("/guidance")
     public String viewGuidance(Model model, Principal principal) {
 
-        model.addAttribute("guidanceList", repo.findByActiveTrueOrderByCreatedDateDesc());
+        model.addAttribute("guidanceList", repo.findAllByOrderByPriorityAsc());
 
         boolean isAdmin = principal != null &&
                 SecurityContextHolder.getContext().getAuthentication()

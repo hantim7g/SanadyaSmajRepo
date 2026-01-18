@@ -266,10 +266,6 @@ $(document).ready(function() {
                         url: '/admin/testimonial/approve/' + testimonialId,
                         type: 'POST',
                         dataType: 'json',
-                        headers: {
-                            'Authorization': 'Bearer ' + getAuthToken(),
-                            'Content-Type': 'application/json'
-                        },
                         success: function(response) {
                             bootbox.alert(response.message || 'प्रशंसापत्र सफलतापूर्वक स्वीकृत किया गया।');
                             $row.fadeOut(500, function() {
@@ -317,10 +313,6 @@ $(document).ready(function() {
                         url: '/admin/testimonial/reject/' + testimonialId,
                         type: 'POST',
                         dataType: 'json',
-                        headers: {
-                            'Authorization': 'Bearer ' + getAuthToken(),
-                            'Content-Type': 'application/json'
-                        },
                         success: function(response) {
                             bootbox.alert(response.message || 'प्रशंसापत्र सफलतापूर्वक अस्वीकृت किया गया।');
                             $row.fadeOut(500, function() {
@@ -374,10 +366,6 @@ $(document).ready(function() {
                         url: '/admin/testimonial/toggle/' + testimonialId,
                         type: 'POST',
                         dataType: 'json',
-                        headers: {
-                            'Authorization': 'Bearer ' + getAuthToken(),
-                            'Content-Type': 'application/json'
-                        },
                         success: function(response) {
                             bootbox.alert(response.message || 'स्थिति सफलतापूर्वक अपडेट की गई।');
                             const newActive = !isActive;
@@ -462,3 +450,4 @@ $(document).ready(function() {
 });
 </script>
 
+<%@ include file="/WEB-INF/views/includes/footer.jsp" %>

@@ -8,4 +8,6 @@ import com.hst.entity.Guidance;
 
 public interface GuidanceRepository extends JpaRepository<Guidance, Long> {
     List<Guidance> findByActiveTrueOrderByCreatedDateDesc();
+    
+    List<Guidance> findAllByOrderByPriorityAsc();
 }

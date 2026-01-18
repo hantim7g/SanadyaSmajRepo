@@ -98,6 +98,33 @@
 				.admin-book-actions a:hover {
 				    text-decoration: underline;
 				}
+				/* Separate page look for each entry */
+				.book-entry {
+				    background: #ffffff;
+				    border: 1px solid #e5dccf;
+				    padding: 35px 40px;
+				    margin-bottom: 70px;
+				    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+				    position: relative;
+				}
+
+				/* Page number / divider feel */
+				.book-entry::after {
+				    content: "";
+				    position: absolute;
+				    bottom: -35px;
+				    left: 50%;
+				    transform: translateX(-50%);
+				    width: 120px;
+				    height: 2px;
+				    background: linear-gradient(to right, transparent, #c05a00, transparent);
+				}
+
+				/* Slight top curve like a page */
+				.book-entry::before {
+				    content: "";
+				    position: absolute;
+				    top: 0
 
 </style>
 				
@@ -142,7 +169,11 @@
 			                       data-id="${g.id}">🗑️ हटाएँ</a>
 			                </div>
 			            </c:if>
-
+						<c:if test="${isAdmin}">
+						    <div style="font-size:12px;color:#999;">
+						        Priority: ${g.priority}
+						    </div>
+						</c:if>
 			        </div>
 			    </c:forEach>
 
@@ -172,4 +203,5 @@
 			</script>
 
 			</body>
-			</html>
+			</html> 			<%@ include file="/WEB-INF/views/includes/footer.jsp" %>
+			

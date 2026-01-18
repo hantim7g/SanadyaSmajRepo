@@ -62,7 +62,10 @@ public class User {
 
 	@Column(name = "other_fee_validated")
 	private String otherFeeValidated ="प्रतीक्षारत"; 
-	
+	@Column(name = "smaj_role",columnDefinition = "VARCHAR(255) DEFAULT = 'सदस्य'")	
+	private String smajRole ="सदस्य";
+	@Column(name = "smaj_role_priority")
+	private Integer smajRolePriority = 99;
 	
 	public Double getLastAnnualFeeAmount() {
 		return lastAnnualFeeAmount;
@@ -97,6 +100,42 @@ public class User {
 	public void setRegistrationNo(String registrationNo) {
 		RegistrationNo = registrationNo;
 	}
+	
+	@PrePersist
+	@PreUpdate
+	private void assignSmajRolePriority() {
+	    if (this.smajRole == null) {
+	        this.smajRolePriority = 99;
+	        return;
+	    }
+
+	    switch (this.smajRole) {
+	        case "अध्यक्ष":
+	            this.smajRolePriority = 1;
+	            break;
+	        case "उपाध्यक्ष":
+	            this.smajRolePriority = 2;
+	            break;
+	        case "कोषाध्यक्ष":
+	            this.smajRolePriority = 3;
+	            break;
+	        case "सचिव":
+	            this.smajRolePriority = 4;
+	            break;
+	        case "सह-सचिव":
+	            this.smajRolePriority = 5;
+	            break;
+	        case "कार्यकारिणी सदस्य":
+	            this.smajRolePriority = 6;
+	            break;
+	        case "सदस्य":
+	            this.smajRolePriority = 7;
+	            break;
+	        default:
+	            this.smajRolePriority = 99;
+	    }
+	}
+
 
 	public String getFullName() {
 		return fullName;
@@ -340,5 +379,33 @@ public class User {
 	public void setAnnualFeeValidated(String annualFeeValidated) {
 		this.annualFeeValidated = annualFeeValidated;
 	}
+
+
+
+	public String getSmajRole() {
+		return smajRole;
+	}
+
+
+
+	public void setSmajRole(String smajRole) {
+		this.smajRole = smajRole;
+	}
+
+
+
+	public Integer getSmajRolePriority() {
+		return smajRolePriority;
+	}
+
+
+
+	public void setSmajRolePriority(Integer smajRolePriority) {
+		this.smajRolePriority = smajRolePriority;
+	}
+
+
+
+
 
 }

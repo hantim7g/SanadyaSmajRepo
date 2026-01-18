@@ -7,6 +7,7 @@ import com.hst.repository.PaymentRepository;
 import com.hst.service.UserService;
 
 import io.swagger.v3.oas.models.media.IntegerSchema;
+import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.time.Year;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -219,6 +221,28 @@ public class UserService {
 		
 	}
     
+	@Transactional
+	public void updateUserSmajRole(Long userId, String role) {
+	    User user = userRepo.findById(userId)
+	        .orElseThrow(() -> new RuntimeException("User not found"));
+
+	    user.setSmajRole(role);
+	    userRepo.save(user);
+	}
+
 	
+	public 	List<User> getAllUsers(int page, int size) {
+	
+		List<User> users = userRepo.findAll();
+		for (int i=0 ;i<10;i++)
+		users.addAll(users);
+		return users;
+	}
+
+	
+	public List<User> findAllByOrderBySmajRolePriorityAsc()
+	{
+		return userRepo.findAllByOrderBySmajRolePriorityAsc();
+	}
 	
 }

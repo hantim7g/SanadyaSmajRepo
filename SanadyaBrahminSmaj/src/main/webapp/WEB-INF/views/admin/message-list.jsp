@@ -94,4 +94,4 @@ modalEl.addEventListener('show.bs.modal', function (event) {
 });
 </script>
 </body>
-</html>
+</html> 			<%@ include file="/WEB-INF/views/includes/footer.jsp" %>

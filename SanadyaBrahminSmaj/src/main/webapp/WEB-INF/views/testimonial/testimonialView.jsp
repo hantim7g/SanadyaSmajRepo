@@ -359,4 +359,5 @@
           <script> (function () { function gotoPage(p) { const url = new URL(window.location.href); url.searchParams.set('page', p); const sizeSel = document.querySelector('select[name="size"]'); const qEl = document.querySelector('input[name="q"]'); if (sizeSel) url.searchParams.set('size', sizeSel.value || '9'); if (qEl && qEl.value.trim().length > 0) url.searchParams.set('q', qEl.value.trim()); else url.searchParams.delete('q'); window.location.href = url.toString(); } document.addEventListener('click', function (e) { const a = e.target.closest('.page-link'); if (!a || !a.dataset.page) return; e.preventDefault(); const to = parseInt(a.dataset.page, 10); if (!isNaN(to) && to >= 0) gotoPage(to); }); const form = document.getElementById('filterForm'); if (form) { form.addEventListener('submit', function (e) { e.preventDefault(); const url = new URL(window.location.href); url.searchParams.set('page', '0'); const size = form.querySelector('select[name="size"]').value; const q = form.querySelector('input[name="q"]').value.trim(); url.searchParams.set('size', size || '9'); if (q.length > 0) url.searchParams.set('q', q); else url.searchParams.delete('q'); window.location.href = url.toString(); }); } })(); </script>
         </body>
 
-        </html>
+        </html> 			<%@ include file="/WEB-INF/views/includes/footer.jsp" %>
+		

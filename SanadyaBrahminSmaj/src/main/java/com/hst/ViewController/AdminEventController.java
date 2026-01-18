@@ -124,7 +124,7 @@ public class AdminEventController {
         target.setEventDate(eventDto.getEventDate());
         target.setPublishDate(eventDto.getPublishDate());
         target.setAuthor(eventDto.getAuthor());
-        target.setEventUrl(eventDto.getEventUrl());
+        target.setEventUrl("url");
         
         // … add the rest of your scalar setters here …
 

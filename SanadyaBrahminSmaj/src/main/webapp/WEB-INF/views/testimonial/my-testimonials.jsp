@@ -1,33 +1,36 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+
+
+    <%@ include file="/WEB-INF/views/includes/header.jsp" %>
+        <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+            <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>सनाढ्य ब्राह्मण सभा</title>
-
-  <!-- ✅ Fonts (Devanagari support) -->
+<!--
+   ✅ Fonts (Devanagari support) 
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-  <!-- ✅ Bootstrap CSS (Latest 5.3) -->
+   ✅ Bootstrap CSS (Latest 5.3) 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <!-- ✅ Font Awesome Icons -->
+   ✅ Font Awesome Icons 
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-  <!-- ✅ DataTables CSS -->
+   ✅ DataTables CSS 
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
 
-  <!-- ✅ jQuery (Only Once, Latest Compatible) -->
+   ✅ jQuery (Only Once, Latest Compatible) 
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-  <!-- ✅ Bootstrap Bundle JS (includes Popper) -->
+   ✅ Bootstrap Bundle JS (includes Popper) 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- ✅ DataTables Core & Buttons -->
+   ✅ DataTables Core & Buttons 
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -36,9 +39,9 @@
   <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
   <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
 
-  <!-- ✅ Bootbox for Alerts -->
+   ✅ Bootbox for Alerts 
   <script src="https://cdn.jsdelivr.net/npm/bootbox@6.0.0/dist/bootbox.min.js"></script>
-
+-->
   <style>
     body {
       background-color: #fffaf0;
@@ -790,4 +793,4 @@
 </script>
 
 </body>
-</html>
+</html> 			<%@ include file="/WEB-INF/views/includes/footer.jsp" %>

@@ -117,7 +117,18 @@
 ${guidance.content}
             </textarea>
         </div>
-
+		<div class="mb-3">
+		    <label class="form-label">प्राथमिकता (Priority)</label>
+		    <input type="number"
+		           name="priority"
+		           class="form-control"
+		           min="1"
+		           value="${guidance.priority}"
+		           required>
+		    <small class="text-muted">
+		        कम संख्या = पहले दिखेगा (जैसे 1, 2, 3)
+		    </small>
+		</div>
         <div class="text-end">
             <button type="submit" class="btn btn-success">Save</button>
             <a href="/guidance" class="btn btn-secondary">Cancel</a>
@@ -128,4 +139,4 @@ ${guidance.content}
 </div>
 
 </body>
-</html>
+</html> 			<%@ include file="/WEB-INF/views/includes/footer.jsp" %>

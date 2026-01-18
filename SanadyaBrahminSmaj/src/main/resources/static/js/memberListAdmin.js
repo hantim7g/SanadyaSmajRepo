@@ -141,6 +141,61 @@ $(document).on('click', '.reject-profile-btn', function () {
       }
     });
   }
+  $(document).on("change", ".user-role-dropdown", function () {
+
+    let dropdown = $(this);
+    let userId = dropdown.data("user-id");
+    let oldRole = dropdown.data("current-role");
+    let newRole = dropdown.val();
+
+    if (oldRole === newRole) {
+      return;
+    }
+
+    bootbox.confirm({
+      title: "⚠️ पुष्टि करें",
+      message: `
+        <p>क्या आप इस यूज़र का <strong>समाज पद</strong> बदलना चाहते हैं?</p>
+        <p><b>नया पद:</b> ${newRole || 'कोई नहीं'}</p>
+      `,
+      buttons: {
+        confirm: {
+          label: 'हाँ, बदलें',
+          className: 'btn-success'
+        },
+        cancel: {
+          label: 'नहीं',
+          className: 'btn-danger'
+        }
+      },
+      callback: function (result) {
+
+        if (!result) {
+          dropdown.val(oldRole);
+          return;
+        }
+
+        $.ajax({
+          url: `/admin/users/update-role`,
+          type: "POST",
+          contentType: "application/json",
+          data: JSON.stringify({
+            userId: userId,
+            role: newRole
+          }),
+          success: function () {
+            bootbox.alert("✅ समाज पद सफलतापूर्वक अपडेट किया गया");
+            dropdown.data("current-role", newRole);
+          },
+          error: function () {
+            bootbox.alert("❌ पद अपडेट करने में त्रुटि हुई");
+            dropdown.val(oldRole);
+          }
+        });
+      }
+    });
+  });
+
 $(document).on('click', '#resetBtn', function () {
   $('#filterForm')[0].reset(); // Reset form fields
   fetchFilteredUsers();        // Reload default data

@@ -49,6 +49,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     	                       @Param("mobile") String mobile,
     	                       @Param("approved") String approved,
     	                       Pageable pageable);
-
+    
+    
+    
+    List<User>  findAllBySmajRole(String smajRole);
+    List<User> findAllByOrderBySmajRolePriorityAsc();
 
 }

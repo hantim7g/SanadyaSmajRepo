@@ -1,5 +1,6 @@
 package com.hst.ViewController;
 
+import com.hst.dto.UserRoleUpdateRequest;
 import com.hst.entity.PasswordResetRequest;
 import com.hst.entity.Payment;
 import com.hst.entity.User;
@@ -137,6 +138,16 @@ public class AdminUserController {
 	    List<PasswordResetRequest> requests = passwordResetRequestService.findByStatus("PENDING");
 	    model.addAttribute("resetRequests", requests);
 	    return "resetRequests"; // JSP name without .jsp
+	}
+	@PostMapping("/users/update-role")
+	public ResponseEntity<?> updateUserRole(@RequestBody UserRoleUpdateRequest request) {
+
+	    userService.updateUserSmajRole(
+	        request.getUserId(),
+	        request.getRole()
+	    );
+
+	    return ResponseEntity.ok().build();
 	}
 
 }

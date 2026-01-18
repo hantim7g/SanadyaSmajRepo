@@ -41,4 +41,4 @@
   </table>
 </div>
  <script src="${pageContext.request.contextPath}/js/resetRequest.js"></script>
-      
+ <%@ include file="/WEB-INF/views/includes/footer.jsp" %>

@@ -246,7 +246,7 @@
                                                                  </div>
                                                              <div class="mb-1">
                                                                   
-                                                                  <c:if test="${not empty ev.eventUrl}">
+
                                                                        <span>
 																		
                                                                             <a href="/events/${ev.id}"
@@ -255,7 +255,7 @@
                                                                            style="color:#b17c45;">कार्यक्रम
                                                                     विवरण</a>
                                                                            </span>
-                                                                      </c:if>
+                                                                     
                                                                  </div>
                                                            
                                                 </div>
@@ -291,4 +291,4 @@
                     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
                 </body>
 
-                </html>
+                </html> 			<%@ include file="/WEB-INF/views/includes/footer.jsp" %>

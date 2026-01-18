@@ -71,7 +71,7 @@ public class SecurityConfig {
 //                .requestMatchers("/member/add-testimonial", "/member/save-testimonial", 
 //                                "/member/edit-testimonial/**", "/member/update-testimonial/**", 
 //                                "/testimonial/my-testimonials", "/member/testimonial/delete/**").hasAnyAuthority("USER", "ADMIN")
-//                .requestMatchers("/admin/testimonials", "/admin/testimonial/**").hasAuthority("ADMIN")
+                .requestMatchers( "/admin/**").hasAuthority("ADMIN")
                 .anyRequest().permitAll() 
 //                .anyRequest().authenticated() // Everything else requires authentication
             )

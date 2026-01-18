@@ -14,6 +14,7 @@
         <style>
           body {
             background: #fffaf4;
+			
             font-family: 'Segoe UI', 'Noto Sans Devanagari', sans-serif;
           }
 
@@ -165,6 +166,69 @@
               font-size: 1.22rem;
             }
           }
+		  /* 🌸 Society Role Dropdown - Premium Style */
+		  .smaj-role-wrapper {
+		    position: relative;
+		    max-width: 260px;
+		  }
+
+		  .smaj-role-label {
+		    font-weight: bold;
+		    color: #6b3a00;
+		    margin-bottom: 4px;
+		 
+		    }
+
+		  .smaj-role-select {
+		    appearance: none;
+		    -webkit-appearance: none;
+		    -moz-appearance: none;
+		    background: linear-gradient(92deg, #fff3cf 60%, #ffd28a 100%);
+		    border: 2px solid #f1c37a;
+		    border-radius: 12px;
+		    padding: 7px 38px 7px 14px;
+		    font-weight: 700;
+		    color: #5a3200;
+		    box-shadow: 0 2px 8px rgba(200, 150, 60, 0.25);
+		    transition: all 0.2s ease;
+		    cursor: pointer;
+		  }
+
+		  .smaj-role-select:hover {
+		    background: linear-gradient(92deg, #fff8e6 60%, #ffbe5c 100%);
+		    border-color: #e3a647;
+		  }
+
+		  .smaj-role-select:focus {
+		    outline: none;
+		    border-color: #d08a2d;
+		    box-shadow: 0 0 0 0.18rem rgba(255, 170, 70, 0.35);
+		  }
+
+		  /* 🔽 Custom Arrow */
+		  .smaj-role-wrapper::after {
+		    content: "▾";
+		    position: absolute;
+		    right: 14px;
+		    top: 38px;
+		    font-size: 1.2rem;
+		    color: #8a4a00;
+		    pointer-events: none;
+		  }
+
+		  /* 🎖 Selected Role Badge Look */
+		  .smaj-role-badge {
+		    display: inline-block;
+		    margin-top: 6px;
+		    background: linear-gradient(90deg, #ffd27a, #ffae42);
+		    color: #5b2d00;
+		    font-weight: 800;
+		    border-radius: 20px;
+		    padding: 4px 14px;
+		    font-size: 0.85rem;
+		    box-shadow: 0 1px 6px rgba(180, 120, 20, 0.35);
+		  }
+
         </style>
       </head>
 
@@ -202,7 +266,8 @@
               </div>
               <div class="col-md-2">
                 <select  class="form-select" name="yearDropdown">
-                  <option value="2025">वार्षिक शुल्क स्थिति 2025</option>
+					<option value="2026">वार्षिक शुल्क स्थिति 2026</option>
+					<option value="2025">वार्षिक शुल्क स्थिति 2025</option>
                   <option value="2024">वार्षिक शुल्क स्थिति 2024</option>
                   <option value="2023">वार्षिक शुल्क स्थिति 2023</option>
                   <option value="2022">वार्षिक शुल्क स्थिति 2022</option>
@@ -256,24 +321,24 @@
                   <div class="col-md-9">
                     <div class="card-body py-2">
                       <div class="row mb-2">
-                        <div class="col-md-6"><strong>पंजीयन क्रमांक:</strong> <span
+                        <div class="col-md-6"><label class="smaj-role-label">पंजीयन क्रमांक:</label> <span
                             class="badge bg-light text-dark">${user.registrationNo}</span></div>
-                        <div class="col-md-6"><strong>पिता का नाम:</strong> ${user.fatherName}</div>
+                        <div class="col-md-6"><label class="smaj-role-label">पिता का नाम:</label> ${user.fatherName}</div>
                       </div>
                       <div class="row mb-2">
-                        <div class="col-md-6"><strong>गोत्र:</strong> ${user.gotra}</div>
-                        <div class="col-md-6"><strong>पेशा:</strong> ${user.occupation}</div>
+                        <div class="col-md-6"><label class="smaj-role-label">गोत्र:</label> ${user.gotra}</div>
+                        <div class="col-md-6"><label class="smaj-role-label">पेशा:</label> ${user.occupation}</div>
                       </div>
                       <div class="row mb-2">
-                        <div class="col-md-6"><strong>पता:</strong> ${user.address}, ${user.homeDistrict}</div>
-                        <div class="col-md-6"><strong>मोबाइल:</strong> <a href="tel:${user.mobile}"
+                        <div class="col-md-6"><label class="smaj-role-label">पता:</label> ${user.address}, ${user.homeDistrict}</div>
+                        <div class="col-md-6"><label class="smaj-role-label">मोबाइल:</label> <a href="tel:${user.mobile}"
                             class="text-decoration-none">${user.mobile}</a></div>
                       </div>
                       <div class="row mb-2">
-                        <div class="col-md-6"><strong>ईमेल:</strong> <a href="mailto:${user.email}"
+                        <div class="col-md-6"><label class="smaj-role-label">ईमेल:</label> <a href="mailto:${user.email}"
                             class="text-decoration-none">${user.email}</a></div>
                         <div class="col-md-6">
-                          <strong>शर्तें स्वीकार:</strong>
+                          <label class="smaj-role-label">शर्तें स्वीकार:</label>
                           <span class="badge bg-${user.agreeToTerms ? 'success' : 'danger'}">
                             ${user.agreeToTerms ? "हाँ" : "नहीं"}
                           </span>
@@ -281,7 +346,7 @@
                       </div>
                       <div class="row mb-2">
                         <div class="col-md-6">
-                          <strong>अंतिम वार्षिक भुगतान:</strong>
+                          <label class="smaj-role-label">अंतिम वार्षिक भुगतान:</label>
                           <c:choose>
                             <c:when test="${user.lastAnnualFeePaid != null}">
                               ₹${user.lastAnnualFeeAmount} — <span class="text-muted">${user.lastAnnualFeePaid}</span>
@@ -290,18 +355,43 @@
                           </c:choose>
                         </div>
                         <div class="col-md-6">
-                          <strong>वार्षिक भुगतान:</strong> <span class="text-danger fw-bold">₹
+                          <label class="smaj-role-label">वार्षिक भुगतान:</label> <span class="text-danger fw-bold">₹
                             ${user.annualFeeStatus}</span>
                         </div>
                       </div>
 
                       <div class="row mb-2 align-items-center">
                         <div class="col-md-6 filedt">
-                          <strong>प्रोफाइल स्थिति:</strong>
+                          <label class="smaj-role-label">प्रोफाइल स्थिति:</label>
                           <span class="badge ${user.approved == 'स्वीकृत'? 'bg-success' : 'bg-warning text-dark'}">
                             ${user.approved}
                           </span>
                         </div>
+					
+						  <div class="col-md-6">
+						    <div class="smaj-role-wrapper">
+						      <label class="smaj-role-label"> समाज पद</label>
+
+						      <select class="form-select smaj-role-select user-role-dropdown"
+						              data-user-id="${user.id}"
+						              data-current-role="${user.smajRole}">
+						        <option value="">-- चयन करें --</option>
+						        <option value="अध्यक्ष" ${user.smajRole=='अध्यक्ष'?'selected':''}>अध्यक्ष</option>
+						        <option value="उपाध्यक्ष" ${user.smajRole=='उपाध्यक्ष'?'selected':''}>उपाध्यक्ष</option>
+						        <option value="कोषाध्यक्ष" ${user.smajRole=='कोषाध्यक्ष'?'selected':''}>कोषाध्यक्ष</option>
+						        <option value="सचिव" ${user.smajRole=='सचिव'?'selected':''}>सचिव</option>
+						        <option value="सह-सचिव" ${user.smajRole=='सह-सचिव'?'selected':''}>सह-सचिव</option>
+						        <option value="कार्यकारिणी सदस्य" ${user.smajRole=='कार्यकारिणी सदस्य'?'selected':''}>कार्यकारिणी सदस्य</option>
+						        <option value="सदस्य" ${user.smajRole=='सदस्य'?'selected':''}>सदस्य</option>
+						      </select>
+
+						      <!--<c:if test="${not empty user.smajRole}">
+						        <span class="smaj-role-badge">${user.smajRole}</span>
+						      </c:if>-->
+						    </div>
+						  </div>
+					
+
 
                         <c:if
                           test="${user.approved=='प्रक्रिया में' || user.annualFeeValidated=='प्रक्रिया में' || user.otherFeeValidated=='प्रक्रिया में'}">
@@ -388,4 +478,4 @@
         <script src="${pageContext.request.contextPath}/js/memberListAdmin.js"></script>
       </body>
 
-      </html>
+      </html> 			<%@ include file="/WEB-INF/views/includes/footer.jsp" %>

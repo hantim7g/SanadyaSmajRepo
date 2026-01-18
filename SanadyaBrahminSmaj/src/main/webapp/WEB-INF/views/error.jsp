@@ -72,4 +72,4 @@
         });
     </script>
 </body>
-</html>
+</html> 			<%@ include file="/WEB-INF/views/includes/footer.jsp" %>

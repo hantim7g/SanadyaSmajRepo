@@ -40,6 +40,76 @@
      
       
     }
+	/* ======================
+	   FOOTER STYLES
+	====================== */
+
+	.site-footer {
+	  font-family: 'Segoe UI', 'Noto Sans Devanagari', sans-serif;
+	}
+
+	.footer-top {
+	  background: linear-gradient(135deg, #b65c02 0%, #8a3f01 100%);
+	  color: #fff;
+	}
+
+	.footer-title {
+	  font-weight: 700;
+	  margin-bottom: 15px;
+	  color: #ffe0b3;
+	}
+
+	.footer-text {
+	  font-size: 14px;
+	  line-height: 1.8;
+	  color: #fff3e0;
+	}
+
+	.footer-links {
+	  list-style: none;
+	  padding: 0;
+	  margin: 0;
+	}
+
+	.footer-links li {
+	  margin-bottom: 8px;
+	}
+
+	.footer-links a {
+	  color: #fff;
+	  text-decoration: none;
+	  font-size: 14px;
+	  transition: all 0.2s ease;
+	}
+
+	.footer-links a:hover {
+	  color: #ffd180;
+	  padding-left: 5px;
+	}
+
+	.footer-social a {
+	  display: inline-block;
+	  width: 36px;
+	  height: 36px;
+	  line-height: 36px;
+	  text-align: center;
+	  background-color: #f87e03;
+	  color: #fff;
+	  border-radius: 50%;
+	  margin-right: 8px;
+	  transition: all 0.3s ease;
+	}
+
+	.footer-social a:hover {
+	  background-color: #ffa600;
+	  transform: translateY(-3px);
+	}
+
+	.footer-bottom {
+	  background-color: #5c2a00;
+	  color: #ffe0b3;
+	  font-size: 13px;
+	}
 
     .navbar-custom {
       background: linear-gradient(135deg, #f87e03 0%, #b65c02 100%);
@@ -217,19 +287,19 @@
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="/guidance"><i class="fas fa-hands-helping"></i> मार्गदर्शन</a></li>
             <li><a class="dropdown-item" href="/officials"><i class="fas fa-users-cog"></i> पदाधिकारी</a></li>
-            <li><a class="dropdown-item" href="/members"><i class="fas fa-users"></i> समिति सदस्य</a></li>
-            <li><a class="dropdown-item" href="/history"><i class="fas fa-history"></i> समाज का इतिहास</a></li>
-            <li><a class="dropdown-item" href="/vision"><i class="fas fa-eye"></i> उद्देश्य और लक्ष्य</a></li>
-            <li><a class="dropdown-item" href="/constitution"><i class="fas fa-scroll"></i> समाज का संविधान</a></li>
-          </ul>
+            <!--<li><a class="dropdown-item" href="/members"><i class="fas fa-users"></i> समिति सदस्य</a></li>-->
+            <li><a class="dropdown-item" href="/smajHistory"><i class="fas fa-history"></i> समाज का इतिहास</a></li>
+            <li><a class="dropdown-item" href="/smajUddeshLakshya"><i class="fas fa-eye"></i> उद्देश्य और लक्ष्य</a></li>
+<!--            <li><a class="dropdown-item" href="/constitution"><i class="fas fa-scroll"></i> समाज का संविधान</a></li>
+-->          </ul>
         </li>
 
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">कार्यक्रम</a>
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="/events"><i class="fas fa-calendar-alt"></i> कार्यक्रम</a></li>
-            <li><a class="dropdown-item" href="/events/past"><i class="fas fa-camera"></i> पूर्व कार्यक्रम और फोटो गैलरी</a></li>
-            <li><a class="dropdown-item" href="/calendar"><i class="fas fa-calendar"></i> वार्षिक कैलेंडर</a></li>
+<!--            <li><a class="dropdown-item" href="/events/past"><i class="fas fa-camera"></i> पूर्व कार्यक्रम और फोटो गैलरी</a></li>
+-->            <li><a class="dropdown-item" href="/calendar"><i class="fas fa-calendar"></i> वार्षिक कैलेंडर</a></li>
             <li><a class="dropdown-item" href="/festivals"><i class="fas fa-star"></i> पर्व और त्योहार</a></li>
             <li><a class="dropdown-item" href="/youth/programs"><i class="fas fa-graduation-cap"></i> युवाओं के लिए कार्यक्रम</a></li>
             <li><a class="dropdown-item" href="/women/activities"><i class="fas fa-female"></i> महिला समूह की गतिविधियाँ</a></li>
@@ -239,7 +309,7 @@
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">वैवाहिक सुविधा</a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/matrimony/browse"><i class="fas fa-search"></i> वर / वधु प्रोफ़ाइल ब्राउज़ करें</a></li>
+            <li><a class="dropdown-item" href="/matrimony/list"><i class="fas fa-search"></i> वर / वधु प्रोफ़ाइल ब्राउज़ करें</a></li>
             <li><a class="dropdown-item" href="/matrimony/add"><i class="fas fa-plus"></i> प्रोफ़ाइल जोड़ें</a></li>
             <li><a class="dropdown-item" href="/matrimony/my-profiles"><i class="fas fa-user-circle"></i> मेरी प्रोफ़ाइलें</a></li>
             <li><a class="dropdown-item" href="/matrimony/privacy"><i class="fas fa-shield-alt"></i> गोपनीयता नीति</a></li>
@@ -266,16 +336,13 @@
           </a>
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="/testimonials"><i class="fas fa-book-open"></i> सदस्यों के विचार देखें</a></li>
-            <li id="memberTestimonialOptions" class="d-none">
-              <a class="dropdown-item" href="/member/add-testimonial"><i class="fas fa-pen-alt"></i> नया प्रशंसापत्र जोड़ें</a>
+            <li id="memberTestimonialOptions " >
+              <a class="dropdown-item d-none" href="/member/add-testimonial"><i class="fas fa-pen-alt"></i> नया प्रशंसापत्र जोड़ें</a>
             </li>
-            <li id="memberTestimonialViewOptions" class="d-none">
-              <a class="dropdown-item" href="/testimonial/my-testimonials"><i class="fas fa-list-ul"></i> मेरे प्रशंसापत्र देखें</a>
+            <li id="memberTestimonialViewOptions " >
+              <a class="dropdown-item" href="/testimonial/my-testimonials"><i class="fas fa-list-ul"></i> मेरे प्रशंसापत्र</a>
             </li>
             <li><hr class="dropdown-divider d-none" id="testimonialDivider"></li>
-            <li id="adminTestimonialOptions" class="d-none">
-              <a class="dropdown-item" href="/admin/testimonials"><i class="fas fa-tasks"></i> प्रशंसापत्र प्रबंधन</a>
-            </li>
           </ul>
         </li>
 
@@ -310,6 +377,7 @@
               <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="/admin/memberList"><i class="fas fa-list-ul"></i> सभी सदस्य</a></li>
                 <li><a class="dropdown-item" href="/admin/reset-requests"><i class="fas fa-key"></i> पासवर्ड अनुरोध</a></li>
+				<li><a class="dropdown-item" href="/admin/testimonials"><i class="fas fa-tasks"></i> प्रशंसापत्र प्रबंधन</a></li>
                </ul>
             </li>
             <li class="dropdown-submenu dropend">
@@ -415,4 +483,4 @@ document.querySelectorAll('.dropdown-submenu > a').forEach(el => {
 </script>
 
 </body>
-</html>
+</html> 		

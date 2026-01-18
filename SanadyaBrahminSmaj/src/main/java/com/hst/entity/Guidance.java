@@ -32,7 +32,8 @@ public class Guidance {
 
     @Column(name = "CREATED_DATE")
     private LocalDateTime createdDate;
-
+    @Column(nullable = false)
+    private Integer priority = 99;
     @PrePersist
     public void prePersist() {
         createdDate = LocalDateTime.now();
@@ -92,6 +93,14 @@ public class Guidance {
 
 	public void setCreatedDate(LocalDateTime createdDate) {
 		this.createdDate = createdDate;
+	}
+
+	public Integer getPriority() {
+		return priority;
+	}
+
+	public void setPriority(Integer priority) {
+		this.priority = priority;
 	}
 
     // getters & setters

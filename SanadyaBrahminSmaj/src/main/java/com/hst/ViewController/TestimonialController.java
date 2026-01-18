@@ -108,7 +108,7 @@ public class TestimonialController {
 	        Testimonial existing = testimonialService.findById(testimonial.getId()).get();
 	        if (existing == null || !existing.getUser().getId().equals(user.getId())) {
 	            redirectAttributes.addFlashAttribute("error", "अमान्य अनुरोध।");
-	            return "redirect:/testimonial/my-testimonials";
+	            return "redirect:/testimonial/add-testimonial";
 	        }
 
 	        // only update editable fields
@@ -120,7 +120,7 @@ public class TestimonialController {
 	        redirectAttributes.addFlashAttribute("success", "आपका प्रशंसापत्र अपडेट कर दिया गया है।");
 	    }
 
-	    return "redirect:/testimonial/my-testimonials";
+	    return "redirect:/testimonial/add-testimonial";
 	}
 	
 	@PostMapping("/member/save-testimonial")
@@ -146,7 +146,7 @@ public class TestimonialController {
 	        Testimonial existing = testimonialService.findById(testimonial.getId()).get();
 	        if (existing == null || !existing.getUser().getId().equals(user.getId())) {
 	            redirectAttributes.addFlashAttribute("error", "अमान्य अनुरोध।");
-	            return "redirect:/testimonial/my-testimonials";
+	            return "redirect:/testimonial/add-testimonial";
 	        }
 
 	        // only update editable fields
@@ -158,7 +158,7 @@ public class TestimonialController {
 	        redirectAttributes.addFlashAttribute("success", "आपका प्रशंसापत्र अपडेट कर दिया गया है।");
 	    }
 
-	    return "redirect:/testimonial/my-testimonials";
+	    return "redirect:/testimonial/add-testimonial";
 	}
 
 	// Member: show edit form
@@ -170,12 +170,12 @@ public class TestimonialController {
 	    User user = userService.findByMobile(auth.getName());
 	    if (!testimonialService.canUserEditTestimonial(id, user)) {
 	        redirect.addFlashAttribute("error", "आपको इस प्रशंसापत्र को संपादित करने की अनुमति नहीं है।");
-	        return "redirect:/testimonial/my-testimonials";
+	        return "redirect:/testimonial/add-testimonial";
 	    }
 	    Optional<Testimonial> testimonialOpt = testimonialService.findById(id);
 	    if (testimonialOpt.isEmpty()) {
 	        redirect.addFlashAttribute("error", "प्रशंसापत्र नहीं मिला।");
-	        return "redirect:/testimonial/my-testimonials";
+	        return "redirect:/testimonial/add-testimonial";
 	    }
 	    model.addAttribute("testimonial", testimonialOpt.get());
 	    model.addAttribute("user", user);
@@ -197,7 +197,7 @@ public class TestimonialController {
 
 	    if (!testimonialService.canUserEditTestimonial(id, user)) {
 	        redirectAttributes.addFlashAttribute("error", "आपको इस प्रशंसापत्र को संपादित करने की अनुमति नहीं है।");
-	        return "redirect:/testimonial/my-testimonials";
+	        return "redirect:/testimonial/add-testimonial";
 	    }
 	    if (message == null || message.trim().isEmpty()) {
 	        redirectAttributes.addFlashAttribute("error", "संदेश खाली नहीं हो सकता।");
@@ -214,7 +214,7 @@ public class TestimonialController {
 	    } else {
 	        redirectAttributes.addFlashAttribute("error", "प्रशंसापत्र अपडेट करने में त्रुटि हुई।");
 	    }
-	    return "redirect:/testimonial/my-testimonials";
+	    return "redirect:/testimonial/add-testimonial";
 	}
 
 	// Member: list own testimonials
@@ -227,7 +227,7 @@ public class TestimonialController {
 	    List<Testimonial> testimonials = testimonialService.getUserTestimonials(user.getId());
 	    model.addAttribute("testimonials", testimonials);
 	    model.addAttribute("user", user);
-	    return "testimonial/my-testimonials";
+	    return "testimonial/add-testimonial";
 	}
 
 	// Member: delete testimonial (AJAX)
