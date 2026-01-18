@@ -1,5 +1,7 @@
 package com.hst.ViewController;
 import org.springframework.data.domain.Sort;
+
+import com.hst.entity.GotraMaster;
 import com.hst.entity.User;
 import com.hst.entity.VivhaUser;
 import com.hst.repository.GotraMasterRepository;
@@ -167,7 +169,7 @@ public class ViewVivhaController {
                 .anyMatch(auth -> auth.getAuthority().equals("ADMIN"));
         model.addAttribute("isAdmin", isAdmin);
 
-        return "matrimony/my-profiles";
+        return "vivah/matrimony-list";
     }
     @GetMapping({"/matrimony/list", "/matrimony/search"})
     public String listMatrimonyProfiles(
@@ -179,21 +181,35 @@ public class ViewVivhaController {
             @RequestParam(required = false) String qualification,
             @RequestParam(required = false) String occupation,
             @RequestParam(required = false) String income,
-
+            @RequestParam(required = false) List<String> excludeGotras,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "6") int size,
+            @RequestParam(defaultValue = "20") int size,
 
             Model model) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
+        List<GotraMaster> gotraList =
+            gotraMasterRepository.findByActiveTrueOrderByGotraNameAsc();
+        if (excludeGotras != null && excludeGotras.isEmpty()) {
+            excludeGotras = null;
+        }
+
+        model.addAttribute("gotraList", gotraList);
         Page<VivhaUser> profilePage =
         		userRepository.searchWithPagination(
+        				excludeGotras,
+//        				excludeGotras,
+//        				excludeGotras,
+//        				excludeGotras,
+//        				excludeGotras,
+//        				excludeGotras,
+//        				excludeGotras,
+//        				excludeGotras,
                     emptyToNull(gender),
                     emptyToNull(manglik),
                     emptyToNull(city),
                     emptyToNull(district),
-                    emptyToNull(gotra),
                     emptyToNull(qualification),
                     emptyToNull(occupation),
                     emptyToNull(income),
@@ -224,5 +240,4 @@ public class ViewVivhaController {
     private String resolveGotra(String selected, String custom){
         return "OTHER".equals(selected) ? custom : selected;
     }
-
 }

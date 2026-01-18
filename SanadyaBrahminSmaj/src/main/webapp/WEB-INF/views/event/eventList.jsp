@@ -250,7 +250,7 @@
                                                                        <span>
 																		
                                                                             <a href="/events/${ev.id}"
-                                                                    target="_blank"
+                                                                   
                                                                     class="text-decoration-underline small"      
                                                                            style="color:#b17c45;">कार्यक्रम
                                                                     विवरण</a>

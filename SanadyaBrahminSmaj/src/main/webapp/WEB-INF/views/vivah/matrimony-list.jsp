@@ -65,6 +65,7 @@ body{
   color:#fff;
 }
 </style>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
 
 <div class="container my-4">
 
@@ -102,11 +103,28 @@ body{
 <label class="field-label">पेशा</label>
 <input name="occupation" class="form-control">
 </div>
-
 <div class="col-md-3">
-<label class="field-label">गोत्र</label>
-<input name="gotra" class="form-control">
+  <label class="field-label">गोत्र (छोड़कर)</label>
+
+  <select name="excludeGotras"
+          id="excludeGotras"
+          class="form-select"
+          multiple>
+
+    <c:forEach items="${gotraList}" var="g">
+      <option value="${g.gotraName}">
+        ${g.gotraName}
+      </option>
+    </c:forEach>
+
+  </select>
+
+  <small class="text-muted">
+    चयनित गोत्रों को छोड़कर परिणाम दिखाए जाएंगे
+  </small>
 </div>
+
+
 
 <div class="col-md-3">
 <label class="field-label">शहर</label>
@@ -215,6 +233,14 @@ body{
       </span>
     </div>
   </div>
+  <div class="row mb-1">
+      <div class="col-12">
+        <b>मोबाइल:</b>
+        <span class="text-muted">
+          ${p.mobile}
+        </span>
+      </div>
+    </div>
 
 </div>
 
@@ -271,5 +297,17 @@ body{
 </c:if>
 
 </div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function () {
+  $('#excludeGotras').select2({
+    placeholder: "गोत्र चुनें (छोड़कर)",
+    allowClear: true,
+    width: '100'
+  });
+});
+</script>
 
 <%@ include file="/WEB-INF/views/includes/footer.jsp" %>
