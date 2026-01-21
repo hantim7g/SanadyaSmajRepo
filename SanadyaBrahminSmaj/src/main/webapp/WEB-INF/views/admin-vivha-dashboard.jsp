@@ -31,7 +31,7 @@
 <a href="/admin/vivha/approve/${p.id}" class="btn btn-success btn-sm">✔</a>
 <a href="/admin/vivha/hide/${p.id}" class="btn btn-secondary btn-sm">👁‍🗨</a>
 <a href="/admin/vivha/feature/${p.id}" class="btn btn-warning btn-sm">⭐</a>
-<a href="/vivhauser/pdf/${p.id}" class="btn btn-danger btn-sm">PDF</a>
+<a href="/user/vivhauser/pdf/${p.id}" class="btn btn-danger btn-sm">PDF</a>
 </td>
 </tr>
 </c:forEach>

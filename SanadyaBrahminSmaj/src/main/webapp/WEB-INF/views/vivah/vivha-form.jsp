@@ -63,7 +63,7 @@ body{
 </div>
 </c:if>
 
-<form action="/vivhauser/save" method="post" enctype="multipart/form-data">
+<form action="/user/vivhauser/save" method="post" enctype="multipart/form-data">
 
 <input type="hidden" name="id" value="${vivhauser.id}" />
 
@@ -380,29 +380,29 @@ class="form-control mt-2" accept="image/*">
 <div class="row g-3 mt-1">
 <div class="col-md-6">
 <label>अपेक्षित शिक्षा</label>
-<input type="text" name="expectedEducation" class="form-control">
+<input type="text" name="expectedEducation" value="${vivhauser.expectedEducation}" class="form-control">
 </div>
 
 <div class="col-md-6">
 <label>अपेक्षित आय</label>
-<input type="text" name="expectedIncome" class="form-control">
+<input type="text" name="expectedIncome" value="${vivhauser.expectedIncome}" class="form-control">
 </div>
 
 <div class="col-md-12">
 <label>अन्य अपेक्षाएँ</label>
-<textarea name="expectations" class="form-control"></textarea>
+<textarea name="expectations" class="form-control">${vivhauser.expectations}</textarea>
 </div>
 </div>
 
 <!-- ADMIN CONTROLS -->
-<c:if test="${isAdmin}">
+<!--<c:if test="${isAdmin}">
 <div class="admin-box">
 <strong>Admin Controls</strong><br><br>
 <a href="/vivhauser/approve/${vivhauser.id}" class="btn btn-success btn-sm">✔ Approve</a>
 <a href="/vivhauser/reject/${vivhauser.id}" class="btn btn-danger btn-sm">✖ Reject</a>
 <a href="/vivhauser/delete/${vivhauser.id}" class="btn btn-dark btn-sm">🗑 Delete</a>
 </div>
-</c:if>
+</c:if>-->
 
 <!-- SUBMIT -->
 <div class="text-end mt-4">

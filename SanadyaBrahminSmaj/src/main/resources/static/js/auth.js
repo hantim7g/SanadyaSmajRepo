@@ -36,7 +36,7 @@ $(function () {
 							centerVertical: true,
 							buttons: {
 								ok: {
-									label: 'रोकें',
+									label: 'ठीक है',
 									className: 'btn btn-light'
 								}
 							}

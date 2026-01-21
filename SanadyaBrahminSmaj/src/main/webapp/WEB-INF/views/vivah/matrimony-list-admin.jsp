@@ -72,7 +72,7 @@ body{
 <h3 class="text-center fw-bold mb-3">विवाह योग्य परिचय</h3>
 <!-- ================= SEARCH ================= -->
 <div class="search-card p-3 mb-4">
-<form action="/user/matrimony/search" method="get">
+<form action="/admin/matrimony/list" method="get">
 <div class="row g-2">
 
 <!-- Gender -->
@@ -163,12 +163,28 @@ body{
        class="form-control"
        value="${fn:escapeXml(param.income)}">
 </div>
-
+<div class="col-md-3">
+  <label class="field-label">स्वीकृति स्थिति</label>
+  <select name="approved" class="form-select">
+    <option value="">सभी</option>
+    <option value="true" ${param.approved=='true'?'selected':''}>स्वीकृत</option>
+    <option value="false" ${param.approved=='false'?'selected':''}>अस्वीकृत</option>
+  </select>
+</div>
+<div class="col-md-3">
+  <label class="field-label">सक्रिय स्थिति</label>
+  <select name="active" class="form-select">
+    <option value="">सभी</option>
+    <option value="true" ${param.active=='true'?'selected':''}>सक्रिय</option>
+    <option value="false" ${param.active=='false'?'selected':''}>निष्क्रिय</option>
+  </select>
+</div>
 <!-- Buttons -->
 <div class="col-12 text-end mt-2">
   <button class="btn btn-warning px-4">खोजें</button>
   <a href="/user/matrimony/list" class="btn btn-outline-dark ms-2">रीसेट</a>
 </div>
+
 
 </div>
 </form>
@@ -253,7 +269,7 @@ body{
     <div class="col-12">
       <b>निवास:</b>
       <span class="text-muted">
-      ${p.houseAddress},  ${p.city}, ${p.state}
+      ${p.houseAddress},   ${p.city},${p.state}
       </span>
     </div>
   </div>
@@ -290,6 +306,37 @@ body{
 📄 बायोडाटा PDF
 </a>
 </div>
+<div class="mb-2">
+
+  <!-- APPROVED -->
+  <span class="badge ${p.approved ? 'bg-success' : 'bg-danger'}">
+    ${p.approved ? 'स्वीकृत' : 'अस्वीकृत'}
+  </span>
+
+  <button
+    class="btn btn-sm ${p.approved ? 'btn-outline-danger' : 'btn-outline-success'} ms-2"
+    onclick="toggleApprove(${p.id}, ${!p.approved})">
+    ${p.approved ? 'अस्वीकृत करें' : 'स्वीकृत करें'}
+  </button>
+
+</div>
+
+<div class="mb-2">
+
+  <!-- ACTIVE -->
+  <span class="badge ${p.active ? 'bg-primary' : 'bg-secondary'}">
+    ${p.active ? 'सक्रिय' : 'निष्क्रिय'}
+  </span>
+
+  <button
+    class="btn btn-sm ${p.active ? 'btn-outline-secondary' : 'btn-outline-primary'} ms-2"
+    onclick="toggleActive(${p.id}, ${!p.active})">
+    ${p.active ? 'निष्क्रिय करें' : 'सक्रिय करें'}
+  </button>
+
+</div>
+
+
 </div>
 
 </div>
@@ -321,7 +368,7 @@ body{
 </c:if>
 
 </div>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
@@ -332,6 +379,89 @@ $(document).ready(function () {
     width: '100%'
   });
 });
+</script>
+<script>
+function toggleApprove(id, approved) {
+
+  bootbox.confirm({
+    title: "पुष्टि करें",
+    message: approved 
+        ? "क्या आप इस प्रोफ़ाइल को <b>स्वीकृत</b> करना चाहते हैं?"
+        : "क्या आप इस प्रोफ़ाइल को <b>अस्वीकृत</b> करना चाहते हैं?",
+    centerVertical: true,
+    buttons: {
+      cancel: {
+        label: 'रद्द करें',
+        className: 'btn-secondary'
+      },
+      confirm: {
+        label: 'हाँ, करें',
+        className: 'btn-success'
+      }
+    },
+    callback: function (result) {
+      if (result) {
+        $.post('/admin/matrimony/' + id + '/approve', { approved: approved })
+          .done(function () {
+            bootbox.alert({
+              message: "स्थिति सफलतापूर्वक अपडेट की गई ✅",
+              centerVertical: true,
+              callback: function () {
+                location.reload();
+              }
+            });
+          })
+          .fail(function () {
+            bootbox.alert({
+              message: "❌ स्वीकृति प्रक्रिया विफल रही",
+              centerVertical: true
+            });
+          });
+      }
+    }
+  });
+}
+
+function toggleActive(id, active) {
+
+  bootbox.confirm({
+    title: "पुष्टि करें",
+    message: active
+        ? "क्या आप इस प्रोफ़ाइल को <b>सक्रिय</b> करना चाहते हैं?"
+        : "क्या आप इस प्रोफ़ाइल को <b>निष्क्रिय</b> करना चाहते हैं?",
+    centerVertical: true,
+    buttons: {
+      cancel: {
+        label: 'रद्द करें',
+        className: 'btn-secondary'
+      },
+      confirm: {
+        label: 'हाँ, करें',
+        className: 'btn-warning'
+      }
+    },
+    callback: function (result) {
+      if (result) {
+        $.post('/admin/matrimony/' + id + '/active', { active: active })
+          .done(function () {
+            bootbox.alert({
+              message: "स्थिति सफलतापूर्वक अपडेट की गई ✅",
+              centerVertical: true,
+              callback: function () {
+                location.reload();
+              }
+            });
+          })
+          .fail(function () {
+            bootbox.alert({
+              message: "❌ सक्रियता अपडेट नहीं हो सकी",
+              centerVertical: true
+            });
+          });
+      }
+    }
+  });
+}
 </script>
 
 <%@ include file="/WEB-INF/views/includes/footer.jsp" %>

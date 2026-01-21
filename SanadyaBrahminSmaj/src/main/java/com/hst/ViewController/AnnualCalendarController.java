@@ -32,7 +32,7 @@ public class AnnualCalendarController {
 //    	 boolean isAdmin = principal != null &&
 //                 SecurityContextHolder.getContext().getAuthentication()
 //                         .getAuthorities().stream()
-//                         .anyMatch(a -> a.getAuthority().equals("ADMIN"));
+//                         .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 //        model.addAttribute("calendarList", service.findAllActive());
 //        model.addAttribute("isAdmin", isAdmin);
 //
@@ -59,7 +59,7 @@ public class AnnualCalendarController {
         boolean isAdmin = principal != null &&
                 SecurityContextHolder.getContext().getAuthentication()
                         .getAuthorities().stream()
-                        .anyMatch(a -> a.getAuthority().equals("ADMIN"));
+                        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
        
         model.addAttribute("calendarList", viewList);
         model.addAttribute("isAdmin",isAdmin);

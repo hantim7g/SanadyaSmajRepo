@@ -2,21 +2,16 @@ package com.hst.security;
 
 import com.hst.filter.JwtAuthenticationFilter;
 import com.hst.service.CustomUserDetailsService;
-
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -42,55 +37,102 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-            .cors(cors -> {}) // enable CORS with the configuration from corsConfigurationSource()
+
+        http
+            /* ---------- CORS ---------- */
+            .cors(cors -> {})
+
+            /* ---------- CSRF ---------- */
             .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 🔒 Stateless
-            .authorizeHttpRequests(auth -> auth
-//                .requestMatchers(
-//                    "/api/auth/**",
-//                    "/swagger-ui/**",
-//                    "/v3/api-docs/**",
-//                    "/swagger-ui.html"
-//                ).permitAll() // 🔓 Public routes
-//                .requestMatchers(
-//                			"/",
-//                        "/home",
-//                        "/index",
-//                        "/index.html",
-//                        "/css/**",
-//                        "/js/**",
-//                        "/images/**",
-//                        "/favicon.ico"
-//                    ).permitAll()
-//                .requestMatchers("/h2-console/**").hasAuthority("ADMIN") // 🔐 H2 console restricted to ADMIN
-//                .requestMatchers("/matrimony/my-profiles").hasAnyAuthority("USER", "ADMIN") 
-//                .requestMatchers("/admin/**").hasAuthority("ADMIN")// 🔐 Protected by role
-//                .requestMatchers("/matrimony/**").authenticated() // All other matrimony routes need login
-//                .requestMatchers("/testimonials").permitAll()
-//                .requestMatchers("/member/add-testimonial", "/member/save-testimonial", 
-//                                "/member/edit-testimonial/**", "/member/update-testimonial/**", 
-//                                "/testimonial/my-testimonials", "/member/testimonial/delete/**").hasAnyAuthority("USER", "ADMIN")
-                .requestMatchers( "/admin/**").hasAuthority("ADMIN")
-                .anyRequest().permitAll() 
-//                .anyRequest().authenticated() // Everything else requires authentication
+
+            /* ---------- SESSION ---------- */
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            .logout(logout -> logout.disable())
+
+            /* ---------- AUTHORIZATION ---------- */
+            .authorizeHttpRequests(auth -> auth
+
+                /* 🔐 ADMIN ONLY */
+                .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+
+                /* 🔐 LOGIN REQUIRED (USER / ADMIN) */
+                .requestMatchers(
+                        "/user/**",
+                        "/member/**",
+                        "/matrimony/**",
+                        "/testimonial/my-testimonials",
+                        "/member/add-testimonial",
+                        "/member/save-testimonial",
+                        "/member/edit-testimonial/**",
+                        "/member/update-testimonial/**",
+                        "/member/testimonial/delete/**"
+                ).authenticated()
+
+                /* 🌍 PUBLIC */
+                .requestMatchers(
+                        "/",
+                        "/home",
+                        "/index",
+                        "/index.html",
+                        "/login",
+                        "/register",
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/favicon.ico",
+                        "/event/**",
+                        "/testimonials",
+                        "/matrimony/list",
+                        "/matrimony/search"
+                ).permitAll()
+
+                /* 🌍 DEFAULT */
+                .anyRequest().permitAll()
+            )
+
+            /* ---------- EXCEPTION HANDLING ---------- */
             .exceptionHandling(ex -> ex
                 .accessDeniedHandler(accessDeniedHandler)
                 .authenticationEntryPoint((request, response, authException) -> {
-                    response.setCharacterEncoding("UTF-8");
-                    response.setContentType("application/json; charset=UTF-8");
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
-                    response.getWriter().write("{\"message\": \"कृपया लॉगिन करें।\"}");
+
+                    String accept = request.getHeader("Accept");
+                    String xhr = request.getHeader("X-Requested-With");
+
+                    boolean isApiCall =
+                            (accept != null && accept.contains("application/json")) ||
+                            ("XMLHttpRequest".equalsIgnoreCase(xhr));
+
+                    if (isApiCall) {
+                        // 🔹 AJAX / API → JSON
+                        response.setCharacterEncoding("UTF-8");
+                        response.setContentType("application/json; charset=UTF-8");
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.getWriter().write("{\"message\":\"कृपया लॉगिन करें।\"}");
+                    } else {
+                        // 🔹 BROWSER → REDIRECT WITH FLASH MESSAGE
+                    	 response.sendRedirect("/?error=login_required");
+                    }
                 })
+
             )
+
+            /* ---------- AUTH PROVIDER ---------- */
             .authenticationProvider(authenticationProvider())
+
+            /* ---------- JWT FILTER ---------- */
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-            .headers(headers -> headers.frameOptions().sameOrigin()) // allow frames for H2 console
-            .build();
+
+            /* ---------- LOGOUT ---------- */
+            .logout(logout -> logout.disable())
+
+            /* ---------- H2 / FRAMES ---------- */
+            .headers(headers -> headers.frameOptions().sameOrigin());
+
+        return http.build();
     }
 
+    /* ---------- AUTH PROVIDER ---------- */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -99,26 +141,31 @@ public class SecurityConfig {
         return provider;
     }
 
+    /* ---------- PASSWORD ---------- */
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Use bcrypt for secure password hashing
+        return new BCryptPasswordEncoder();
     }
 
+    /* ---------- AUTH MANAGER ---------- */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    // CORS configuration: allow Authorization header and cookies (credentials).
+    /* ---------- CORS ---------- */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // TODO: replace '*' with explicit origins in production
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000")); // 🔒 Restrict to specific origin
+
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:8080"
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
         configuration.setAllowCredentials(true);
         configuration.setExposedHeaders(List.of("Set-Cookie"));
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

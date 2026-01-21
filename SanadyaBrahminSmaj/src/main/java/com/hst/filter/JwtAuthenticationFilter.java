@@ -21,7 +21,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
-
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -37,6 +36,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
+    /* 🔒 Skip filter for public/static resources */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+
+        return path.startsWith("/css/")
+            || path.startsWith("/js/")
+            || path.startsWith("/images/")
+            || path.startsWith("/webjars/")
+            || path.equals("/")
+            || path.equals("/home")
+            || path.equals("/login")
+            || path.equals("/register")
+            || path.equals("/favicon.ico");
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -44,42 +59,40 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         try {
-            // 1️⃣ Extract token (Header → Cookie)
-            String token = jwtProvider.getJwtFromHeader(request);
-            if (token == null) {
-                token = jwtProvider.getJwtFromCookies(request);
+            String token = resolveToken(request);
+
+            /* 🚫 No token → continue */
+            if (token == null || !token.contains(".")) {
+                filterChain.doFilter(request, response);
+                return;
             }
 
-            // 2️⃣ Validate token
-            if (token != null && jwtProvider.validateToken(token)) {
-
-                // 3️⃣ Avoid duplicate authentication
-                if (SecurityContextHolder.getContext().getAuthentication() == null) {
-
-                    String username = jwtProvider.getUsernameFromToken(token);
-
-                    UserDetails userDetails =
-                            userDetailsService.loadUserByUsername(username);
-
-                    List<SimpleGrantedAuthority> authorities =
-                            jwtProvider.getRolesFromToken(token)
-                                    .stream()
-                                    .map(SimpleGrantedAuthority::new)
-                                    .collect(Collectors.toList());
-
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails, null, authorities);
-
-                    authentication.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request));
-
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
-            }
-            // 4️⃣ Invalid token → clear cookie
-            else if (token != null) {
+            /* 🚫 Invalid token → clear cookie only for secured paths */
+            if (!jwtProvider.validateToken(token)) {
                 clearAuthCookie(response, request.isSecure());
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            /* ✅ Authenticate only once */
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                String username = jwtProvider.getUsernameFromToken(token);
+
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(username);
+
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()   // 🔥 SINGLE SOURCE OF TRUTH
+                        );
+
+                authentication.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request));
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
 
         } catch (Exception ex) {
@@ -88,6 +101,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private String resolveToken(HttpServletRequest request) {
+        String token = jwtProvider.getJwtFromHeader(request);
+        if (token == null || token.isBlank()) {
+            token = jwtProvider.getJwtFromCookies(request);
+        }
+        return token;
     }
 
     private void clearAuthCookie(HttpServletResponse response, boolean secure) {

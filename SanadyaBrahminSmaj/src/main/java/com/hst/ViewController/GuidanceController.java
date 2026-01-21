@@ -55,7 +55,7 @@ public class GuidanceController {
         boolean isAdmin = principal != null &&
                 SecurityContextHolder.getContext().getAuthentication()
                         .getAuthorities().stream()
-                        .anyMatch(a -> a.getAuthority().equals("ADMIN"));
+                        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
         model.addAttribute("isAdmin", isAdmin);
         return "guidance/guidance-list";

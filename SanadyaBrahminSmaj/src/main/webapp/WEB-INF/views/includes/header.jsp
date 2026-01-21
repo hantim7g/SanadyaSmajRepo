@@ -309,10 +309,10 @@
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">वैवाहिक सुविधा</a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/matrimony/list"><i class="fas fa-search"></i> वर / वधु प्रोफ़ाइल ब्राउज़ करें</a></li>
-            <li><a class="dropdown-item" href="/matrimony/add"><i class="fas fa-plus"></i> प्रोफ़ाइल जोड़ें</a></li>
-            <li><a class="dropdown-item" href="/matrimony/my-profiles"><i class="fas fa-user-circle"></i> मेरी प्रोफ़ाइलें</a></li>
-            <li><a class="dropdown-item" href="/matrimony/privacy"><i class="fas fa-shield-alt"></i> गोपनीयता नीति</a></li>
+            <li><a class="dropdown-item" href="/user/matrimony/list"><i class="fas fa-search"></i> वर / वधु प्रोफ़ाइल ब्राउज़ करें</a></li>
+            <li><a class="dropdown-item" href="/user/vivhauser/form"><i class="fas fa-plus"></i> विवाह प्रोफ़ाइल जोड़ें</a></li>
+            <li><a class="dropdown-item" href="/user/matrimony/my-profiles"><i class="fas fa-user-circle"></i>मेरी विवाह प्रोफ़ाइलें</a></li>
+            <li><a class="dropdown-item" href="/matrimony/privacy"><i class="fas fa-shield-alt"></i> गोपनीयता नीति-विवाह प्रोफ़ाइल</a></li>
           </ul>
         </li>
 
@@ -388,7 +388,15 @@
               </ul>
             </li>
             <li><a class="dropdown-item" href="/admin/hall-bookings"><i class="fas fa-hotel"></i> हॉल बुकिंग्स</a></li>
-          </ul>
+			
+            <li class="dropdown-submenu dropend">
+              <a class="dropdown-item dropdown-toggle" href="#"><i class="fas fa-ring"></i> वैवाहिक सुविधा प्रबंधन</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/admin/matrimony/list"><i class="fas fa-list-ul"></i> सभी प्रोफ़ाइलें समीक्षा</a></li>
+              </ul>
+            </li>
+			
+			  </ul>
         </li>
 
 		<li class="nav-item dropdown" id="loginArea">
@@ -406,6 +414,43 @@
     </div>
   </div>
 </nav>
+<!-- =========================
+     GLOBAL ERROR BANNER
+========================= -->
+<c:if test="${not empty error}">
+  <div class="container-fluid px-0">
+    <div class="alert alert-danger alert-dismissible fade show text-center rounded-0 mb-0"
+         role="alert"
+         style="font-weight: 600;">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      ${error}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  </div>
+</c:if>
+
+<c:if test="${not empty success}">
+  <div class="container-fluid px-0">
+    <div class="alert alert-success alert-dismissible fade show text-center rounded-0 mb-0"
+         role="alert"
+         style="font-weight: 600;">
+      <i class="fas fa-check-circle me-2"></i>
+      ${success}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  </div>
+</c:if>
+<c:if test="${param.error == 'login_required'}">
+  <div class="container-fluid px-0">
+    <div class="alert alert-danger alert-dismissible fade show text-center rounded-0 mb-0"
+         role="alert"
+         style="font-weight: 600;">
+      <i class="fas fa-lock me-2"></i>
+      कृपया आगे बढ़ने के लिए लॉगिन करें।
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  </div>
+</c:if>
 
 <%@ include file="/WEB-INF/views/includes/auth-popup.jsp" %>
 
@@ -480,6 +525,13 @@ document.querySelectorAll('.dropdown-submenu > a').forEach(el => {
     this.nextElementSibling?.classList.toggle('show');
   });
 });
+</script>
+<script>
+  setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(alert => {
+      bootstrap.Alert.getOrCreateInstance(alert).close();
+    });
+  }, 5000);
 </script>
 
 </body>

@@ -69,13 +69,14 @@ body{
 
 <div class="container my-4">
 
-<h3 class="text-center fw-bold mb-3">विवाह योग्य परिचय</h3>
+<h3 class="text-center fw-bold mb-3"> मेरी विवाह प्रोफ़ाइलें</h3>
 <!-- ================= SEARCH ================= -->
+<!--
 <div class="search-card p-3 mb-4">
-<form action="/user/matrimony/search" method="get">
+<form action="/matrimony/search" method="get">
 <div class="row g-2">
 
-<!-- Gender -->
+ Gender 
 <div class="col-md-3">
 <label class="field-label">लिंग</label>
 <select name="gender" class="form-select">
@@ -85,7 +86,7 @@ body{
 </select>
 </div>
 
-<!-- Manglik -->
+ Manglik 
 <div class="col-md-3">
 <label class="field-label">मांगलिक</label>
 <select name="manglik" class="form-select">
@@ -95,7 +96,7 @@ body{
 </select>
 </div>
 
-<!-- Qualification -->
+ Qualification 
 <div class="col-md-3">
 <label class="field-label">शिक्षा</label>
 <input name="qualification"
@@ -103,7 +104,7 @@ body{
        value="${fn:escapeXml(param.qualification)}">
 </div>
 
-<!-- Occupation -->
+ Occupation 
 <div class="col-md-3">
 <label class="field-label">पेशा</label>
 <input name="occupation"
@@ -111,7 +112,7 @@ body{
        value="${fn:escapeXml(param.occupation)}">
 </div>
 
-<!-- Exclude Gotra (Multi Select) -->
+ Exclude Gotra (Multi Select) 
 <div class="col-md-3">
 <label class="field-label">गोत्र (छोड़कर)</label>
 
@@ -140,7 +141,7 @@ body{
 </small>
 </div>
 
-<!-- City -->
+ City 
 <div class="col-md-3">
 <label class="field-label">शहर</label>
 <input name="city"
@@ -148,7 +149,7 @@ body{
        value="${fn:escapeXml(param.city)}">
 </div>
 
-<!-- District -->
+ District 
 <div class="col-md-3">
 <label class="field-label">जिला</label>
 <input name="district"
@@ -156,7 +157,7 @@ body{
        value="${fn:escapeXml(param.district)}">
 </div>
 
-<!-- Income -->
+ Income 
 <div class="col-md-3">
 <label class="field-label">आय</label>
 <input name="income"
@@ -164,15 +165,15 @@ body{
        value="${fn:escapeXml(param.income)}">
 </div>
 
-<!-- Buttons -->
+ Buttons 
 <div class="col-12 text-end mt-2">
   <button class="btn btn-warning px-4">खोजें</button>
-  <a href="/user/matrimony/list" class="btn btn-outline-dark ms-2">रीसेट</a>
+  <a href="/matrimony/list" class="btn btn-outline-dark ms-2">रीसेट</a>
 </div>
 
 </div>
 </form>
-</div>
+</div>-->
 
 <!-- ================= RESULT ================= -->
 <c:if test="${empty profiles}">
@@ -253,7 +254,7 @@ body{
     <div class="col-12">
       <b>निवास:</b>
       <span class="text-muted">
-      ${p.houseAddress},  ${p.city}, ${p.state}
+      ${p.houseAddress},   ${p.city},${p.state}
       </span>
     </div>
   </div>
@@ -289,6 +290,8 @@ body{
 <a href="/user/vivhauser/pdf/${p.id}" class="btn btn-success btn-sm">
 📄 बायोडाटा PDF
 </a>
+<a href="/user/vivhauser/form?id=${p.id}" class="btn btn-success btn-sm">Edit</a>
+
 </div>
 </div>
 
