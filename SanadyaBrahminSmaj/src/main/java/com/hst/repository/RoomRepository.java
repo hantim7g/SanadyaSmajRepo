@@ -1,11 +1,9 @@
 package com.hst.repository;
 
-import java.time.LocalDate;
-
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import com.hst.entity.BookingSys.Room;
 
-import com.hst.entity.Booking;
-import com.hst.entity.Building;
-import com.hst.entity.Room;
-
-public interface RoomRepository extends JpaRepository<Room, Long> {}
+public interface RoomRepository extends JpaRepository<Room, Long> {
+    List<Room> findByIsActiveTrue();
+}
