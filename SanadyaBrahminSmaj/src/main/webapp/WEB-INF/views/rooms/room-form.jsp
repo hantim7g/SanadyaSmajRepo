@@ -5,9 +5,9 @@
 <%@ include file="/WEB-INF/views/includes/header.jsp" %>
 
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
-<title>Room Management</title>
+<title>रूम प्रबंधन</title>
 
 <style>
 body {
@@ -52,7 +52,7 @@ body {
 <div class="container main-width my-4">
 
 <h3 class="mb-3">
-  ${room.id == null ? "➕ Add Room" : "✏️ Edit Room"}
+  ${room.id == null ? "➕ नया रूम जोड़ें" : "✏️ रूम संशोधित करें"}
 </h3>
 
 <form:form action="/rooms/save" method="post"
@@ -63,125 +63,101 @@ body {
 <form:hidden path="id"/>
 
 <!-- BASIC INFO -->
-<div class="section-title">Basic Information</div>
+<div class="section-title">मूल जानकारी</div>
 <div class="row mt-2 g-3">
 
 <div class="col-md-3">
-  <label>Room Number</label>
+  <label>रूम संख्या</label>
   <form:input path="roomNumber" class="form-control"/>
   <form:errors path="roomNumber" cssClass="error"/>
 </div>
 
 <div class="col-md-3">
-  <label>Floor</label>
+  <label>फ्लोर</label>
   <form:input path="floor" class="form-control"/>
   <form:errors path="floor" cssClass="error"/>
 </div>
 
 <div class="col-md-3">
-  <label>Room Type</label>
+  <label>रूम का प्रकार</label>
   <form:select path="roomType" class="form-select">
-    <form:option value="Single">Single</form:option>
-    <form:option value="Double">Double</form:option>
-    <form:option value="Deluxe">Deluxe</form:option>
-    <form:option value="Suite">Suite</form:option>
+      <form:option value="ONLY_ROOM">केवल कमरा</form:option>
+      <form:option value="HALL">हॉल</form:option>
+      <form:option value="COMPLETE_FLOOR">पूरा फ्लोर</form:option>
   </form:select>
   <form:errors path="roomType" cssClass="error"/>
 </div>
 
 <div class="col-md-3">
-  <label>Status</label>
+  <label>स्थिति</label>
   <form:select path="status" class="form-select">
-    <form:option value="AVAILABLE">AVAILABLE</form:option>
-    <form:option value="MAINTENANCE">MAINTENANCE</form:option>
-    <form:option value="BLOCKED">BLOCKED</form:option>
+    <form:option value="AVAILABLE">उपलब्ध</form:option>
+    <form:option value="MAINTENANCE">मरम्मत में</form:option>
+    <form:option value="BLOCKED">अवरुद्ध</form:option>
   </form:select>
   <form:errors path="status" cssClass="error"/>
 </div>
 </div>
 
-<!-- CAPACITY -->
-<div class="section-title">Capacity</div>
-<div class="row mt-2 g-3">
-
-<div class="col-md-3">
-  <label>Max Adults</label>
-  <form:input path="maxAdults" class="form-control"/>
-  <form:errors path="maxAdults" cssClass="error"/>
-</div>
-
-<div class="col-md-3">
-  <label>Max Children</label>
-  <form:input path="maxChildren" class="form-control"/>
-  <form:errors path="maxChildren" cssClass="error"/>
-</div>
-</div>
-
 <!-- PRICING -->
-<div class="section-title">Pricing</div>
+<div class="section-title">मूल्य विवरण</div>
 <div class="row mt-2 g-3">
 
 <div class="col-md-3">
-  <label>Base Price</label>
+  <label>आधार मूल्य (₹)</label>
   <form:input path="basePrice" class="form-control"/>
   <form:errors path="basePrice" cssClass="error"/>
 </div>
 
 <div class="col-md-3">
-  <label>Min Stay</label>
+  <label>न्यूनतम प्रवास (दिन)</label>
   <form:input path="minStay" class="form-control"/>
   <form:errors path="minStay" cssClass="error"/>
 </div>
 
 <div class="col-md-3">
-  <label>Max Stay</label>
+  <label>अधिकतम प्रवास (दिन)</label>
   <form:input path="maxStay" class="form-control"/>
   <form:errors path="maxStay" cssClass="error"/>
 </div>
 
 <div class="col-md-3">
-  <label>Advance Booking Days</label>
+  <label>अग्रिम बुकिंग दिवस</label>
   <form:input path="advanceBookingDays" class="form-control"/>
   <form:errors path="advanceBookingDays" cssClass="error"/>
 </div>
 </div>
 
 <!-- AVAILABILITY -->
-<div class="section-title">Availability</div>
+<div class="section-title">उपलब्धता</div>
 <div class="row mt-2 g-3">
 
 <div class="col-md-3">
-  <label>Available From</label>
+  <label>उपलब्धता प्रारंभ तिथि</label>
   <form:input path="availableFrom" type="date" class="form-control"/>
   <form:errors path="availableFrom" cssClass="error"/>
 </div>
 
 <div class="col-md-3">
-  <label>Available To</label>
+  <label>उपलब्धता समाप्ति तिथि</label>
   <form:input path="availableTo" type="date" class="form-control"/>
   <form:errors path="availableTo" cssClass="error"/>
 </div>
 </div>
 
-<!-- FEATURES -->
-<div class="section-title">Features</div>
-<div class="row mt-2">
-<div class="col-md-8">
-  <label><form:checkbox path="gardenView"/> Garden View</label>
-  <label class="ms-3"><form:checkbox path="hallRoom"/> Hall Room</label>
-  <label class="ms-3"><form:checkbox path="housekeepingRequired"/> Housekeeping</label>
-</div>
-</div>
-
 <!-- IMAGES -->
-<div class="section-title">Images</div>
+<div class="section-title">रूम की तस्वीरें</div>
 <input type="file" name="files" multiple class="form-control">
+
+<small class="text-muted">
+  एक से अधिक तस्वीरें चुनने के लिए Ctrl / Shift का उपयोग करें
+</small>
 
 <!-- ACTIONS -->
 <div class="row mt-4">
 <div class="col-md-12 text-end">
-  <button class="btn btnn px-4">Save</button>
-  <a href="/rooms/admin" class="btn btn-secondary ms-2">Back</a>
+  <button class="btn btnn px-4">सहेजें</button>
+  <a href="/rooms/admin" class="btn btn-secondary ms-2">वापस जाएँ</a>
 </div>
 </div>
 

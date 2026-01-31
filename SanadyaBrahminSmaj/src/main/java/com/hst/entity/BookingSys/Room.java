@@ -27,21 +27,22 @@ public class Room {
     private String roomNumber;          // 101, A-1
 
     @NotBlank(message = "कमरे का प्रकार चुनना अनिवार्य है")
-    private String roomType;            // Single, Double, Deluxe, Suite
+    private String roomType;          // ONLY_ROOM (केवल कमरा), HALL (हॉल), COMPLETE_FLOOR (पूरा फ्लोर)
+
 
     @NotBlank(message = "फ्लोर की जानकारी अनिवार्य है")
     private String floor;               // 1st, 2nd
 
-    // ========== CAPACITY ==========
-    @NotNull(message = "अधिकतम वयस्क संख्या अनिवार्य है")
-    @Min(value = 1, message = "कम से कम 1 वयस्क होना चाहिए")
-    @Max(value = 20, message = "अधिकतम 20 वयस्क अनुमत हैं")
-    private Integer maxAdults;
-
-    @NotNull(message = "अधिकतम बच्चों की संख्या अनिवार्य है")
-    @Min(value = 0, message = "बच्चों की संख्या नकारात्मक नहीं हो सकती")
-    @Max(value = 10, message = "अधिकतम 10 बच्चे अनुमत हैं")
-    private Integer maxChildren;
+//    // ========== CAPACITY ==========
+//    @NotNull(message = "अधिकतम वयस्क संख्या अनिवार्य है")
+//    @Min(value = 1, message = "कम से कम 1 वयस्क होना चाहिए")
+//    @Max(value = 20, message = "अधिकतम 20 वयस्क अनुमत हैं")
+//    private Integer maxAdults;
+//
+//    @NotNull(message = "अधिकतम बच्चों की संख्या अनिवार्य है")
+//    @Min(value = 0, message = "बच्चों की संख्या नकारात्मक नहीं हो सकती")
+//    @Max(value = 10, message = "अधिकतम 10 बच्चे अनुमत हैं")
+//    private Integer maxChildren;
 
     // ========== PRICING ==========
     @NotNull(message = "आधार मूल्य अनिवार्य है")
@@ -57,12 +58,12 @@ public class Room {
     @Enumerated(EnumType.STRING)
     private RoomStatus status;          // AVAILABLE, BOOKED, CLEANING, MAINTENANCE
 
-    // ========== FEATURES ==========
-    @NotNull
-    private Boolean gardenView = false;
-
-    @NotNull
-    private Boolean hallRoom = false;
+//    // ========== FEATURES ==========
+//    @NotNull
+//    private Boolean gardenView = false;
+//
+//    @NotNull
+//    private Boolean hallRoom = false;
 
     // ========== AVAILABILITY RULES ==========
     @NotNull(message = "न्यूनतम प्रवास अवधि अनिवार्य है")
@@ -88,10 +89,10 @@ public class Room {
     private LocalDate availableTo;
 
     // ========== HOUSEKEEPING ==========
-    @NotNull
-    private Boolean housekeepingRequired = true;
-
-    private LocalDateTime lastCleanedAt;
+//    @NotNull
+//    private Boolean housekeepingRequired = true;
+//
+//    private LocalDateTime lastCleanedAt;
 
     // ========== AUDIT ==========
     private LocalDateTime createdAt;
@@ -135,18 +136,18 @@ public class Room {
 	public void setFloor(String floor) {
 		this.floor = floor;
 	}
-	public Integer getMaxAdults() {
-		return maxAdults;
-	}
-	public void setMaxAdults(Integer maxAdults) {
-		this.maxAdults = maxAdults;
-	}
-	public Integer getMaxChildren() {
-		return maxChildren;
-	}
-	public void setMaxChildren(Integer maxChildren) {
-		this.maxChildren = maxChildren;
-	}
+//	public Integer getMaxAdults() {
+//		return maxAdults;
+//	}
+//	public void setMaxAdults(Integer maxAdults) {
+//		this.maxAdults = maxAdults;
+//	}
+//	public Integer getMaxChildren() {
+//		return maxChildren;
+//	}
+//	public void setMaxChildren(Integer maxChildren) {
+//		this.maxChildren = maxChildren;
+//	}
 	public BigDecimal getBasePrice() {
 		return basePrice;
 	}
@@ -165,18 +166,18 @@ public class Room {
 	public void setStatus(RoomStatus status) {
 		this.status = status;
 	}
-	public Boolean getGardenView() {
-		return gardenView;
-	}
-	public void setGardenView(Boolean gardenView) {
-		this.gardenView = gardenView;
-	}
-	public Boolean getHallRoom() {
-		return hallRoom;
-	}
-	public void setHallRoom(Boolean hallRoom) {
-		this.hallRoom = hallRoom;
-	}
+//	public Boolean getGardenView() {
+//		return gardenView;
+//	}
+//	public void setGardenView(Boolean gardenView) {
+//		this.gardenView = gardenView;
+//	}
+//	public Boolean getHallRoom() {
+//		return hallRoom;
+//	}
+//	public void setHallRoom(Boolean hallRoom) {
+//		this.hallRoom = hallRoom;
+//	}
 	public Integer getMinStay() {
 		return minStay;
 	}
@@ -207,18 +208,18 @@ public class Room {
 	public void setAvailableTo(LocalDate availableTo) {
 		this.availableTo = availableTo;
 	}
-	public Boolean getHousekeepingRequired() {
-		return housekeepingRequired;
-	}
-	public void setHousekeepingRequired(Boolean housekeepingRequired) {
-		this.housekeepingRequired = housekeepingRequired;
-	}
-	public LocalDateTime getLastCleanedAt() {
-		return lastCleanedAt;
-	}
-	public void setLastCleanedAt(LocalDateTime lastCleanedAt) {
-		this.lastCleanedAt = lastCleanedAt;
-	}
+//	public Boolean getHousekeepingRequired() {
+//		return housekeepingRequired;
+//	}
+//	public void setHousekeepingRequired(Boolean housekeepingRequired) {
+//		this.housekeepingRequired = housekeepingRequired;
+//	}
+//	public LocalDateTime getLastCleanedAt() {
+//		return lastCleanedAt;
+//	}
+//	public void setLastCleanedAt(LocalDateTime lastCleanedAt) {
+//		this.lastCleanedAt = lastCleanedAt;
+//	}
 	public LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
@@ -238,6 +239,72 @@ public class Room {
 	public void setImages(List<RoomImage> images) {
 	    this.images = images;
 	}
-	
+
+	@Override
+	public String toString() {
+		return "Room [id=" + id + ", images=" + images + ", roomNumber=" + roomNumber + ", roomType=" + roomType
+				+ ", floor=" + floor + ", basePrice=" + basePrice + ", isActive=" + isActive + ", status=" + status
+				+ ", minStay=" + minStay + ", maxStay=" + maxStay + ", advanceBookingDays=" + advanceBookingDays
+				+ ", availableFrom=" + availableFrom + ", availableTo=" + availableTo + ", createdAt=" + createdAt
+				+ ", updatedAt=" + updatedAt + "]";
+	}
+	@Transient
+	public String getRoomTypeLabel() {
+	    if (roomType == null) return "";
+
+	    switch (roomType) {
+	        case "ONLY_ROOM":
+	            return "केवल कमरा";
+	        case "HALL":
+	            return "हॉल";
+	        case "COMPLETE_FLOOR":
+	            return "पूरा फ्लोर";
+	        default:
+	            return roomType;
+	    }
+	}
+	@Transient
+	public String getStatusLabel() {
+	    if (status == null) return "";
+
+	    switch (status) {
+	        case AVAILABLE:
+	            return "उपलब्ध";
+	        case BOOKED:
+	            return "बुक किया गया";
+	        case CLEANING:
+	            return "सफाई में";
+	        case MAINTENANCE:
+	            return "मरम्मत में";
+	        default:
+	            return status.name();
+	    }
+	}
+	@Transient
+	public String getFloorLabel() {
+	    if (floor == null) return "";
+
+	    switch (floor) {
+	        case "Ground":
+	            return "ग्राउंड फ्लोर";
+	        case "1st":
+	            return "पहला फ्लोर";
+	        case "2nd":
+	            return "दूसरा फ्लोर";
+	        case "3rd":
+	            return "तीसरा फ्लोर";
+	        default:
+	            return floor;
+	    }
+	}
+	@Transient
+	public String getActiveLabel() {
+	    return Boolean.TRUE.equals(isActive) ? "सक्रिय" : "निष्क्रिय";
+	}
+	@Transient
+	public String getPriceLabel() {
+	    return basePrice != null ? "₹" + basePrice + " / रात" : "";
+	}
+
 
 }

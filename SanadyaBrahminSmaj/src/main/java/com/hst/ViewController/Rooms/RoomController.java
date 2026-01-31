@@ -1,7 +1,9 @@
 package com.hst.ViewController.Rooms;
 
+import com.hst.dto.RoomFilterDTO;
 import com.hst.entity.BookingSys.Room;
 import com.hst.entity.BookingSys.RoomImage;
+import com.hst.entity.BookingSys.RoomStatus;
 import com.hst.service.RoomService;
 
 import jakarta.validation.Valid;
@@ -14,6 +16,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,10 +34,21 @@ public class RoomController {
 
  // List page
     @GetMapping("/admin")
-    public String roomList(Model model) {
-        model.addAttribute("rooms", roomService.getAll());
+    public String roomList(RoomFilterDTO filter, Model model) {
+
+        // empty string → null (important for LIKE / equals)
+        if (filter.getRoomType() != null && filter.getRoomType().isBlank()) {
+            filter.setRoomType(null);
+        }
+
+        if (filter.getFloor() != null && filter.getFloor().isBlank()) {
+            filter.setFloor(null);
+        }
+
+        model.addAttribute("rooms", roomService.search(filter));
         return "rooms/room-list";
     }
+
 
     // Add form
     @GetMapping("/admin/add")
@@ -92,19 +106,20 @@ public class RoomController {
              model.addAttribute("room", room);
              return "rooms/room-form"; // back to form with errors
          }
-        Room existing = null;
+    	  Room entity;
 
-        // If edit
-        if (room.getId() != null) {
-            existing = roomService.getById(room.getId());
+    	    if (room.getId() != null) {
+    	        // ===== UPDATE =====
+    	        entity = roomService.getById(room.getId());
 
-            existing.setRoomNumber(room.getRoomNumber());
-            existing.setRoomType(room.getRoomType());
-            existing.setFloor(room.getFloor());
-            existing.setBasePrice(room.getBasePrice());
-            existing.setStatus(room.getStatus());
-            room = existing;
-        }
+    	        // 🔑 MERGE ONLY NON-NULL VALUES
+    	        mergeNonNull(room, entity);
+
+    	    } else {
+    	        // ===== CREATE =====
+    	        entity = room;
+    	    }
+
 
         // Handle images
         if (files != null && files.length > 0) {
@@ -120,15 +135,15 @@ public class RoomController {
 
                     RoomImage img = new RoomImage();
                     img.setImageUrl(relativePath);
-                    img.setRoom(room);
+                    img.setRoom(entity);
 
-                    room.getImages().add(img);
+                    entity.getImages().add(img);
                 }
             }
         }
 
-        room.setIsActive(true);
-        roomService.save(room);
+        entity.setIsActive(true);
+        roomService.save(entity);
 
         return "redirect:/rooms/admin";
     }
@@ -146,4 +161,62 @@ public class RoomController {
         model.addAttribute("rooms", roomService.getActive());
         return "rooms/rooms-view";
     }
+    @GetMapping("/filter")
+    public String filter(RoomFilterDTO filter, Model model) {
+    	if(filter!=null &&filter.getRoomType()!=null && filter.getRoomType().isEmpty()) {
+    		filter.setRoomType(null);
+    	}
+    	if (filter.getRoomType() != null && filter.getRoomType().isBlank()) {
+    	    filter.setRoomType(null);
+    	}
+
+    	if (filter.getFloor() != null && filter.getFloor().isBlank()) {
+    	    filter.setFloor(null);
+    	}
+
+      model.addAttribute("rooms", roomService.search(filter));
+      return "rooms/room-cards";
+    }
+    
+    private void mergeNonNull(Room src, Room dest) {
+
+        // BASIC INFO
+        if (src.getRoomNumber() != null)
+            dest.setRoomNumber(src.getRoomNumber());
+
+        if (src.getRoomType() != null)
+            dest.setRoomType(src.getRoomType());
+
+        if (src.getFloor() != null)
+            dest.setFloor(src.getFloor());
+
+        // PRICING
+        if (src.getBasePrice() != null)
+            dest.setBasePrice(src.getBasePrice());
+
+        // STATUS
+        if (src.getStatus() != null)
+            dest.setStatus(src.getStatus());
+
+        if (src.getIsActive() != null)
+            dest.setIsActive(src.getIsActive());
+
+        // STAY RULES
+        if (src.getMinStay() != null)
+            dest.setMinStay(src.getMinStay());
+
+        if (src.getMaxStay() != null)
+            dest.setMaxStay(src.getMaxStay());
+
+        if (src.getAdvanceBookingDays() != null)
+            dest.setAdvanceBookingDays(src.getAdvanceBookingDays());
+
+        // AVAILABILITY
+        if (src.getAvailableFrom() != null)
+            dest.setAvailableFrom(src.getAvailableFrom());
+
+        if (src.getAvailableTo() != null)
+            dest.setAvailableTo(src.getAvailableTo());
+    }
+
 }

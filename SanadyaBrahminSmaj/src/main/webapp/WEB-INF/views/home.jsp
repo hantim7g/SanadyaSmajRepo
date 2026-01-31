@@ -221,7 +221,7 @@
                                                     <img src="${event.mainImageUrl}" class="d-block w-100"
                                                         alt="${event.title}">
                                                     <div class="carousel-caption-custom">
-                                                        <div class="carousel-title">${event.title}</div>
+                                                        <div  class="carousel-title">${event.title}</div>
                                                         <div class="carousel-subtitle">
                                                             <c:out
                                                                 value="${fn:length(event.content) > 100 ? fn:substring(event.content, 0, 100) : event.content}" />

@@ -55,7 +55,9 @@ public class SecurityConfig {
 
                 /* 🔐 ADMIN ONLY */
                 .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
-
+                .requestMatchers("/rooms/admin").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/rooms/admin/**").hasAuthority("ROLE_ADMIN")
+                
                 /* 🔐 LOGIN REQUIRED (USER / ADMIN) */
                 .requestMatchers(
                         "/user/**",

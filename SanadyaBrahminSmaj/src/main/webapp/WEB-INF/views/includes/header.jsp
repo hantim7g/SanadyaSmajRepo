@@ -380,6 +380,62 @@
 				<li><a class="dropdown-item" href="/admin/testimonials"><i class="fas fa-tasks"></i> प्रशंसापत्र प्रबंधन</a></li>
                </ul>
             </li>
+			<li class="dropdown-submenu dropend">
+			  <a class="dropdown-item dropdown-toggle" href="#">
+			    <i class="fas fa-book"></i> बुकिंग प्रबंधन
+			  </a>
+			  <ul class="dropdown-menu">
+			    <li>
+			      <a class="dropdown-item" href="/admin/bookings">
+			        <i class="fas fa-th-list"></i> सभी बुकिंग
+			      </a>
+			    </li>
+			    <li>
+			      <a class="dropdown-item" href="/admin/bookings/add">
+			        <i class="fas fa-plus-circle"></i> नई बुकिंग
+			      </a>
+			    </li>
+			    <li>
+			      <a class="dropdown-item" href="/admin/bookings/checkin">
+			        <i class="fas fa-sign-in-alt"></i> चेक-इन
+			      </a>
+			    </li>
+			    <li>
+			      <a class="dropdown-item" href="/admin/bookings/checkout">
+			        <i class="fas fa-sign-out-alt"></i> चेक-आउट
+			      </a>
+			    </li>
+			  </ul>
+			</li>
+
+			<li class="dropdown-submenu dropend">
+			  <a class="dropdown-item dropdown-toggle" href="#">
+			    <i class="fas fa-bed"></i> रूम
+			  </a>
+			  <ul class="dropdown-menu">
+			    <li>
+			      <a class="dropdown-item" href="/rooms/admin">
+			        <i class="fas fa-th-list"></i> सभी रूम
+			      </a>
+			    </li>
+			    <li>
+			      <a class="dropdown-item" href="/rooms/admin/add">
+			        <i class="fas fa-plus-circle"></i> नया रूम जोड़ें
+			      </a>
+			    </li>
+			    <li>
+			      <a class="dropdown-item" href="/rooms/admin">
+			        <i class="fas fa-edit"></i> रूम संपादित करें
+			      </a>
+			    </li>
+			    <li>
+			      <a class="dropdown-item" href="/rooms/view">
+			        <i class="fas fa-door-open"></i> उपलब्ध रूम देखें
+			      </a>
+			    </li>
+			  </ul>
+			</li>
+
             <li class="dropdown-submenu dropend">
               <a class="dropdown-item dropdown-toggle" href="#"><i class="fas fa-calendar-plus"></i> कार्यक्रम प्रबंधन</a>
               <ul class="dropdown-menu">

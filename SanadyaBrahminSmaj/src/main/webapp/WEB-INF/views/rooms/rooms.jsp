@@ -60,18 +60,19 @@ body {
 </div>
 
 <div class="col-md-3">
-<label>Room Number</label>
+<label>Room Id</label>
 <input name="roomNumber" class="form-control" placeholder="101 / A1">
 </div>
 
 <div class="col-md-3">
 <label>Room Type</label>
 <select name="roomType" class="form-select">
-<option>Single</option>
-<option>Double</option>
-<option>Deluxe</option>
-<option>Suite</option>
+    <option value="">सभी</option>
+    <option value="ONLY_ROOM">केवल कमरा</option>
+    <option value="HALL">हॉल</option>
+    <option value="COMPLETE_FLOOR">पूरा फ्लोर</option>
 </select>
+
 </div>
 
 <div class="col-md-3">
@@ -89,21 +90,6 @@ body {
 </div>
 
 <!-- CAPACITY -->
-<div class="col-12 mt-3">
-<h5 class="text-primary">Capacity</h5>
-<hr>
-</div>
-
-<div class="col-md-3">
-<label>Max Adults</label>
-<input name="maxAdults" class="form-control" type="number">
-</div>
-
-<div class="col-md-3">
-<label>Max Children</label>
-<input name="maxChildren" class="form-control" type="number">
-</div>
-
 <!-- PRICING -->
 <div class="col-12 mt-3">
 <h5 class="text-primary">Pricing</h5>
@@ -146,25 +132,6 @@ body {
 <input type="date" name="availableTo" class="form-control">
 </div>
 
-<!-- FEATURES -->
-<div class="col-12 mt-3">
-<h5 class="text-primary">Features</h5>
-<hr>
-</div>
-
-<div class="col-md-6">
-<label class="me-3">
-<input type="checkbox" name="gardenView"> Garden View
-</label>
-
-<label class="me-3">
-<input type="checkbox" name="hallRoom"> Hall Room
-</label>
-
-<label>
-<input type="checkbox" name="housekeepingRequired"> Housekeeping Required
-</label>
-</div>
 
 <!-- IMAGES -->
 <div class="col-12 mt-3">
@@ -174,7 +141,12 @@ body {
 
 <div class="col-md-6">
 <label>Upload Images</label>
-<input type="file" name="files" multiple class="form-control">
+<input type="file"
+       name="files[]"
+       multiple
+       accept="image/*"
+       class="form-control">
+
 </div>
 
 <!-- SUBMIT -->
@@ -197,16 +169,16 @@ ${r.roomType} - Room ${r.roomNumber}
 <div class="row">
 <div class="col-md-8">
 <b>Floor:</b> ${r.floor} |
-<b>Price:</b> ₹${r.basePrice} |
+<b>Price:</b> ₹${r.basePrice} |<!--
 <b>Adults:</b> ${r.maxAdults} |
-<b>Children:</b> ${r.maxChildren} <br>
+<b>Children:</b> ${r.maxChildren} <br>-->
 
 <b>Stay:</b> ${r.minStay}-${r.maxStay} days |
 <b>Advance:</b> ${r.advanceBookingDays} days <br>
-
+<!--
 <b>Garden:</b> ${r.gardenView?'Yes':'No'} |
 <b>Hall:</b> ${r.hallRoom?'Yes':'No'} |
-<b>Housekeeping:</b> ${r.housekeepingRequired?'Yes':'No'} <br>
+<b>Housekeeping:</b> ${r.housekeepingRequired?'Yes':'No'} <br>-->
 
 <b>Status:</b>
 <span class="badge bg-${r.status=='AVAILABLE'?'success':'warning'}">
@@ -256,9 +228,22 @@ ${r.status}
 <input id="editMaxChildren" name="maxChildren" class="form-control mb-2">
 
 <select id="editType" name="roomType" class="form-select mb-2">
-<option>Single</option><option>Double</option>
-<option>Deluxe</option><option>Suite</option>
+    <option value="ONLY_ROOM"
+        ${room.roomType=='ONLY_ROOM' ? 'selected' : ''}>
+        केवल कमरा
+    </option>
+
+    <option value="HALL"
+        ${room.roomType=='HALL' ? 'selected' : ''}>
+        हॉल
+    </option>
+
+    <option value="COMPLETE_FLOOR"
+        ${room.roomType=='COMPLETE_FLOOR' ? 'selected' : ''}>
+        पूरा फ्लोर
+    </option>
 </select>
+
 
 <select id="editStatus" name="status" class="form-select mb-2">
 <option value="AVAILABLE">AVAILABLE</option>
@@ -270,7 +255,12 @@ ${r.status}
 <label class="ms-3"><input type="checkbox" id="editHall" name="hallRoom"> Hall</label>
 <label class="ms-3"><input type="checkbox" id="editHouse" name="housekeepingRequired"> Housekeeping</label>
 
-<input type="file" name="files" multiple class="form-control mt-2">
+<input type="file"
+       name="files[]"
+       multiple
+       accept="image/*"
+       class="form-control mt-2">
+
 <button class="btn btnn mt-3">Update</button>
 </form>
 </div>
@@ -286,13 +276,13 @@ function editRoom(id){
     $("#editRoomNumber").val(r.roomNumber);
     $("#editFloor").val(r.floor);
     $("#editPrice").val(r.basePrice);
-    $("#editMaxAdults").val(r.maxAdults);
-    $("#editMaxChildren").val(r.maxChildren);
+ //   $("#editMaxAdults").val(r.maxAdults);
+  //  $("#editMaxChildren").val(r.maxChildren);
     $("#editType").val(r.roomType);
     $("#editStatus").val(r.status);
-    $("#editGarden").prop("checked", r.gardenView);
-    $("#editHall").prop("checked", r.hallRoom);
-    $("#editHouse").prop("checked", r.housekeepingRequired);
+   // $("#editGarden").prop("checked", r.gardenView);
+   // $("#editHall").prop("checked", r.hallRoom);
+    //$("#editHouse").prop("checked", r.housekeepingRequired);
     $("#editModal").modal("show");
   });
 }

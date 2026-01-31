@@ -3,7 +3,8 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <div class="container py-4">
-    <h3 class="text-center mb-4">सदस्यों के विचार</h3>
+	<h4 class="text-center mb-4 text-danger fw-bold" style="margin-bottom: -20px;">
+सदस्यों के विचार</h4>
     
     <c:choose>
         <c:when test="${not empty testimonials}">
@@ -30,7 +31,7 @@
                                     
                                     <div class="testimonial-content flex-grow-1">
                                         <div class="testimonial-header mb-2">
-                                            <h5 class="testimonial-name mb-1">${testimonial.user.fullName}</h5>
+                                            <h5 class=" mb-4 text-danger fw-bold" class="testimonial-name mb-1">${testimonial.user.fullName}</h5>
                                             <p class="testimonial-designation text-muted mb-0">
                                                 <c:choose>
                                                     <c:when test="${not empty testimonial.designation}">
