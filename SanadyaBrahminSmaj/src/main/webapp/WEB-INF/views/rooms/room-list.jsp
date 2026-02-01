@@ -51,11 +51,14 @@ body {
     <!-- Floor -->
     <div class="col-md-2">
       <label class="fw-bold">फ्लोर</label>
-      <input type="text"
-             name="floor"
-             class="form-control"
-             value="${fn:escapeXml(param.floor)}"
-             placeholder="Ground / 1st / 2nd">
+	  <select name="floor" class="form-select">
+	         <option value="">सभी फ्लोर</option>
+	         
+	  	     <option value="ग्राउंड फ्लोर">ग्राउंड फ्लोर</option>
+	  	     <option value="पहला फ्लोर">पहला फ्लोर</option>
+	  	     <option value="दूसरा फ्लोर">दूसरा फ्लोर</option>
+	  	
+	       </select>
     </div>
 
     <!-- Price Range -->

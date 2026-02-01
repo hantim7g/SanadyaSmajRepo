@@ -278,4 +278,10 @@ public class Booking {
 	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
+	public synchronized String getLoginUser() {
+		return LoginUser;
+	}
+	public synchronized void setLoginUser(String loginUser) {
+		LoginUser = loginUser;
+	}
 }

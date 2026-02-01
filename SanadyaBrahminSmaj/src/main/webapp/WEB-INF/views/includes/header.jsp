@@ -346,17 +346,46 @@
           </ul>
         </li>
 
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-            <i class="fas fa-building d-lg-none me-1"></i>हॉल / रूम बुकिंग
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/hall/availability"><i class="fas fa-calendar-check"></i> उपलब्धता जांचें</a></li>
-            <li><a class="dropdown-item" href="/hall/booking-form"><i class="fas fa-edit"></i> बुकिंग फॉर्म</a></li>
-            <li><a class="dropdown-item" href="/hall/rules"><i class="fas fa-list-alt"></i> शुल्क एवं नियम</a></li>
-            <li><a class="dropdown-item" href="/hall/gallery"><i class="fas fa-images"></i> फोटो गैलरी</a></li>
-          </ul>
-        </li>
+		<li class="nav-item dropdown">
+		  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+		    <i class="fas fa-building d-lg-none me-1"></i>हॉल / रूम बुकिंग
+		  </a>
+		  <ul class="dropdown-menu">
+
+		    <!-- PUBLIC -->
+		    <li>
+		      <a class="dropdown-item" href="/rooms/view">
+		        <i class="fas fa-calendar-check"></i> उपलब्धता देखें
+		      </a>
+		    </li>
+
+		    
+
+		    <li>
+		      <a class="dropdown-item" href="/hall/rules">
+		        <i class="fas fa-list-alt"></i> शुल्क एवं नियम
+		      </a>
+		    </li>
+
+		    <li>
+		      <a class="dropdown-item" href="/hall/gallery">
+		        <i class="fas fa-images"></i> फोटो गैलरी
+		      </a>
+		    </li>
+
+		    <!-- MEMBER ONLY -->
+		    <li  id="memberBookingMenu">
+		      <hr class="dropdown-divider">
+		    </li>
+
+		    <li class="d-none" id="memberBookingMenu">
+		      <a class="dropdown-item" href="/member/bookings">
+		        <i class="fas fa-calendar"></i> मेरी बुकिंग
+		      </a>
+		    </li>
+
+		  </ul>
+		</li>
 
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">हमसे संपर्क करें</a>
@@ -385,56 +414,74 @@
 			    <i class="fas fa-book"></i> बुकिंग प्रबंधन
 			  </a>
 			  <ul class="dropdown-menu">
+
 			    <li>
-			      <a class="dropdown-item" href="/admin/bookings">
+			      <a class="dropdown-item" href="/bookings/admin">
 			        <i class="fas fa-th-list"></i> सभी बुकिंग
 			      </a>
 			    </li>
+
 			    <li>
-			      <a class="dropdown-item" href="/admin/bookings/add">
-			        <i class="fas fa-plus-circle"></i> नई बुकिंग
+			      <a class="dropdown-item" href="/bookings/admin?status=CONFIRMED">
+			        <i class="fas fa-check-circle"></i> कन्फर्म बुकिंग
 			      </a>
 			    </li>
+
 			    <li>
-			      <a class="dropdown-item" href="/admin/bookings/checkin">
+			      <a class="dropdown-item" href="/bookings/admin?status=CHECKED_IN">
 			        <i class="fas fa-sign-in-alt"></i> चेक-इन
 			      </a>
 			    </li>
+
 			    <li>
-			      <a class="dropdown-item" href="/admin/bookings/checkout">
+			      <a class="dropdown-item" href="/bookings/admin?status=COMPLETED">
 			        <i class="fas fa-sign-out-alt"></i> चेक-आउट
 			      </a>
 			    </li>
+
+			    <li>
+			      <a class="dropdown-item" href="/bookings/admin?status=CANCELLED">
+			        <i class="fas fa-times-circle"></i> रद्द बुकिंग
+			      </a>
+			    </li>
+
 			  </ul>
 			</li>
 
+
 			<li class="dropdown-submenu dropend">
 			  <a class="dropdown-item dropdown-toggle" href="#">
-			    <i class="fas fa-bed"></i> रूम
+			    <i class="fas fa-bed"></i> रूम प्रबंधन
 			  </a>
 			  <ul class="dropdown-menu">
+
 			    <li>
 			      <a class="dropdown-item" href="/rooms/admin">
 			        <i class="fas fa-th-list"></i> सभी रूम
 			      </a>
 			    </li>
+
 			    <li>
 			      <a class="dropdown-item" href="/rooms/admin/add">
 			        <i class="fas fa-plus-circle"></i> नया रूम जोड़ें
 			      </a>
 			    </li>
+
 			    <li>
-			      <a class="dropdown-item" href="/rooms/admin">
-			        <i class="fas fa-edit"></i> रूम संपादित करें
+			      <a class="dropdown-item" href="/rooms/admin?status=AVAILABLE">
+			        <i class="fas fa-door-open"></i> उपलब्ध रूम
 			      </a>
 			    </li>
+
 			    <li>
-			      <a class="dropdown-item" href="/rooms/view">
-			        <i class="fas fa-door-open"></i> उपलब्ध रूम देखें
+			      <a class="dropdown-item" href="/rooms/admin?status=MAINTENANCE">
+			        <i class="fas fa-tools"></i> मरम्मत में
 			      </a>
 			    </li>
+
 			  </ul>
 			</li>
+
 
             <li class="dropdown-submenu dropend">
               <a class="dropdown-item dropdown-toggle" href="#"><i class="fas fa-calendar-plus"></i> कार्यक्रम प्रबंधन</a>
@@ -443,8 +490,7 @@
                 <li><a class="dropdown-item" href="/admin/event-form"><i class="fas fa-plus-circle"></i> कार्यक्रम जोड़ें</a></li>
               </ul>
             </li>
-            <li><a class="dropdown-item" href="/admin/hall-bookings"><i class="fas fa-hotel"></i> हॉल बुकिंग्स</a></li>
-			
+            
             <li class="dropdown-submenu dropend">
               <a class="dropdown-item dropdown-toggle" href="#"><i class="fas fa-ring"></i> वैवाहिक सुविधा प्रबंधन</a>
               <ul class="dropdown-menu">

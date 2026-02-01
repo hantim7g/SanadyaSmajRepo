@@ -255,51 +255,92 @@
 	</head>
 	<body>
 		<div class="container my-4">
-		  <h3 class="text-center mb-3">🏨 उपलब्ध रूम</h3>
+		  <h3 class="text-center  page-title mb-3">🏨 उपलब्ध रूम/हॉल/फ्लोर</h3>
 
 		  <div class="row g-4">
-		    <c:forEach items="${rooms}" var="r">
-		      <div class="col-md-4">
-		        <div class="card shadow-sm h-100">
+			<c:forEach items="${rooms}" var="r">
+			  <div class="col-md-4">
+			    <div class="room-card position-relative h-100">
 
-		          <!-- Room Image -->
-		          <img src="/images/${r.images[0].imageUrl}"
-		               class="card-img-top"
-		               alt="रूम छवि">
+			      <!-- PRICE -->
+			      <div class="price-badge">
+			        ₹${r.basePrice} / रात
+			      </div>
 
-		          <div class="card-body">
+			      <!-- FORM START -->
+			      <form method="post" action="/bookings/add">
 
-		            <!-- Room Type & Number -->
-		            <h5 class="card-title">
-		              रूम प्रकार : ${r.roomTypeLabel}
-		            </h5>
+			        <!-- IMAGE -->
+			        <img src="/images/${r.images[0].imageUrl}"
+			             alt="रूम छवि">
 
-		            <p class="mb-1">
-		              <strong>रूम संख्या :</strong> ${r.roomNumber}
-		            </p>
+			        <div class="p-3">
 
-		            <p class="mb-1">
-		              <strong>फ्लोर :</strong> ${r.floorLabel}
-		            </p>
+			          <h5 class="fw-bold mb-1">
+			            ${r.roomTypeLabel}
+			          </h5>
 
-		            <p class="mb-2">
-		              <strong>मूल्य :</strong> ₹${r.basePrice} / रात
-		            </p>
+			          <p class="mb-1">
+			            <strong>रूम:</strong> ${r.roomNumber}
+			          </p>
 
-		            <p class="mb-2">
-		              <strong>स्थिति :</strong> ${r.statusLabel}
-		            </p>
+			          <p class="mb-1">
+			            <strong>फ्लोर:</strong> ${r.floorLabel}
+			          </p>
 
-		            <button class="btn btn-success w-100">
-		              🛏️ बुक करें
-		            </button>
+			          <p class="mb-2">
+			            <strong>स्थिति:</strong> ${r.statusLabel}
+			          </p>
 
-		          </div>
-		        </div>
-		      </div>
-		    </c:forEach>
+			          <!-- ===== DATES FROM SEARCH FORM ===== -->
+			          <input type="hidden" class='checkInDate'id="checkInDate" name="checkInDate"
+			                 value="${param.fromDate}">
+			          <input type="hidden" class='checkOutDate' id="checkOutDate" name="checkOutDate"
+			                 value="${param.toDate}">
+
+			          <!-- ROOM ID -->
+			          <input type="hidden" name="roomId" value="${r.id}">
+
+			          <button type="submit"
+			                  class="btn btn-book w-100 mt-2">
+			            🛏️ बुक करें
+			          </button>
+
+			        </div>
+			      </form>
+			      <!-- FORM END -->
+
+			    </div>
+			  </div>
+			</c:forEach>
+
 		  </div>
 		</div>
 
 	</body>
+	<script>
+	function bookRoom(roomId, btn) {
+
+	  const card = btn.closest('.card-body');
+
+	  const checkIn =$('#fromDate').val();
+	  const checkOut = $('#toDate').val();
+	  $('#toDate').val();
+	  $('#toDate').val();
+
+	  if (!checkIn || !checkOut) {
+	    bootbox.alert("कृपया चेक-इन और चेक-आउट तिथि चुनें");
+	    return;
+	  }
+
+	  const url =
+	    "/bookings/add"
+	    + "?roomId=" + roomId
+	    + "&checkInDate=" + checkIn
+	    + "&checkOutDate=" + checkOut;
+
+	  window.location.href = url;
+	}
+	</script>
+
 	</html>

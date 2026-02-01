@@ -77,8 +77,14 @@ body {
 
 <div class="col-md-3">
 <label>Floor</label>
-<input name="floor" class="form-control" placeholder="1st / 2nd">
-</div>
+<select name="floor" class="form-select">
+       <option value="">सभी फ्लोर</option>
+       
+	     <option value="ग्राउंड फ्लोर">ग्राउंड फ्लोर</option>
+	     <option value="पहला फ्लोर">पहला फ्लोर</option>
+	     <option value="दूसरा फ्लोर">दूसरा फ्लोर</option>
+	
+     </select></div>
 
 <div class="col-md-3">
 <label>Status</label>

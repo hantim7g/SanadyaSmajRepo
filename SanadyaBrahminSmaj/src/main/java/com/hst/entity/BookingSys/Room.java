@@ -285,13 +285,13 @@ public class Room {
 	    if (floor == null) return "";
 
 	    switch (floor) {
-	        case "Ground":
+	        case "ग्राउंड फ्लोर":
 	            return "ग्राउंड फ्लोर";
-	        case "1st":
+	        case "पहला फ्लोर":
 	            return "पहला फ्लोर";
-	        case "2nd":
+	        case "दूसरा फ्लोर":
 	            return "दूसरा फ्लोर";
-	        case "3rd":
+	        case "तीसरा फ्लोर":
 	            return "तीसरा फ्लोर";
 	        default:
 	            return floor;

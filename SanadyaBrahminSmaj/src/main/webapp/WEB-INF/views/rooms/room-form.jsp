@@ -72,9 +72,14 @@ body {
   <form:errors path="roomNumber" cssClass="error"/>
 </div>
 
+
 <div class="col-md-3">
   <label>फ्लोर</label>
-  <form:input path="floor" class="form-control"/>
+  <form:select path="floor" class="form-select">
+      <form:option value="ग्राउंड फ्लोर">ग्राउंड फ्लोर</form:option>
+      <form:option value="पहला फ्लोर">पहला फ्लोर</form:option>
+      <form:option value="दूसरा फ्लोर">दूसरा फ्लोर</form:option>
+  </form:select>
   <form:errors path="floor" cssClass="error"/>
 </div>
 

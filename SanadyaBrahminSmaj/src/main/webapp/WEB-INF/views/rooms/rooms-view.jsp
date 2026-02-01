@@ -114,7 +114,7 @@ body {
 <body>
 <div class="container main-width my-4">
 
-<h3 class="text-center mb-4 page-title">🔍 रूम खोजें</h3>
+<h3 class="text-center mb-4 page-title">🔍 रूम/हॉल/फ्लोर खोजें</h3>
 
 <!-- ================= FILTER FORM ================= -->
 <form id="roomFilterForm" class="filter-card mb-4">
@@ -140,22 +140,23 @@ body {
 
 	<div class="col-md-2 col-sm-6">
       <label class="fw-bold">आगमन तिथि</label>
-      <input type="date" name="fromDate" class="form-control">
+      <input type="date" id="fromDate" name="fromDate" class="form-control">
     </div>
 
 	<div class="col-md-2 col-sm-6">
       <label class="fw-bold">प्रस्थान तिथि</label>
-      <input type="date" name="toDate" class="form-control">
+      <input type="date" id="toDate" name="toDate" class="form-control">
     </div>
 
     <div class="col-md-2">
       <label class="fw-bold">फ्लोर</label>
       <select name="floor" class="form-select">
         <option value="">सभी फ्लोर</option>
-        <option value="Ground">ग्राउंड फ्लोर</option>
-        <option value="1st">पहला फ्लोर</option>
-        <option value="2nd">दूसरा फ्लोर</option>
-        <option value="3rd">तीसरा फ्लोर</option>
+        
+		     <option value="ग्राउंड फ्लोर">ग्राउंड फ्लोर</option>
+		     <option value="पहला फ्लोर">पहला फ्लोर</option>
+		     <option value="दूसरा फ्लोर">दूसरा फ्लोर</option>
+		
       </select>
     </div>
 
@@ -184,6 +185,55 @@ body {
 </div>
 
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const fromDate = document.getElementById("fromDate");
+  const toDate   = document.getElementById("toDate");
+
+  if (!fromDate || !toDate) return;
+
+  
+  const etc = new Date();
+    etc.setHours(0,0,0,0);
+    const etcStr = etc.toISOString().split("T")[0];
+  // Today
+  const today = new Date(etc);
+  today.setDate(etc.getDate() + 1);
+  const todayStr = today.toISOString().split("T")[0];
+//etc
+
+  // Tomorrow
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split("T")[0];
+
+  // Default values
+  fromDate.value = todayStr;
+  toDate.value   = tomorrowStr;
+
+  // Disable past dates
+  fromDate.min = todayStr;
+  toDate.min   = tomorrowStr;
+
+  // When fromDate changes
+  fromDate.addEventListener("change", () => {
+
+    // toDate must always be after fromDate
+    if (!toDate.value || toDate.value <= fromDate.value) {
+      const nextDay = new Date(fromDate.value);
+      nextDay.setDate(nextDay.getDate() + 1);
+      toDate.value = nextDay.toISOString().split("T")[0];
+    }
+
+    // Update min for toDate
+    toDate.min = toDate.value;
+
+  });
+
+});
+</script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -222,7 +272,6 @@ function loadRooms() {
     });
 }
 </script>
-
 </body>
 </html>
 
