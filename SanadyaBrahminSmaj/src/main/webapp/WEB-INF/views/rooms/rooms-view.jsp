@@ -140,12 +140,13 @@ body {
 
 	<div class="col-md-2 col-sm-6">
       <label class="fw-bold">आगमन तिथि</label>
-      <input type="date" id="fromDate" name="fromDate" class="form-control">
+
+	  <input type="date" id="fromDate" name="fromDate" class="form-control" required>
     </div>
 
 	<div class="col-md-2 col-sm-6">
       <label class="fw-bold">प्रस्थान तिथि</label>
-      <input type="date" id="toDate" name="toDate" class="form-control">
+      <input type="date" id="toDate" name="toDate" class="form-control" required>
     </div>
 
     <div class="col-md-2">
@@ -166,6 +167,11 @@ body {
 
   </div>
 </form>
+<div id="dateErrorMsg"
+     class="text-center mt-2"
+     style="display:none; color:#b00020; font-weight:700;">
+  ⚠️ कृपया आगमन एवं प्रस्थान तिथि चुनें
+</div>
 
 <!-- ================= RESULT ================= -->
 <div id="skeletonLoader" class="row g-4" style="display:none;">
@@ -185,93 +191,101 @@ body {
 </div>
 
 </div>
-
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-
-  const fromDate = document.getElementById("fromDate");
-  const toDate   = document.getElementById("toDate");
-
-  if (!fromDate || !toDate) return;
-
-  
-  const etc = new Date();
-    etc.setHours(0,0,0,0);
-    const etcStr = etc.toISOString().split("T")[0];
-  // Today
-  const today = new Date(etc);
-  today.setDate(etc.getDate() + 1);
-  const todayStr = today.toISOString().split("T")[0];
-//etc
-
-  // Tomorrow
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
-  const tomorrowStr = tomorrow.toISOString().split("T")[0];
-
-  // Default values
-  fromDate.value = todayStr;
-  toDate.value   = tomorrowStr;
-
-  // Disable past dates
-  fromDate.min = todayStr;
-  toDate.min   = tomorrowStr;
-
-  // When fromDate changes
-  fromDate.addEventListener("change", () => {
-
-    // toDate must always be after fromDate
-    if (!toDate.value || toDate.value <= fromDate.value) {
-      const nextDay = new Date(fromDate.value);
-      nextDay.setDate(nextDay.getDate() + 1);
-      toDate.value = nextDay.toISOString().split("T")[0];
-    }
-
-    // Update min for toDate
-    toDate.min = toDate.value;
-
-  });
-
-});
-</script>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-
+  const fromDateInput = document.getElementById("fromDate");
+  const toDateInput = document.getElementById("toDate");
   const form = document.getElementById("roomFilterForm");
 
-  form.querySelectorAll("select, input").forEach(el => {
+  // 1. Setup Initial Dates (Today + 1 and Today + 2)
+  const today = new Date();
+  
+  // Arrival: Tomorrow
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() );
+  const tomorrowStr = tomorrow.toISOString().split("T")[0];
+
+  // Departure: Day after Tomorrow
+  const dayAfter = new Date(tomorrow);
+  dayAfter.setDate(tomorrow.getDate() + 1);
+  const dayAfterStr = dayAfter.toISOString().split("T")[0];
+
+  // Apply to inputs
+  fromDateInput.value = tomorrowStr;
+  fromDateInput.min = tomorrowStr;
+  
+  toDateInput.value = dayAfterStr;
+  toDateInput.min = dayAfterStr;
+
+  // 2. Logic: When Arrival Date changes
+  fromDateInput.addEventListener("change", () => {
+    const selectedArrival = new Date(fromDateInput.value);
+    
+    // Departure must be at least one day after Arrival
+    const minDeparture = new Date(selectedArrival);
+    minDeparture.setDate(selectedArrival.getDate() + 1);
+    const minDepartureStr = minDeparture.toISOString().split("T")[0];
+
+    toDateInput.min = minDepartureStr;
+
+    // If current Departure is before or equal to new Arrival, reset it
+    if (toDateInput.value <= fromDateInput.value) {
+      toDateInput.value = minDepartureStr;
+    }
+    
+    loadRooms(); // Trigger refresh
+  });
+
+  // 3. Setup Filter Listeners
+  form.querySelectorAll("select, input:not([type='date'])").forEach(el => {
     el.addEventListener("change", loadRooms);
     el.addEventListener("keyup", loadRooms);
   });
+  
+  // Departure change also triggers refresh
+  toDateInput.addEventListener("change", loadRooms);
 
+  // Initial Load
   loadRooms();
 });
 
 function loadRooms() {
+  const fromDate = document.getElementById("fromDate");
+  const toDate   = document.getElementById("toDate");
+  const errorMsg = document.getElementById("dateErrorMsg");
+  const container = document.getElementById("roomContainer");
+  const skeleton = document.getElementById("skeletonLoader");
+  const noRooms = document.getElementById("noRoomsMsg");
+
+  if (!fromDate.value || !toDate.value) {
+    errorMsg.style.display = "block";
+    container.innerHTML = "";
+    return;
+  }
+
+  errorMsg.style.display = "none";
+  noRooms.style.display = "none";
+  skeleton.style.display = "flex";
+  container.innerHTML = "";
+
   const form = document.getElementById("roomFilterForm");
   const params = new URLSearchParams(new FormData(form)).toString();
-
-  document.getElementById("roomContainer").innerHTML = "";
-  document.getElementById("noRoomsMsg").style.display = "none";
-  document.getElementById("skeletonLoader").style.display = "flex";
 
   fetch("/rooms/filter?" + params)
     .then(res => res.text())
     .then(html => {
-      document.getElementById("skeletonLoader").style.display = "none";
-      document.getElementById("roomContainer").innerHTML = html;
-
+      skeleton.style.display = "none";
+      container.innerHTML = html;
       if (!html.trim()) {
-        document.getElementById("noRoomsMsg").style.display = "block";
+        noRooms.style.display = "block";
       }
     })
     .catch(err => {
-      document.getElementById("skeletonLoader").style.display = "none";
-      console.error(err);
+      skeleton.style.display = "none";
+      console.error("Fetch error:", err);
     });
-}
-</script>
+}</script>
+
 </body>
 </html>
 

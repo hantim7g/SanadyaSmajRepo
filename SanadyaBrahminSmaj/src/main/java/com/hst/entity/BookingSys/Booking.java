@@ -4,15 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "bookings")
@@ -22,266 +15,417 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String bookingCode; // HTL2026-0001
+    private String bookingCode;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Room room;
 
-    // Primary guest
+    /* ================= GUEST ================= */
+    @NotBlank(message = "अतिथि का नाम अनिवार्य है")
     private String guestName;
-    private String phone;
-    private String email;
-    private String LoginUser;
-    // Walk-in or online
-    private Boolean isWalkIn;
 
-    // Dates
+    @NotBlank(message = "मोबाइल नंबर अनिवार्य है")
+    @Pattern(regexp = "^[6-9][0-9]{9}$", message = "मान्य मोबाइल नंबर दर्ज करें")
+    private String phone;
+
+    @Email(message = "मान्य ईमेल दर्ज करें")
+    private String email;
+
+    /* ================= LOGIN USER ================= */
+    @NotBlank(message = "लॉगिन उपयोगकर्ता मोबाइल अनिवार्य है")
+    @Pattern(regexp = "^[6-9][0-9]{9}$", message = "मान्य मोबाइल नंबर दर्ज करें")
+    private String loginUserMobile;
+
+    private Boolean isWalkIn = false;
+
+    /* ================= DATES ================= */
+    @NotNull(message = "चेक-इन तिथि अनिवार्य है")
     private LocalDate checkInDate;
+
+    @NotNull(message = "चेक-आउट तिथि अनिवार्य है")
     private LocalDate checkOutDate;
+
     private LocalDateTime actualCheckIn;
     private LocalDateTime actualCheckOut;
 
+    /* ================= GUEST COUNT ================= */
+    @NotNull(message = "वयस्कों की संख्या अनिवार्य है")
+    @Min(value = 1, message = "कम से कम 1 वयस्क होना चाहिए")
     private Integer adults;
+
+    @Min(value = 0)
     private Integer children;
 
-    // Booking status
+    /* ================= STATUS ================= */
     @Enumerated(EnumType.STRING)
     private BookingStatus status;
 
-    // Pricing
+    /* ================= PRICING ================= */
+    @NotNull
     private BigDecimal roomPrice;
-    private BigDecimal discountAmount;
-    private BigDecimal taxAmount;
+
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+    private BigDecimal taxAmount = BigDecimal.ZERO;
+
+    @NotNull
     private BigDecimal totalAmount;
 
-    // Payment
-    private BigDecimal paidAmount;
+    private BigDecimal paidAmount = BigDecimal.ZERO;
     private BigDecimal balanceAmount;
-    private Boolean payAtHotel;
 
-    // GST / compliance
-    private String gstNumber;
+    private Boolean payAtHotel = true;
+
+    /* ================= ADDRESS ================= */
+    @NotBlank(message = "पता अनिवार्य है")
+    private String address;
+
+    @NotBlank(message = "शहर अनिवार्य है")
+    private String city;
+
+    @NotBlank(message = "राज्य अनिवार्य है")
+    private String state;
+
+    @NotBlank(message = "पिन कोड अनिवार्य है")
+    @Pattern(regexp = "^[0-9]{6}$", message = "मान्य पिन कोड दर्ज करें")
+    private String pinCode;
+
+    @NotBlank(message = "राष्ट्रीयता अनिवार्य है")
+    private String nationality = "भारतीय";
+
+    /* ================= EMERGENCY ================= */
+    @NotBlank(message = "आपातकालीन संपर्क नाम अनिवार्य है")
+    private String emergencyContactName;
+
+    @NotBlank(message = "आपातकालीन मोबाइल अनिवार्य है")
+    @Pattern(regexp = "^[6-9][0-9]{9}$", message = "मान्य मोबाइल नंबर दर्ज करें")
+    private String emergencyContactPhone;
+
+    /* ================= ID PROOF ================= */
+    @NotBlank(message = "ID प्रूफ प्रकार अनिवार्य है")
     private String idProofType;
+
+    @NotBlank(message = "ID प्रूफ नंबर अनिवार्य है")
     private String idProofNumber;
+
+    @NotBlank(message = "ID प्रूफ फ़ाइल अनिवार्य है")
     private String idProofFileUrl;
 
-    // Early / Late
-    private Boolean earlyCheckIn;
-    private Boolean lateCheckOut;
+    /* ================= OTHER ================= */
+    @Size(max = 500, message = "टिप्पणी 500 अक्षरों से अधिक नहीं हो सकती")
+    private String remarks;
 
-    // Cancellation
-    private BigDecimal cancellationCharge;
-    private Boolean isNoShow;
-
-    // Source
-    private String bookingSource; // WEBSITE, WALKIN, ADMIN
-
-    // Audit
-    private String createdBy; // admin/reception username
+    private String bookingSource = "WEBSITE";
+    private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-	public Long getId() {
+
+    @PrePersist
+    public void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+	public synchronized Long getId() {
 		return id;
 	}
-	public void setId(Long id) {
+
+	public synchronized void setId(Long id) {
 		this.id = id;
 	}
-	public String getBookingCode() {
+
+	public synchronized String getBookingCode() {
 		return bookingCode;
 	}
-	public void setBookingCode(String bookingCode) {
+
+	public synchronized void setBookingCode(String bookingCode) {
 		this.bookingCode = bookingCode;
 	}
-	public Room getRoom() {
+
+	public synchronized Room getRoom() {
 		return room;
 	}
-	public void setRoom(Room room) {
+
+	public synchronized void setRoom(Room room) {
 		this.room = room;
 	}
-	public String getGuestName() {
+
+	public synchronized String getGuestName() {
 		return guestName;
 	}
-	public void setGuestName(String guestName) {
+
+	public synchronized void setGuestName(String guestName) {
 		this.guestName = guestName;
 	}
-	public String getPhone() {
+
+	public synchronized String getPhone() {
 		return phone;
 	}
-	public void setPhone(String phone) {
+
+	public synchronized void setPhone(String phone) {
 		this.phone = phone;
 	}
-	public String getEmail() {
+
+	public synchronized String getEmail() {
 		return email;
 	}
-	public void setEmail(String email) {
+
+	public synchronized void setEmail(String email) {
 		this.email = email;
 	}
-	public Boolean getIsWalkIn() {
+
+	public synchronized String getLoginUserMobile() {
+		return loginUserMobile;
+	}
+
+	public synchronized void setLoginUserMobile(String loginUserMobile) {
+		this.loginUserMobile = loginUserMobile;
+	}
+
+	public synchronized Boolean getIsWalkIn() {
 		return isWalkIn;
 	}
-	public void setIsWalkIn(Boolean isWalkIn) {
+
+	public synchronized void setIsWalkIn(Boolean isWalkIn) {
 		this.isWalkIn = isWalkIn;
 	}
-	public LocalDate getCheckInDate() {
+
+	public synchronized LocalDate getCheckInDate() {
 		return checkInDate;
 	}
-	public void setCheckInDate(LocalDate checkInDate) {
+
+	public synchronized void setCheckInDate(LocalDate checkInDate) {
 		this.checkInDate = checkInDate;
 	}
-	public LocalDate getCheckOutDate() {
+
+	public synchronized LocalDate getCheckOutDate() {
 		return checkOutDate;
 	}
-	public void setCheckOutDate(LocalDate checkOutDate) {
+
+	public synchronized void setCheckOutDate(LocalDate checkOutDate) {
 		this.checkOutDate = checkOutDate;
 	}
-	public LocalDateTime getActualCheckIn() {
+
+	public synchronized LocalDateTime getActualCheckIn() {
 		return actualCheckIn;
 	}
-	public void setActualCheckIn(LocalDateTime actualCheckIn) {
+
+	public synchronized void setActualCheckIn(LocalDateTime actualCheckIn) {
 		this.actualCheckIn = actualCheckIn;
 	}
-	public LocalDateTime getActualCheckOut() {
+
+	public synchronized LocalDateTime getActualCheckOut() {
 		return actualCheckOut;
 	}
-	public void setActualCheckOut(LocalDateTime actualCheckOut) {
+
+	public synchronized void setActualCheckOut(LocalDateTime actualCheckOut) {
 		this.actualCheckOut = actualCheckOut;
 	}
-	public Integer getAdults() {
+
+	public synchronized Integer getAdults() {
 		return adults;
 	}
-	public void setAdults(Integer adults) {
+
+	public synchronized void setAdults(Integer adults) {
 		this.adults = adults;
 	}
-	public Integer getChildren() {
+
+	public synchronized Integer getChildren() {
 		return children;
 	}
-	public void setChildren(Integer children) {
+
+	public synchronized void setChildren(Integer children) {
 		this.children = children;
 	}
-	public BookingStatus getStatus() {
+
+	public synchronized BookingStatus getStatus() {
 		return status;
 	}
-	public void setStatus(BookingStatus status) {
+
+	public synchronized void setStatus(BookingStatus status) {
 		this.status = status;
 	}
-	public BigDecimal getRoomPrice() {
+
+	public synchronized BigDecimal getRoomPrice() {
 		return roomPrice;
 	}
-	public void setRoomPrice(BigDecimal roomPrice) {
+
+	public synchronized void setRoomPrice(BigDecimal roomPrice) {
 		this.roomPrice = roomPrice;
 	}
-	public BigDecimal getDiscountAmount() {
+
+	public synchronized BigDecimal getDiscountAmount() {
 		return discountAmount;
 	}
-	public void setDiscountAmount(BigDecimal discountAmount) {
+
+	public synchronized void setDiscountAmount(BigDecimal discountAmount) {
 		this.discountAmount = discountAmount;
 	}
-	public BigDecimal getTaxAmount() {
+
+	public synchronized BigDecimal getTaxAmount() {
 		return taxAmount;
 	}
-	public void setTaxAmount(BigDecimal taxAmount) {
+
+	public synchronized void setTaxAmount(BigDecimal taxAmount) {
 		this.taxAmount = taxAmount;
 	}
-	public BigDecimal getTotalAmount() {
+
+	public synchronized BigDecimal getTotalAmount() {
 		return totalAmount;
 	}
-	public void setTotalAmount(BigDecimal totalAmount) {
+
+	public synchronized void setTotalAmount(BigDecimal totalAmount) {
 		this.totalAmount = totalAmount;
 	}
-	public BigDecimal getPaidAmount() {
+
+	public synchronized BigDecimal getPaidAmount() {
 		return paidAmount;
 	}
-	public void setPaidAmount(BigDecimal paidAmount) {
+
+	public synchronized void setPaidAmount(BigDecimal paidAmount) {
 		this.paidAmount = paidAmount;
 	}
-	public BigDecimal getBalanceAmount() {
+
+	public synchronized BigDecimal getBalanceAmount() {
 		return balanceAmount;
 	}
-	public void setBalanceAmount(BigDecimal balanceAmount) {
+
+	public synchronized void setBalanceAmount(BigDecimal balanceAmount) {
 		this.balanceAmount = balanceAmount;
 	}
-	public Boolean getPayAtHotel() {
+
+	public synchronized Boolean getPayAtHotel() {
 		return payAtHotel;
 	}
-	public void setPayAtHotel(Boolean payAtHotel) {
+
+	public synchronized void setPayAtHotel(Boolean payAtHotel) {
 		this.payAtHotel = payAtHotel;
 	}
-	public String getGstNumber() {
-		return gstNumber;
+
+	public synchronized String getAddress() {
+		return address;
 	}
-	public void setGstNumber(String gstNumber) {
-		this.gstNumber = gstNumber;
+
+	public synchronized void setAddress(String address) {
+		this.address = address;
 	}
-	public String getIdProofType() {
+
+	public synchronized String getCity() {
+		return city;
+	}
+
+	public synchronized void setCity(String city) {
+		this.city = city;
+	}
+
+	public synchronized String getState() {
+		return state;
+	}
+
+	public synchronized void setState(String state) {
+		this.state = state;
+	}
+
+	public synchronized String getPinCode() {
+		return pinCode;
+	}
+
+	public synchronized void setPinCode(String pinCode) {
+		this.pinCode = pinCode;
+	}
+
+	public synchronized String getNationality() {
+		return nationality;
+	}
+
+	public synchronized void setNationality(String nationality) {
+		this.nationality = nationality;
+	}
+
+	public synchronized String getEmergencyContactName() {
+		return emergencyContactName;
+	}
+
+	public synchronized void setEmergencyContactName(String emergencyContactName) {
+		this.emergencyContactName = emergencyContactName;
+	}
+
+	public synchronized String getEmergencyContactPhone() {
+		return emergencyContactPhone;
+	}
+
+	public synchronized void setEmergencyContactPhone(String emergencyContactPhone) {
+		this.emergencyContactPhone = emergencyContactPhone;
+	}
+
+	public synchronized String getIdProofType() {
 		return idProofType;
 	}
-	public void setIdProofType(String idProofType) {
+
+	public synchronized void setIdProofType(String idProofType) {
 		this.idProofType = idProofType;
 	}
-	public String getIdProofNumber() {
+
+	public synchronized String getIdProofNumber() {
 		return idProofNumber;
 	}
-	public void setIdProofNumber(String idProofNumber) {
+
+	public synchronized void setIdProofNumber(String idProofNumber) {
 		this.idProofNumber = idProofNumber;
 	}
-	public String getIdProofFileUrl() {
+
+	public synchronized String getIdProofFileUrl() {
 		return idProofFileUrl;
 	}
-	public void setIdProofFileUrl(String idProofFileUrl) {
+
+	public synchronized void setIdProofFileUrl(String idProofFileUrl) {
 		this.idProofFileUrl = idProofFileUrl;
 	}
-	public Boolean getEarlyCheckIn() {
-		return earlyCheckIn;
+
+	public synchronized String getRemarks() {
+		return remarks;
 	}
-	public void setEarlyCheckIn(Boolean earlyCheckIn) {
-		this.earlyCheckIn = earlyCheckIn;
+
+	public synchronized void setRemarks(String remarks) {
+		this.remarks = remarks;
 	}
-	public Boolean getLateCheckOut() {
-		return lateCheckOut;
-	}
-	public void setLateCheckOut(Boolean lateCheckOut) {
-		this.lateCheckOut = lateCheckOut;
-	}
-	public BigDecimal getCancellationCharge() {
-		return cancellationCharge;
-	}
-	public void setCancellationCharge(BigDecimal cancellationCharge) {
-		this.cancellationCharge = cancellationCharge;
-	}
-	public Boolean getIsNoShow() {
-		return isNoShow;
-	}
-	public void setIsNoShow(Boolean isNoShow) {
-		this.isNoShow = isNoShow;
-	}
-	public String getBookingSource() {
+
+	public synchronized String getBookingSource() {
 		return bookingSource;
 	}
-	public void setBookingSource(String bookingSource) {
+
+	public synchronized void setBookingSource(String bookingSource) {
 		this.bookingSource = bookingSource;
 	}
-	public String getCreatedBy() {
+
+	public synchronized String getCreatedBy() {
 		return createdBy;
 	}
-	public void setCreatedBy(String createdBy) {
+
+	public synchronized void setCreatedBy(String createdBy) {
 		this.createdBy = createdBy;
 	}
-	public LocalDateTime getCreatedAt() {
+
+	public synchronized LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
-	public void setCreatedAt(LocalDateTime createdAt) {
+
+	public synchronized void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
-	public LocalDateTime getUpdatedAt() {
+
+	public synchronized LocalDateTime getUpdatedAt() {
 		return updatedAt;
 	}
-	public void setUpdatedAt(LocalDateTime updatedAt) {
+
+	public synchronized void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-	public synchronized String getLoginUser() {
-		return LoginUser;
-	}
-	public synchronized void setLoginUser(String loginUser) {
-		LoginUser = loginUser;
-	}
+
+    /* ===== GETTERS / SETTERS ===== */
+    // 👉 Generate via IDE (no custom logic needed)
 }

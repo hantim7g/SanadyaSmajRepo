@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.hst.dto.RoomFilterDTO;
+import com.hst.entity.BookingSys.BookingStatus;
 import com.hst.entity.BookingSys.Room;
 import com.hst.entity.BookingSys.RoomImage;
 import com.hst.entity.BookingSys.RoomStatus;
@@ -60,60 +61,39 @@ public class RoomService {
     }
     public List<Room> search(RoomFilterDTO f) {
 
+        if (f.getFromDate() != null && f.getToDate() != null) {
+        	return repo.findAvailableRoomsWithStrictFloorRule(
+        	        f.getFromDate(),
+        	        f.getToDate(),
+        	        RoomStatus.AVAILABLE,
+        	        List.of(
+        	            BookingStatus.CONFIRMED,
+        	            BookingStatus.CHECKED_IN
+        	        )
+        	);
+
+            
+        }
+
+        // fallback (no date filter)
         return repo.findAll((root, query, cb) -> {
 
             List<Predicate> predicates = new ArrayList<>();
 
-            // ===== DEFAULT / MANDATORY FILTERS =====
             predicates.add(cb.isTrue(root.get("isActive")));
             predicates.add(cb.equal(root.get("status"), RoomStatus.AVAILABLE));
 
-            // ===== ROOM TYPE =====
-            if (f.getRoomType() != null && !f.getRoomType().isBlank()) {
+            if (f.getRoomType() != null)
                 predicates.add(cb.equal(root.get("roomType"), f.getRoomType()));
-            }
 
-            // ===== FLOOR =====
-            if (f.getFloor() != null && !f.getFloor().isBlank()) {
+            if (f.getFloor() != null)
                 predicates.add(cb.equal(root.get("floor"), f.getFloor()));
-            }
 
-            // ===== PRICE RANGE =====
-            if (f.getMinPrice() != null) {
+            if (f.getMinPrice() != null)
                 predicates.add(cb.ge(root.get("basePrice"), f.getMinPrice()));
-            }
 
-            if (f.getMaxPrice() != null) {
+            if (f.getMaxPrice() != null)
                 predicates.add(cb.le(root.get("basePrice"), f.getMaxPrice()));
-            }
-
-            // ===== AVAILABILITY DATE LOGIC =====
-            if (f.getFromDate() != null) {
-                predicates.add(
-                    cb.lessThanOrEqualTo(root.get("availableFrom"), f.getFromDate())
-                );
-            }
-
-            if (f.getToDate() != null) {
-                predicates.add(
-                    cb.greaterThanOrEqualTo(root.get("availableTo"), f.getToDate())
-                );
-            }
-            if (f.getStatus() != null) {
-                
-                    predicates.add(cb.equal(root.get("status"), f.getStatus()));
-                
-            }
-            
-            else {
-
-                 predicates.add(cb.equal(root.get("status"), RoomStatus.AVAILABLE));
-
-            }
-            if (f.getIsActive() != null) {
-              	 predicates.add(cb.equal(root.get("isActive"),f.getIsActive()));
-            }else
-           	 predicates.add(cb.isTrue(root.get("isActive")));
 
             return cb.and(predicates.toArray(new Predicate[0]));
         });

@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.*;
 
 @Controller
@@ -158,11 +159,35 @@ public class RoomController {
     // User view
     @GetMapping("/view")
     public String viewRooms(Model model) {
-        model.addAttribute("rooms", roomService.getActive());
+    	RoomFilterDTO filter=new RoomFilterDTO();
+	
+    	filter.setFromDate(LocalDate.now());
+    	filter.setToDate(LocalDate.now().plusDays(1));
+		
+
+    	
+    	if (filter.getFromDate() == null || filter.getToDate() == null) {
+    	    return "rooms/room-cards"; // empty
+    	}
+    	if(filter!=null &&filter.getRoomType()!=null && filter.getRoomType().isEmpty()) {
+    		filter.setRoomType(null);
+    	}
+    	if (filter.getRoomType() != null && filter.getRoomType().isBlank()) {
+    	    filter.setRoomType(null);
+    	}
+
+    	if (filter.getFloor() != null && filter.getFloor().isBlank()) {
+    	    filter.setFloor(null);
+    	}
+
+      model.addAttribute("rooms", roomService.search(filter));
         return "rooms/rooms-view";
     }
     @GetMapping("/filter")
     public String filter(RoomFilterDTO filter, Model model) {
+    	if (filter.getFromDate() == null || filter.getToDate() == null) {
+    	    return "rooms/room-cards"; // empty
+    	}
     	if(filter!=null &&filter.getRoomType()!=null && filter.getRoomType().isEmpty()) {
     		filter.setRoomType(null);
     	}
