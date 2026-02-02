@@ -188,7 +188,7 @@ body{background:#fffaf4;font-family:'Segoe UI','Noto Sans Devanagari',sans-serif
 
     <!-- INVOICE -->
     <c:if test="${b.status=='CHECKED_IN' || b.status=='COMPLETED'}">
-      <a href="/bookings/admin/invoice/${b.id}"
+      <a href="/bookings/admin/invoice/pdf/${b.id}"
          class="btn btn-secondary btn-action"
          title="इनवॉइस">
          🧾

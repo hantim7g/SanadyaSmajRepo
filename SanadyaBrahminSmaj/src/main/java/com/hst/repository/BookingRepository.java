@@ -51,5 +51,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     		        LocalDate toDate
     		);
 
-    
+    List<Booking> findByLoginUserMobileOrderByCreatedAtDesc(String loginUserMobile);
+   
 }

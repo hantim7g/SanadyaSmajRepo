@@ -50,6 +50,12 @@ body{
 @media(max-width:768px){
   .room-carousel img{height:260px;}
 }
+
+/* only asterisk style */
+.req{
+  color:#c40000;
+  font-weight:900;
+}
 </style>
 </head>
 
@@ -57,6 +63,7 @@ body{
 <div class="container main-width my-4">
 
 <h3 class="mb-3">➕ नई बुकिंग</h3>
+<p><span class="req">*</span> चिन्हित फ़ील्ड अनिवार्य हैं</p>
 
 <form:form modelAttribute="booking"
            method="post"
@@ -107,21 +114,19 @@ body{
 <input type="hidden" name="room.id" value="${booking.room.id}"/>
 
 <!-- ================= GUEST ================= -->
-<div class="section">अतिथि</div>
+<div class="section">अतिथि <span class="req">*</span></div>
 
-<input name="guestName" class="form-control" placeholder="अतिथि का नाम" required>
+<input name="guestName" class="form-control" placeholder="अतिथि का नाम *" required>
 <form:errors path="guestName" class="text-danger"/>
 
-<input name="phone" class="form-control mt-2" placeholder="मोबाइल नंबर" required>
+<input name="phone" class="form-control mt-2" placeholder="मोबाइल नंबर *" required>
 <form:errors path="phone" class="text-danger"/>
 
-<input name="loginUserMobile" class="form-control mt-2" placeholder="लॉगिन उपयोगकर्ता मोबाइल" required>
-<form:errors path="loginUserMobile" class="text-danger"/>
 
 <input name="email" class="form-control mt-2" placeholder="ईमेल (वैकल्पिक)">
 
 <!-- ================= DATES ================= -->
-<div class="section">तिथियाँ</div>
+<div class="section">तिथियाँ <span class="req">*</span></div>
 
 <input type="date" name="checkInDate"
        class="form-control readonly"
@@ -153,31 +158,31 @@ body{
 </div>
 
 <!-- ================= ADDRESS ================= -->
-<div class="section">पता</div>
+<div class="section">पता <span class="req">*</span></div>
 
-<input name="address" class="form-control" placeholder="पूरा पता" required>
-<input name="city" class="form-control mt-2" placeholder="शहर" required>
-<input name="state" class="form-control mt-2" placeholder="राज्य" required>
-<input name="pinCode" class="form-control mt-2" placeholder="पिन कोड" required>
-<input name="nationality" class="form-control mt-2" value="भारतीय" required>
+<input name="address" class="form-control" placeholder="पूरा पता *" required>
+<input name="city" class="form-control mt-2" placeholder="शहर *" required>
+<input name="state" class="form-control mt-2" placeholder="राज्य *" required>
+<input name="pinCode" class="form-control mt-2" placeholder="पिन कोड *" required>
+<input name="nationality" class="form-control mt-2" value="भारतीय" placeholder="राष्ट्रीयता *" required>
 
 <!-- ================= EMERGENCY ================= -->
-<div class="section">आपातकालीन संपर्क</div>
+<div class="section">आपातकालीन संपर्क <span class="req">*</span></div>
 
-<input name="emergencyContactName" class="form-control" placeholder="नाम" required>
-<input name="emergencyContactPhone" class="form-control mt-2" placeholder="मोबाइल" required>
+<input name="emergencyContactName" class="form-control" placeholder="नाम *" required>
+<input name="emergencyContactPhone" class="form-control mt-2" placeholder="मोबाइल *" required>
 
 <!-- ================= ID PROOF ================= -->
-<div class="section">पहचान पत्र</div>
+<div class="section">पहचान पत्र <span class="req">*</span></div>
 
 <select name="idProofType" class="form-select" required>
-  <option value="">ID प्रूफ चुनें</option>
+  <option value="">ID प्रूफ चुनें *</option>
   <option value="AADHAR">आधार</option>
   <option value="PAN">पैन</option>
   <option value="PASSPORT">पासपोर्ट</option>
 </select>
 
-<input name="idProofNumber" class="form-control mt-2" placeholder="ID नंबर" required>
+<input name="idProofNumber" class="form-control mt-2" placeholder="ID नंबर *" required>
 
 <input type="file"
        name="idProofFile"

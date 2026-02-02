@@ -79,6 +79,7 @@ body {
       <form:option value="ग्राउंड फ्लोर">ग्राउंड फ्लोर</form:option>
       <form:option value="पहला फ्लोर">पहला फ्लोर</form:option>
       <form:option value="दूसरा फ्लोर">दूसरा फ्लोर</form:option>
+	  	        <form:option value="सामुदायिक भवन">सामुदायिक भवन</form:option>
   </form:select>
   <form:errors path="floor" cssClass="error"/>
 </div>
@@ -89,6 +90,7 @@ body {
       <form:option value="ONLY_ROOM">केवल कमरा</form:option>
       <form:option value="HALL">हॉल</form:option>
       <form:option value="COMPLETE_FLOOR">पूरा फ्लोर</form:option>
+	  <form:option value="COMPLETE_BUILDING">सामुदायिक भवन</form:option>
   </form:select>
   <form:errors path="roomType" cssClass="error"/>
 </div>

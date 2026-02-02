@@ -62,7 +62,7 @@ public class User {
 
 	@Column(name = "other_fee_validated")
 	private String otherFeeValidated ="प्रतीक्षारत"; 
-	@Column(name = "smaj_role",columnDefinition = "VARCHAR(255) DEFAULT = 'सदस्य'")	
+	@Column(name = "smaj_role",columnDefinition = "VARCHAR(255) DEFAULT  'सदस्य'")	
 	private String smajRole ="सदस्य";
 	@Column(name = "smaj_role_priority")
 	private Integer smajRolePriority = 99;

@@ -8,6 +8,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -71,7 +72,8 @@ import com.hst.repository.BookingGuestRepository;
 @Controller
 @RequestMapping("/bookings")
 public class BookingController {
-
+	@Value("${upload.image.dir}")
+	private String uploadDir;
     @Autowired
     private BookingRepository bookingRepo;
 
@@ -141,12 +143,12 @@ public class BookingController {
         }
 
         /* ===== FILE UPLOAD ===== */
-        String uploadDir = "uploads/id-proof/";
-        File dir = new File(uploadDir);
+//        String uploadDir = "uploads/id-proof/";
+        File dir = new File(uploadDir+"/id-proof/");
         if (!dir.exists()) dir.mkdirs();
 
         String fileName = System.currentTimeMillis() + "_" + idProofFile.getOriginalFilename();
-        File dest = new File(uploadDir + fileName);
+        File dest = new File(uploadDir+"/id-proof/" + fileName);
         idProofFile.transferTo(dest);
         booking.setIdProofFileUrl(fileName);
 
@@ -167,7 +169,7 @@ public class BookingController {
         booking.setBalanceAmount(total);
 
         booking.setStatus(BookingStatus.CONFIRMED);
-        booking.setCreatedBy(principal != null ? principal.getName() : "SYSTEM");
+        booking.setLoginUserMobile(principal != null ? principal.getName() : "SYSTEM");
         booking.setBookingCode(generateBookingCode());
 
         bookingRepo.save(booking);
@@ -313,7 +315,7 @@ public class BookingController {
     /* =========================================================
        INVOICE (VIEW / PDF)
        ========================================================= */
-    @GetMapping("/admin/invoice/pdf/{id}")
+    @GetMapping({"/admin/invoice/pdf/{id}" , "/invoice/pdf/{id}"})
     public void generateInvoicePdf(
             @PathVariable Long id,
             HttpServletResponse response) throws Exception {

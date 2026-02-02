@@ -71,6 +71,7 @@ body {
     <option value="ONLY_ROOM">केवल कमरा</option>
     <option value="HALL">हॉल</option>
     <option value="COMPLETE_FLOOR">पूरा फ्लोर</option>
+	    <option value="COMPLETE_BUILDING">सामुदायिक भवन</option>  
 </select>
 
 </div>
@@ -83,6 +84,8 @@ body {
 	     <option value="ग्राउंड फ्लोर">ग्राउंड फ्लोर</option>
 	     <option value="पहला फ्लोर">पहला फ्लोर</option>
 	     <option value="दूसरा फ्लोर">दूसरा फ्लोर</option>
+		 <option value="सामुदायिक भवन">सामुदायिक भवन</option>
+
 	
      </select></div>
 
@@ -248,6 +251,9 @@ ${r.status}
         ${room.roomType=='COMPLETE_FLOOR' ? 'selected' : ''}>
         पूरा फ्लोर
     </option>
+	     <option value="COMPLETE_BUILDING"
+          ${room.roomType=='COMPLETE_BUILDING' ? 'selected' : ''}>
+          सामुदायिक भवन</option>
 </select>
 
 

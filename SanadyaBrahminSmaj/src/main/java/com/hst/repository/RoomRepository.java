@@ -30,7 +30,7 @@ public interface RoomRepository extends JpaRepository<Room, Long>, JpaSpecificat
     	    AND NOT EXISTS (
     	        SELECT fb FROM Booking fb
     	        WHERE fb.status IN (:bookingStatuses)
-    	        AND fb.room.roomType = 'COMPLETE_FLOOR'
+    	        AND fb.room.roomType IN ('COMPLETE_FLOOR','COMPLETE_Building')
     	        AND fb.room.floor = r.floor
     	        AND fb.checkInDate < :toDate
     	        AND fb.checkOutDate > :fromDate
@@ -47,7 +47,13 @@ public interface RoomRepository extends JpaRepository<Room, Long>, JpaSpecificat
         SELECT r FROM Room r
         WHERE r.isActive = true
         AND r.status = :availableStatus
-
+        		AND NOT EXISTS (
+        SELECT bb FROM Booking bb
+        WHERE bb.status IN (:bookingStatuses)
+        AND bb.room.roomType = 'COMPLETE_BUILDING'
+        AND bb.checkInDate < :toDate
+        AND bb.checkOutDate > :fromDate
+    )
 
         AND NOT EXISTS (
             SELECT b FROM Booking b
@@ -65,6 +71,7 @@ public interface RoomRepository extends JpaRepository<Room, Long>, JpaSpecificat
             AND fb.checkInDate < :toDate
             AND fb.checkOutDate > :fromDate
         )
+        
         """)
         List<Room> findAvailableRoomsWithStrictFloorRule(
                 @Param("fromDate") LocalDate fromDate,

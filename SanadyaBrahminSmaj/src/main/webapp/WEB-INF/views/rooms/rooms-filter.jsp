@@ -9,6 +9,7 @@
 	      <option value="ONLY_ROOM">केवल कमरा</option>
 	      <option value="HALL">हॉल</option>
 	      <option value="COMPLETE_FLOOR">पूरा फ्लोर</option>
+		  <option value="COMPLETE_BUILDING">सामुदायिक भवन</option>  
 	  </select>
 
     </div>

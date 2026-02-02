@@ -25,15 +25,14 @@ public class Booking {
     private String guestName;
 
     @NotBlank(message = "मोबाइल नंबर अनिवार्य है")
-    @Pattern(regexp = "^[6-9][0-9]{9}$", message = "मान्य मोबाइल नंबर दर्ज करें")
+    @Pattern(regexp = "^(\\+91|0)?[6-9][0-9]{9}$",
+    message = "मान्य मोबाइल नंबर दर्ज करें")
     private String phone;
 
     @Email(message = "मान्य ईमेल दर्ज करें")
     private String email;
 
-    /* ================= LOGIN USER ================= */
-    @NotBlank(message = "लॉगिन उपयोगकर्ता मोबाइल अनिवार्य है")
-    @Pattern(regexp = "^[6-9][0-9]{9}$", message = "मान्य मोबाइल नंबर दर्ज करें")
+   
     private String loginUserMobile;
 
     private Boolean isWalkIn = false;
@@ -49,11 +48,9 @@ public class Booking {
     private LocalDateTime actualCheckOut;
 
     /* ================= GUEST COUNT ================= */
-    @NotNull(message = "वयस्कों की संख्या अनिवार्य है")
-    @Min(value = 1, message = "कम से कम 1 वयस्क होना चाहिए")
+
     private Integer adults;
 
-    @Min(value = 0)
     private Integer children;
 
     /* ================= STATUS ================= */
@@ -61,13 +58,13 @@ public class Booking {
     private BookingStatus status;
 
     /* ================= PRICING ================= */
-    @NotNull
+  
     private BigDecimal roomPrice;
 
     private BigDecimal discountAmount = BigDecimal.ZERO;
     private BigDecimal taxAmount = BigDecimal.ZERO;
 
-    @NotNull
+ 
     private BigDecimal totalAmount;
 
     private BigDecimal paidAmount = BigDecimal.ZERO;
@@ -97,7 +94,8 @@ public class Booking {
     private String emergencyContactName;
 
     @NotBlank(message = "आपातकालीन मोबाइल अनिवार्य है")
-    @Pattern(regexp = "^[6-9][0-9]{9}$", message = "मान्य मोबाइल नंबर दर्ज करें")
+    @Pattern(regexp = "^(\\+91|0)?[6-9][0-9]{9}$",
+    message = "मान्य मोबाइल नंबर दर्ज करें")
     private String emergencyContactPhone;
 
     /* ================= ID PROOF ================= */
@@ -107,7 +105,7 @@ public class Booking {
     @NotBlank(message = "ID प्रूफ नंबर अनिवार्य है")
     private String idProofNumber;
 
-    @NotBlank(message = "ID प्रूफ फ़ाइल अनिवार्य है")
+
     private String idProofFileUrl;
 
     /* ================= OTHER ================= */
@@ -115,7 +113,7 @@ public class Booking {
     private String remarks;
 
     private String bookingSource = "WEBSITE";
-    private String createdBy;
+    
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -400,14 +398,6 @@ public class Booking {
 
 	public synchronized void setBookingSource(String bookingSource) {
 		this.bookingSource = bookingSource;
-	}
-
-	public synchronized String getCreatedBy() {
-		return createdBy;
-	}
-
-	public synchronized void setCreatedBy(String createdBy) {
-		this.createdBy = createdBy;
 	}
 
 	public synchronized LocalDateTime getCreatedAt() {

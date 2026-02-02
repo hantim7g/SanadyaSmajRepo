@@ -45,7 +45,9 @@ body {
         <option value="ONLY_ROOM" ${param.roomType=='ONLY_ROOM'?'selected':''}>केवल कमरा</option>
         <option value="HALL" ${param.roomType=='HALL'?'selected':''}>हॉल</option>
         <option value="COMPLETE_FLOOR" ${param.roomType=='COMPLETE_FLOOR'?'selected':''}>पूरा फ्लोर</option>
-      </select>
+         <option value="COMPLETE_BUILDING" ${param.roomType=='COMPLETE_BUILDING'?'selected':''}>सामुदायिक भवन</option>
+	
+		  </select>
     </div>
 
     <!-- Floor -->
@@ -57,6 +59,8 @@ body {
 	  	     <option value="ग्राउंड फ्लोर">ग्राउंड फ्लोर</option>
 	  	     <option value="पहला फ्लोर">पहला फ्लोर</option>
 	  	     <option value="दूसरा फ्लोर">दूसरा फ्लोर</option>
+			 <option value="सामुदायिक भवन">सामुदायिक भवन</option>
+
 	  	
 	       </select>
     </div>

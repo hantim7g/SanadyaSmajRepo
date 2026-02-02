@@ -259,6 +259,8 @@ public class Room {
 	            return "हॉल";
 	        case "COMPLETE_FLOOR":
 	            return "पूरा फ्लोर";
+	        case "COMPLETE_BUILDING":
+	            return "सामुदायिक भवन";
 	        default:
 	            return roomType;
 	    }
@@ -293,6 +295,8 @@ public class Room {
 	            return "दूसरा फ्लोर";
 	        case "तीसरा फ्लोर":
 	            return "तीसरा फ्लोर";
+	        case "सामुदायिक भवन":
+	            return "सामुदायिक भवन";
 	        default:
 	            return floor;
 	    }

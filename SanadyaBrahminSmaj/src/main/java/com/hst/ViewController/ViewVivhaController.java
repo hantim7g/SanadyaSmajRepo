@@ -185,7 +185,7 @@ public class ViewVivhaController {
 //
 //        /* ================= FONT (Hindi Safe) ================= */
 //        BaseFont bf = BaseFont.createFont(
-//                "fonts/NotoSansDevanagari-Regular.ttf",
+//                "fonts/NotoDeva-Regular.ttf",
 //                BaseFont.IDENTITY_H,
 //                BaseFont.EMBEDDED
 //        );

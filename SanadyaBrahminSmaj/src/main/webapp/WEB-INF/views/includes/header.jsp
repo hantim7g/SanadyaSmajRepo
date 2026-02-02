@@ -358,7 +358,11 @@
 		        <i class="fas fa-calendar-check"></i> उपलब्धता देखें
 		      </a>
 		    </li>
-
+			<li id="memberBookingMenu">
+								      <a class="dropdown-item" href="/my-bookings">
+								        <i class="fas fa-calendar"></i> मेरी बुकिंग
+								      </a>
+								    </li>
 		    
 
 		    <li>
@@ -374,15 +378,7 @@
 		    </li>
 
 		    <!-- MEMBER ONLY -->
-		    <li  id="memberBookingMenu">
-		      <hr class="dropdown-divider">
-		    </li>
-
-		    <li class="d-none" id="memberBookingMenu">
-		      <a class="dropdown-item" href="/member/bookings">
-		        <i class="fas fa-calendar"></i> मेरी बुकिंग
-		      </a>
-		    </li>
+		   
 
 		  </ul>
 		</li>
@@ -495,7 +491,14 @@
               <a class="dropdown-item dropdown-toggle" href="#"><i class="fas fa-ring"></i> वैवाहिक सुविधा प्रबंधन</a>
               <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="/admin/matrimony/list"><i class="fas fa-list-ul"></i> सभी प्रोफ़ाइलें समीक्षा</a></li>
-              </ul>
+				<li>
+				       <a class="dropdown-item" href="/gotra">
+				           <i class="fas fa-om"></i> गोत्र प्रबंधन
+				       </a>
+				   </li>
+				</ul>
+			  
+
             </li>
 			
 			  </ul>

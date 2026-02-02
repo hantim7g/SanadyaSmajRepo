@@ -286,7 +286,7 @@ body{
 </div>
 
 <div class="text-end">
-<a href="/user/vivhauser/pdf/${p.id}" class="btn btn-success btn-sm">
+<a href="/user/vivhauser/pdf/${p.id}"   target="_blank"  class="btn btn-success btn-sm">
 📄 बायोडाटा PDF
 </a>
 </div>
