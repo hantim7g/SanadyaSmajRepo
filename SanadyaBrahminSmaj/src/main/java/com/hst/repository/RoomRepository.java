@@ -43,12 +43,13 @@ public interface RoomRepository extends JpaRepository<Room, Long>, JpaSpecificat
     	            @Param("bookingStatuses") List<BookingStatus> bookingStatuses
     	    );
 
+    
+    
     @Query("""
     	    SELECT r FROM Room r
     	    WHERE r.isActive = true
     	    AND r.status = :availableStatus
     	    
-    	    -- 1. अगर 'पूरा भवन' बुक है, तो कुछ भी न दिखाएं (Rooms, Floors, Building सब गायब)
     	    AND NOT EXISTS (
     	        SELECT bb FROM Booking bb
     	        WHERE bb.status IN (:bookingStatuses)
@@ -57,7 +58,6 @@ public interface RoomRepository extends JpaRepository<Room, Long>, JpaSpecificat
     	        AND bb.checkOutDate > :fromDate
     	    )
 
-    	    -- 2. अगर यह विशिष्ट कमरा (r) बुक है, तो इसे न दिखाएं
     	    AND NOT EXISTS (
     	        SELECT b FROM Booking b
     	        WHERE b.room = r
@@ -66,7 +66,6 @@ public interface RoomRepository extends JpaRepository<Room, Long>, JpaSpecificat
     	        AND b.checkOutDate > :fromDate
     	    )
 
-    	    -- 3. अगर जिस फ्लोर पर यह कमरा है, उसका 'पूरा फ्लोर' बुक है, तो इसे न दिखाएं
     	    AND NOT EXISTS (
     	        SELECT fb FROM Booking fb
     	        WHERE fb.status IN (:bookingStatuses)
@@ -76,8 +75,6 @@ public interface RoomRepository extends JpaRepository<Room, Long>, JpaSpecificat
     	        AND fb.checkOutDate > :fromDate
     	    )
 
-    	    -- 4. फ्लोर बुकिंग नियम: अगर कोई 'COMPLETE_FLOOR' सर्च कर रहा है, 
-    	    -- और उस फ्लोर का कोई भी एक कमरा बुक है, तो 'COMPLETE_FLOOR' हटा दें
     	    AND NOT (
     	        r.roomType = 'COMPLETE_FLOOR' 
     	        AND EXISTS (
@@ -90,8 +87,7 @@ public interface RoomRepository extends JpaRepository<Room, Long>, JpaSpecificat
     	        )
     	    )
 
-    	    -- 5. भवन बुकिंग नियम (New): अगर कोई 'COMPLETE_BUILDING' सर्च कर रहा है,
-    	    -- और डेटाबेस में किसी भी कमरे/फ्लोर की बुकिंग पहले से है, तो 'COMPLETE_BUILDING' हटा दें
+
     	    AND NOT (
     	        r.roomType = 'COMPLETE_BUILDING'
     	        AND EXISTS (
