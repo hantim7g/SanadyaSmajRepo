@@ -7,8 +7,11 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.hst.dto.RoomFilterDTO;
 import com.hst.entity.BookingSys.BookingStatus;
@@ -127,5 +130,26 @@ public class RoomService {
     	        return cb.and(p.toArray(new Predicate[0]));
     	    });
     	}
- 
+    public Map<Room, String> searchAdminRooms(RoomFilterDTO f) {
+        List<BookingStatus> activeStatuses = List.of(
+            BookingStatus.CONFIRMED, 
+            BookingStatus.CHECKED_IN
+        );
+        
+        // Default dates to today/tomorrow if not provided
+        LocalDate from = (f.getFromDate() != null) ? f.getFromDate() : LocalDate.now();
+        LocalDate to = (f.getToDate() != null) ? f.getToDate() : LocalDate.now().plusDays(1);
+
+        List<Object[]> rawResults = repo.findAdminRoomsWithStatus(
+            f.getIsActive(), f.getStatus(), f.getRoomType(), f.getFloor(), 
+            f.getMinPrice(), f.getMaxPrice(), from, to, activeStatuses
+        );
+
+        Map<Room, String> roomStatusMap = new LinkedHashMap<>();
+        for (Object[] result : rawResults) {
+            roomStatusMap.put((Room) result[0], (String) result[1]);
+        }
+        
+        return roomStatusMap;
+    }
 }

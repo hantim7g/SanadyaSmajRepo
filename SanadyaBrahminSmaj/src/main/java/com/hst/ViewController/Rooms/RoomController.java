@@ -2,14 +2,17 @@ package com.hst.ViewController.Rooms;
 
 import com.hst.dto.RoomFilterDTO;
 import com.hst.entity.BookingSys.Room;
+import com.hst.entity.BookingSys.RoomBlock;
 import com.hst.entity.BookingSys.RoomImage;
 import com.hst.entity.BookingSys.RoomStatus;
+import com.hst.service.RoomBlockService;
 import com.hst.service.RoomService;
 
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -34,20 +37,81 @@ public class RoomController {
     private RoomService roomService;
 
  // List page
+    @Autowired
+    private RoomBlockService roomBlockService;
     @GetMapping("/admin")
-    public String roomList(RoomFilterDTO filter, Model model) {
-
-        // empty string → null (important for LIKE / equals)
-        if (filter.getRoomType() != null && filter.getRoomType().isBlank()) {
-            filter.setRoomType(null);
+    public String adminRoomList(RoomFilterDTO filter, Model model) {
+        
+        // 1. यदि तारीखें नहीं चुनी गई हैं, तो आज और कल की तारीख डिफॉल्ट सेट करें
+        if (filter.getFromDate() == null) {
+            filter.setFromDate(LocalDate.now());
+        }
+        if (filter.getToDate() == null) {
+            filter.setToDate(LocalDate.now().plusDays(1));
         }
 
-        if (filter.getFloor() != null && filter.getFloor().isBlank()) {
-            filter.setFloor(null);
-        }
+        // 2. रिक्त स्ट्रिंग्स को नल में बदलें (SQL के लिए सुरक्षित)
+        if (filter.getRoomType() != null && filter.getRoomType().isBlank()) filter.setRoomType(null);
+        if (filter.getFloor() != null && filter.getFloor().isBlank()) filter.setFloor(null);
 
-        model.addAttribute("rooms", roomService.search(filter));
+        // 3. सर्विस से Map प्राप्त करें: Key = Room, Value = 'AVAILABLE' | 'BOOKED' | 'BLOCKED'
+        Map<Room, String> roomStatusMap = roomService.searchAdminRooms(filter);
+
+        model.addAttribute("rooms", roomStatusMap);
+        model.addAttribute("filter", filter); // फॉर्म में वैल्यू बनाए रखने के लिए
+        
+        // सक्रिय ब्लॉक्स की सूची (Management Table के लिए)
+        model.addAttribute("activeBlocks", roomBlockService.getAllActiveBlocks());
+        
         return "rooms/room-list";
+    }
+
+    /**
+     * रूम ब्लॉक करने के लिए API
+     */
+    @PostMapping("/admin/block")
+    @ResponseBody
+    public ResponseEntity<?> handleBlockRoom(@RequestBody Map<String, String> payload) {
+        try {
+            Long roomId = Long.parseLong(payload.get("roomId"));
+            LocalDate from = LocalDate.parse(payload.get("fromDate"));
+            LocalDate to = LocalDate.parse(payload.get("toDate"));
+            String reason = payload.get("reason");
+
+            Room room = roomService.getById(roomId);
+            
+            RoomBlock block = new RoomBlock();
+            block.setRoom(room);
+            block.setFromDate(from);
+            block.setToDate(to);
+            block.setReason(reason);
+
+            roomBlockService.createBlock(block);
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true, 
+                "message", "रूम सफलतापूर्वक ब्लॉक कर दिया गया है।"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false, 
+                "message", e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * रूम अनब्लॉक (डिलीट) करने के लिए API
+     */
+    @DeleteMapping("/admin/unblock/{id}")
+    @ResponseBody
+    public ResponseEntity<?> unblock(@PathVariable Long id) {
+        try {
+            roomBlockService.deleteBlock(id);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 
 

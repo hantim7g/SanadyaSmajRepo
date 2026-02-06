@@ -52,5 +52,22 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     		);
 
     List<Booking> findByLoginUserMobileOrderByCreatedAtDesc(String loginUserMobile);
-   
+
+//	boolean existsByRoomAndDates(Long id, LocalDate fromDate, LocalDate toDate);
+	@Query("""
+	        SELECT COUNT(b) > 0 FROM Booking b 
+	        WHERE (b.room.id = :roomId 
+	               OR (b.room.roomType = 'COMPLETE_FLOOR' AND b.room.floor = :floor)
+	               OR b.room.roomType = 'COMPLETE_BUILDING')
+	        AND b.status IN (com.hst.entity.BookingSys.BookingStatus.CONFIRMED, 
+	                         com.hst.entity.BookingSys.BookingStatus.CHECKED_IN)
+	        AND b.checkInDate < :toDate 
+	        AND b.checkOutDate > :fromDate
+	    """)
+	    boolean hasExistingBooking(
+	        @Param("roomId") Long roomId, 
+	        @Param("floor") String floor,
+	        @Param("fromDate") LocalDate fromDate, 
+	        @Param("toDate") LocalDate toDate
+	    );
 }
