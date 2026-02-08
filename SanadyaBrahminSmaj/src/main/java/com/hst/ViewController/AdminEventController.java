@@ -4,6 +4,8 @@ package com.hst.ViewController;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -141,8 +143,8 @@ public class AdminEventController {
          * 5.  Gallery images (orphanRemoval=true)
          * --------------------------------------------------------- */
         List<EventImage> incomingImages = (eventDto.getImages() == null)
-                ? java.util.Collections.emptyList()
-                : eventDto.getImages();
+                ? Collections.emptyList()
+                : new ArrayList<>(eventDto.getImages());
 
      // Extract IDs of images provided by the client
         Set<Long> incomingImgIds = incomingImages.stream()
