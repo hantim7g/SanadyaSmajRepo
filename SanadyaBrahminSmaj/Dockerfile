@@ -3,18 +3,20 @@ FROM maven:3.9.9-eclipse-temurin-17 AS builder
 
 WORKDIR /app
 
-# Copy only required files first (for caching)
-COPY pom.xml .
-COPY mvnw .
-COPY .mvn .mvn
+# Copy pom first (dependency caching)
+COPY SanadyaBrahminSmaj/pom.xml .
 
-# Download dependencies (faster rebuilds)
+# Copy Maven wrapper files (if present)
+COPY SanadyaBrahminSmaj/mvnw .
+COPY SanadyaBrahminSmaj/.mvn .mvn
+
+# Download dependencies
 RUN mvn -B dependency:go-offline
 
-# Copy source
-COPY src ./src
+# Copy full source code
+COPY SanadyaBrahminSmaj/src ./src
 
-# Build jar
+# Build Spring Boot jar
 RUN mvn clean package -DskipTests
 
 
@@ -23,14 +25,14 @@ FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 
-# Copy jar from builder
+# Copy jar from builder stage
 COPY --from=builder /app/target/*.jar app.jar
 
-# Render / Cloud provides PORT dynamically
+# Render provides PORT automatically
 ENV PORT=8080
 
-# expose port
+# Expose port
 EXPOSE 8080
 
-# Run Spring Boot properly with dynamic port
+# Run application
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
