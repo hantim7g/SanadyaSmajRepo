@@ -15,6 +15,8 @@ RUN rm -rf /usr/local/tomcat/webapps/*
 
 COPY --from=builder /app/target/SanadyaBrahminSmaj.war /usr/local/tomcat/webapps/ROOT.war
 
+RUN mkdir -p /opt/render/project/src/uploads/images/events
+
 EXPOSE 8080
 
 CMD ["catalina.sh", "run"]
