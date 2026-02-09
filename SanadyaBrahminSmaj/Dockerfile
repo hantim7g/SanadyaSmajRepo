@@ -3,20 +3,21 @@ FROM maven:3.9.9-eclipse-temurin-17 AS builder
 
 WORKDIR /app
 
-# Copy pom first (dependency caching)
+# Copy pom.xml
 COPY SanadyaBrahminSmaj/pom.xml .
 
-# Copy Maven wrapper files (if present)
+# Copy Maven wrapper (optional but safe)
 COPY SanadyaBrahminSmaj/mvnw .
 COPY SanadyaBrahminSmaj/.mvn .mvn
 
 # Download dependencies
 RUN mvn -B dependency:go-offline
 
-# Copy full source code
+# Copy FULL project including webapp (IMPORTANT for JSP)
 COPY SanadyaBrahminSmaj/src ./src
+COPY SanadyaBrahminSmaj/src/main/webapp ./src/main/webapp
 
-# Build Spring Boot jar
+# Build jar
 RUN mvn clean package -DskipTests
 
 
@@ -25,14 +26,14 @@ FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 
-# Copy jar from builder stage
+# Copy jar from builder
 COPY --from=builder /app/target/*.jar app.jar
 
-# Render provides PORT automatically
+# Render dynamic port support
 ENV PORT=8080
 
 # Expose port
 EXPOSE 8080
 
-# Run application
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+# Start Spring Boot
+ENTRYPOINT ["java", "-Dserver.port=${PORT}", "-jar", "/app/app.jar"]
