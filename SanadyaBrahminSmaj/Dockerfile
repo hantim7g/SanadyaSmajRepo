@@ -8,14 +8,12 @@ COPY SanadyaBrahminSmaj .
 RUN mvn clean package -DskipTests
 
 
-# RUNTIME STAGE (Tomcat)
+# RUNTIME STAGE
 FROM tomcat:10.1-jdk17-temurin
 
-# Remove default apps
 RUN rm -rf /usr/local/tomcat/webapps/*
 
-# Copy WAR as ROOT app
-COPY --from=builder /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
+COPY --from=builder /app/target/SanadyaBrahminSmaj.war /usr/local/tomcat/webapps/ROOT.war
 
 EXPOSE 8080
 
