@@ -16,19 +16,11 @@ RUN rm -rf /usr/local/tomcat/webapps/*
 
 # Copy WAR
 COPY --from=builder /app/target/SanadyaBrahminSmaj.war /usr/local/tomcat/webapps/ROOT.war
+# Create upload directories
+RUN mkdir -p /var/data/uploads/images/{events,guidance,id-proof,logo,profile_images,receiptImage,rooms}
 
-# Create upload directories (IMPORTANT)
-RUN mkdir -p /opt/render/project/src/uploads/images/events \
-    && mkdir -p /opt/render/project/src/uploads/images/guidance \
-    && mkdir -p /opt/render/project/src/uploads/images/id-proof \
-    && mkdir -p /opt/render/project/src/uploads/images/logo \
-    && mkdir -p /opt/render/project/src/uploads/images/profile_images \
-    && mkdir -p /opt/render/project/src/uploads/images/receiptImage \
-    && mkdir -p /opt/render/project/src/uploads/images/rooms
-
-# Set permissions
-RUN chmod -R 777 /opt/render/project/src/uploads
-
+# Set permissions (safe)
+RUN chmod -R 777 /var/data/uploads || true
 EXPOSE 8080
 
 CMD ["catalina.sh", "run"]
