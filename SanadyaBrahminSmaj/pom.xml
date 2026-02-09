@@ -14,8 +14,8 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>SanadyaBrahminSmaj</name>
 	<description>SanadyaBrahminSmaj</description>
-	<!--	<packaging>war</packaging>
--->
+		<packaging>war</packaging>
+
 	<url />
 	<licenses>
 		<license />
@@ -51,6 +51,11 @@
 			<artifactId>spring-boot-admin-starter-server</artifactId>
 			<version>3.4.1</version>
 		</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-tomcat</artifactId>
+    <scope>provided</scope>
+</dependency>
 
 
 		<dependency>

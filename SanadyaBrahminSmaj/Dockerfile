@@ -1,39 +1,22 @@
-# ---------- BUILD STAGE ----------
+# BUILD STAGE
 FROM maven:3.9.9-eclipse-temurin-17 AS builder
 
 WORKDIR /app
 
-# Copy pom.xml
-COPY SanadyaBrahminSmaj/pom.xml .
+COPY SanadyaBrahminSmaj .
 
-# Copy Maven wrapper (optional but safe)
-COPY SanadyaBrahminSmaj/mvnw .
-COPY SanadyaBrahminSmaj/.mvn .mvn
-
-# Download dependencies
-RUN mvn -B dependency:go-offline
-
-# Copy FULL project including webapp (IMPORTANT for JSP)
-COPY SanadyaBrahminSmaj/src ./src
-COPY SanadyaBrahminSmaj/src/main/webapp ./src/main/webapp
-
-# Build jar
 RUN mvn clean package -DskipTests
 
 
-# ---------- RUNTIME STAGE ----------
-FROM eclipse-temurin:17-jre-jammy
+# RUNTIME STAGE (Tomcat)
+FROM tomcat:10.1-jdk17-temurin
 
-WORKDIR /app
+# Remove default apps
+RUN rm -rf /usr/local/tomcat/webapps/*
 
-# Copy jar from builder
-COPY --from=builder /app/target/*.jar app.jar
+# Copy WAR as ROOT app
+COPY --from=builder /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
 
-# Render dynamic port support
-ENV PORT=8080
-
-# Expose port
 EXPOSE 8080
 
-# Start Spring Boot
-ENTRYPOINT ["java", "-Dserver.port=${PORT}", "-jar", "/app/app.jar"]
+CMD ["catalina.sh", "run"]

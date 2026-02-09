@@ -2,19 +2,18 @@ package com.hst;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
-import de.codecentric.boot.admin.server.config.EnableAdminServer;
 @SpringBootApplication
-@EnableScheduling
-public class SanadyaBrahminSmajApplication {
+public class SanadyaBrahminSmajApplication extends SpringBootServletInitializer {
 
-	
-	public static void main(String[] args) {
-		SpringApplication.run(SanadyaBrahminSmajApplication.class, args);
-	}
-//	   @Override
-//	    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-//	        return builder.sources(MyApp.class);
-//	    }
+    public static void main(String[] args) {
+        SpringApplication.run(SanadyaBrahminSmajApplication.class, args);
+    }
+
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+        return builder.sources(SanadyaBrahminSmajApplication.class);
+    }
 }
