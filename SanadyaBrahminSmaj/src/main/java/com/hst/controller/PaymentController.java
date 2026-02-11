@@ -5,6 +5,7 @@ import com.hst.entity.Payment;
 import com.hst.entity.User;
 import com.hst.repository.UserRepository;
 import com.hst.service.AuditLogService;
+import com.hst.service.CloudinaryService;
 import com.hst.service.PaymentService;
 import com.hst.service.UserService;
 
@@ -29,7 +30,9 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/payment")
 public class PaymentController {
-
+	
+	@Autowired
+	private CloudinaryService cloudinaryService;
 	private final AuditLogService auditLogService;
 
     private static final Set<String> ALLOWED_IMAGE_TYPES =
@@ -205,13 +208,14 @@ auditLogService.log(
         String safeFileName = UUID.randomUUID() + ".jpg";
 
         try {
-            Path uploadPath = Paths.get(uploadDir, "receiptImage");
-            Files.createDirectories(uploadPath);
+//            Path uploadPath = Paths.get(uploadDir, "receiptImage");
+//            Files.createDirectories(uploadPath);
+//
+//            Path targetPath = uploadPath.resolve(safeFileName);
+//            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
-            Path targetPath = uploadPath.resolve(safeFileName);
-            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
-
-            return "receiptImage/" + safeFileName;
+            String cloudinaryUrl = cloudinaryService.uploadFile(file, "receiptImage");
+            return cloudinaryUrl;
 
         } catch (IOException e) {
             throw new RuntimeException("Failed to store receipt image");

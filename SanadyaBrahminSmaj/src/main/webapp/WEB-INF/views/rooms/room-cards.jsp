@@ -271,7 +271,7 @@
 			      <form method="post" action="/bookings/add">
 
 			        <!-- IMAGE -->
-			        <img src="/images/${r.images[0].imageUrl}"
+			        <img src="${r.images[0].imageUrl}"
 			             alt="रूम छवि">
 
 			        <div class="p-3">

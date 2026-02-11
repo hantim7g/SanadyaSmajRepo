@@ -87,7 +87,7 @@ body{
     <div class="carousel-inner">
       <c:forEach items="${booking.room.images}" var="img" varStatus="s">
         <div class="carousel-item ${s.first?'active':''}">
-          <img src="/images/${img.imageUrl}" class="d-block w-100">
+          <img src="${img.imageUrl}" class="d-block w-100">
         </div>
       </c:forEach>
     </div>

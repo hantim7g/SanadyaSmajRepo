@@ -7,6 +7,7 @@ import com.hst.entity.User;
 import com.hst.repository.UserRepository;
 import com.hst.response.ApiResponse;
 import com.hst.security.JwtTokenProvider;
+import com.hst.service.CloudinaryService;
 import com.hst.service.PasswordResetRequestService;
 import com.hst.service.RegistrationNumberService;
 import jakarta.servlet.http.Cookie;
@@ -41,7 +42,8 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/api/auth/")
 public class AuthController {
-
+    @Autowired
+    private CloudinaryService cloudinaryService;
 	@Autowired
 	private PasswordResetRequestService passwordResetRequestService;
 
@@ -178,27 +180,27 @@ public class AuthController {
 
 		try {
 			// Ensure directory exists
-			Path uploadPath = Paths.get(uploadDir + "/profile_images");
-			Files.createDirectories(uploadPath);
-
-			// Create unique file name
-			String originalName = file.getOriginalFilename();
-			String ext = originalName != null && originalName.contains(".")
-					? originalName.substring(originalName.lastIndexOf('.'))
-					: "";
-			String fileName = "user_" + userId + "_" + System.currentTimeMillis() + ext;
-
-			// Save file
-			Path targetPath = uploadPath.resolve(fileName);
-			Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
-
+//			Path uploadPath = Paths.get(uploadDir + "/profile_images");
+//			Files.createDirectories(uploadPath);
+//
+//			// Create unique file name
+//			String originalName = file.getOriginalFilename();
+//			String ext = originalName != null && originalName.contains(".")
+//					? originalName.substring(originalName.lastIndexOf('.'))
+//					: "";
+//			String fileName = "user_" + userId + "_" + System.currentTimeMillis() + ext;
+//
+//			// Save file
+//			Path targetPath = uploadPath.resolve(fileName);
+//			Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+			 String imageUrl = cloudinaryService.uploadFile(file, "profile_images");
 			// Update user
 			User user = userOpt.get();
-			user.setProfileImagePath("/images/profile_images/" + fileName); // Served via WebConfig
+			user.setProfileImagePath(imageUrl);
 			userRepository.save(user);
 
 			return ResponseEntity.ok(
-					Map.of("message", "✅ छवि सफलतापूर्वक अपलोड हुई", "filePath", "/images/profile_images/" + fileName));
+					Map.of("message", "✅ छवि सफलतापूर्वक अपलोड हुई", "filePath", imageUrl));
 
 		} catch (IOException e) {
 			e.printStackTrace();

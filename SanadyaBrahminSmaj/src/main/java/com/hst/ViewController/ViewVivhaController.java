@@ -7,6 +7,7 @@ import com.hst.entity.User;
 import com.hst.entity.VivhaUser;
 import com.hst.repository.GotraMasterRepository;
 import com.hst.repository.VivhaUserRepository;
+import com.hst.service.CloudinaryService;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -25,6 +26,8 @@ import com.itextpdf.text.pdf.draw.LineSeparator;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.core.Authentication;
@@ -71,7 +74,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class ViewVivhaController {
-
+	@Autowired
+	private CloudinaryService cloudinaryService;
 	private final VivhaUserRepository userRepository;
 	private final com.hst.repository.GotraMasterRepository gotraMasterRepository;
 
@@ -144,14 +148,16 @@ public class ViewVivhaController {
 		}
 
 		if (imageFile != null && !imageFile.isEmpty()) {
-			String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
-			String uploadPath = Paths.get(uploadDir).toAbsolutePath().toString();
-			File dir = new File(uploadPath);
-			if (!dir.exists())
-				dir.mkdirs();
-			File savedFile = new File(dir, fileName);
-			imageFile.transferTo(savedFile);
-			user.setProfileImagePath("/images/" + fileName);
+//			String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
+//			String uploadPath = Paths.get(uploadDir).toAbsolutePath().toString();
+//			File dir = new File(uploadPath);
+//			if (!dir.exists())
+//				dir.mkdirs();
+//			File savedFile = new File(dir, fileName);
+//			imageFile.transferTo(savedFile);
+//			user.setProfileImagePath("/images/" + fileName);
+			String imageUrl = cloudinaryService.uploadFile(imageFile, "images");
+			user.setProfileImagePath(imageUrl);
 		}
 
 		user.setLoginMobile(loggedInMobile);
@@ -347,14 +353,14 @@ public class ViewVivhaController {
 
 		String template = Files.readString(Paths.get("src/main/resources/templates/biodata.fo"),
 				StandardCharsets.UTF_8);
-		String imageUri = "";
+//		String imageUri = "";
 
-		if (p.getProfileImagePath() != null && !p.getProfileImagePath().isBlank()) {
-		    imageUri = new File(
-		            uploadDir.replaceAll("/images", "")
-		            + p.getProfileImagePath()
-		    ).toURI().toString();
-		}
+//		if (p.getProfileImagePath() != null && !p.getProfileImagePath().isBlank()) {
+//		    imageUri = new File(
+//		            uploadDir.replaceAll("/images", "")
+//		            + p.getProfileImagePath()
+//		    ).toURI().toString();
+//		}
 		template = template.replace("${name}", p.getName()).replace("${gender}", p.getGender())
 				.replace("${dob}", p.getDob().toString()).replace("${birthTime}", p.getBirthTime())
 				.replace("${father}", p.getFatherName()).replace("${mother}", p.getMotherName())
@@ -364,7 +370,7 @@ public class ViewVivhaController {
 				.replace("${address}", p.getHouseAddress() + ", " + p.getCity()).replace("${mobile}", p.getMobile())
 				.replace("${gotra}", p.getGotra()).replace("${motherGotra}", p.getMotherGotra())
 				.replace("${dadiGotra}", p.getDadiGotra()).replace("${naniGotra}", p.getNaniGotra())
-				.replace("${photoPath}", imageUri);
+				.replace("${photoPath}", p.getProfileImagePath());
 
 		response.setContentType("application/pdf");
 		response.setHeader("Content-Disposition", "attachment; filename=biodata_" + p.getName() + ".pdf");

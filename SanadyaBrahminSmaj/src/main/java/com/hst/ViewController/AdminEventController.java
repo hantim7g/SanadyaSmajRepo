@@ -38,6 +38,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.hst.entity.Event;
 import com.hst.entity.EventImage;
 import com.hst.repository.EventRepository;
+import com.hst.service.CloudinaryService;
 import com.hst.service.EventService;
 
 
@@ -51,7 +52,8 @@ public class AdminEventController {
 	private String uploadDir;
     @Autowired
     private EventService eventService;
-
+    @Autowired
+    private CloudinaryService cloudinaryService;
     @GetMapping("/events")
     public String listEvents(
         @RequestParam(defaultValue = "0") int page,
@@ -104,10 +106,10 @@ public class AdminEventController {
          * 1.  Resolve upload directory (create once if missing)
          * --------------------------------------------------------- */
       //  String uploadDir = uploadDir;//request.getServletContext().getRealPath("/uploads/");
-        File dir = new File(uploadDir+"/events/");
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+//        File dir = new File(uploadDir+"/events/");
+//        if (!dir.exists()) {
+//            dir.mkdirs();
+//        }
 
         /* ---------------------------------------------------------
          * 2.  Load the MANAGED entity (or use new one for inserts)
@@ -134,9 +136,10 @@ public class AdminEventController {
          * 4.  Main image
          * --------------------------------------------------------- */
         if (mainImage != null && !mainImage.isEmpty()) {
-            String storedName = UUID.randomUUID() + "_" + mainImage.getOriginalFilename();
-            mainImage.transferTo(new File(uploadDir+"/events/" , storedName));
-            target.setMainImageUrl("/images/events/" + storedName);
+//            String storedName = UUID.randomUUID() + "_" + mainImage.getOriginalFilename();
+//            mainImage.transferTo(new File(uploadDir+"/events/" , storedName));
+            String imageUrl = cloudinaryService.uploadFile(mainImage, "events");
+            target.setMainImageUrl(imageUrl);
         }
 
         /* ---------------------------------------------------------
@@ -217,9 +220,10 @@ public class AdminEventController {
             HttpServletRequest request) throws IOException {
 
 if (file != null && !file.isEmpty()) {
-String storedName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-file.transferTo(new File(uploadDir+"/events/", storedName));
-img.setUrl("/images/events/" + storedName);
+
+String imageUrl = cloudinaryService.uploadFile(file, "events");
+
+img.setUrl(imageUrl);
 } else if (img.getId() != null) {
 /* The row already exists in DB and no new file was uploaded:
 leave the URL untouched (it was loaded in 'img' by Spring). */

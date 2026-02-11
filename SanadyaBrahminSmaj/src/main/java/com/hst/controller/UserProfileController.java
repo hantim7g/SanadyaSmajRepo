@@ -30,6 +30,7 @@ import com.hst.entity.User;
 import com.hst.repository.UserRepository;
 import com.hst.response.ApiResponse;
 import com.hst.security.JwtTokenProvider;
+import com.hst.service.CloudinaryService;
 import com.hst.service.PaymentService;
 import com.hst.service.UserService;
 
@@ -43,7 +44,8 @@ public class UserProfileController {
 	
 	@Autowired
 	private PaymentService paymentService;
-	
+	@Autowired
+	private CloudinaryService cloudinaryService;
 	@Autowired
 	private UserService userService;
 	@Autowired
@@ -86,13 +88,15 @@ public class UserProfileController {
 		User user = optionalUser.get();
 
 		try {
-			String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
-			Path storageDir = Paths.get("C:/data/uploads/images/profile_images");
-			Files.createDirectories(storageDir);
-			Path filePath = storageDir.resolve(fileName);
-			Files.write(filePath, image.getBytes());
-
-			String publicUrl = "/images/profile_images/" + fileName;
+//			String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
+//			Path storageDir = Paths.get("C:/data/uploads/images/profile_images");
+//			Files.createDirectories(storageDir);
+//			Path filePath = storageDir.resolve(fileName);
+//			Files.write(filePath, image.getBytes());
+//
+//			String publicUrl = "/images/profile_images/" + fileName;
+			 // If using Cloudinary, replace above lines with:
+			String publicUrl = cloudinaryService.uploadFile(image, "profile_images");
 			user.setProfileImagePath(publicUrl);
 			userRepository.save(user);
 

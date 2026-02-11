@@ -1,6 +1,7 @@
 package com.hst.service;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,7 +16,8 @@ import java.util.Locale;
 public class ImageStorageService {
 
     private final Path uploadRoot;
-
+@Autowired
+	private CloudinaryService cloudinaryService;
     public ImageStorageService(@Value("${upload.image.dir}") String uploadDir) {
         this.uploadRoot = Paths.get(uploadDir).toAbsolutePath().normalize();
     }
@@ -33,31 +35,33 @@ public class ImageStorageService {
             throw new IOException("Only PNG/JPEG/WEBP images are allowed");
         }
 
-        Files.createDirectories(uploadRoot);
+        String imageUrl = cloudinaryService.uploadFile(file, "images");
+//        Files.createDirectories(uploadRoot);
+//
+//        String original = file.getOriginalFilename();
+//        String clean = sanitizeFilename(original);
+//
+//        String ext = getExtension(clean);
+//        if (ext.isEmpty()) {
+//            ext = mimeToExt(ct);
+//        }
+//
+//        String unique = Instant.now().toEpochMilli() + "-" + clean;
+//        if (!ext.isEmpty() && !unique.toLowerCase(Locale.ROOT).endsWith("." + ext)) {
+//            unique = unique + "." + ext;
+//        }
+//
+//        Path target = uploadRoot.resolve(unique).normalize();
+//        if (!target.startsWith(uploadRoot)) {
+//            throw new IOException("Invalid path");
+//        }
+//
+//        try (InputStream in = file.getInputStream()) {
+//            Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
+//        }
 
-        String original = file.getOriginalFilename();
-        String clean = sanitizeFilename(original);
-
-        String ext = getExtension(clean);
-        if (ext.isEmpty()) {
-            ext = mimeToExt(ct);
-        }
-
-        String unique = Instant.now().toEpochMilli() + "-" + clean;
-        if (!ext.isEmpty() && !unique.toLowerCase(Locale.ROOT).endsWith("." + ext)) {
-            unique = unique + "." + ext;
-        }
-
-        Path target = uploadRoot.resolve(unique).normalize();
-        if (!target.startsWith(uploadRoot)) {
-            throw new IOException("Invalid path");
-        }
-
-        try (InputStream in = file.getInputStream()) {
-            Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
-        }
-
-        return "/images/" + target.getFileName().toString();
+//        return "/images/" + target.getFileName().toString();
+        return imageUrl;
     }
 
     private String sanitizeFilename(String name) {

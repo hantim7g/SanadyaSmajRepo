@@ -5,6 +5,7 @@ import com.hst.entity.BookingSys.Room;
 import com.hst.entity.BookingSys.RoomBlock;
 import com.hst.entity.BookingSys.RoomImage;
 import com.hst.entity.BookingSys.RoomStatus;
+import com.hst.service.CloudinaryService;
 import com.hst.service.RoomBlockService;
 import com.hst.service.RoomService;
 
@@ -36,6 +37,8 @@ public class RoomController {
     @Autowired
     private RoomService roomService;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
  // List page
     @Autowired
     private RoomBlockService roomBlockService;
@@ -191,15 +194,15 @@ public class RoomController {
             for (MultipartFile file : files) {
                 if (!file.isEmpty()) {
 
-                    String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-                    String relativePath = "rooms/" + fileName;
-                    Path fullPath = Paths.get(uploadDir + "/" + relativePath);
-
-                    Files.createDirectories(fullPath.getParent());
-                    Files.copy(file.getInputStream(), fullPath);
+//                    String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+//                    String relativePath = "rooms/" + fileName;
+//                    Path fullPath = Paths.get(uploadDir + "/" + relativePath);
+                    String imageUrl = cloudinaryService.uploadFile(file, "rooms");
+//                    Files.createDirectories(fullPath.getParent());
+//                    Files.copy(file.getInputStream(), fullPath);
 
                     RoomImage img = new RoomImage();
-                    img.setImageUrl(relativePath);
+                    img.setImageUrl(imageUrl);
                     img.setRoom(entity);
 
                     entity.getImages().add(img);

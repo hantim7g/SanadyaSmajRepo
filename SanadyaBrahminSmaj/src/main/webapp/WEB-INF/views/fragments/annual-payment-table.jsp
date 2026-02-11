@@ -44,8 +44,8 @@
             </td>
             <td>
               <c:if test="${not empty payment.receiptImagePath}">
-                <a href="/images/${payment.receiptImagePath}" target="_blank">
-                  <img src="/images/${payment.receiptImagePath}" class="receipt-thumbnail" style="height: 50px;" alt="Receipt" />
+                <a href="${payment.receiptImagePath}" target="_blank">
+                  <img src="${payment.receiptImagePath}" class="receipt-thumbnail" style="height: 50px;" alt="Receipt" />
                 </a>
               </c:if>
             </td>

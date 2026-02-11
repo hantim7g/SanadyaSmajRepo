@@ -23,10 +23,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.hst.entity.Guidance;
 import com.hst.repository.GuidanceRepository;
+import com.hst.service.CloudinaryService;
 
 @Controller
 public class GuidanceController {
-
+@Autowired
+private CloudinaryService cloudinaryService;
 	@Value("${upload.image.dir}")
 	private String uploadDirPath;
     @Autowired
@@ -93,15 +95,17 @@ public class GuidanceController {
         // 🔹 Image uploaded → replace
         if (imageFile != null && !imageFile.isEmpty()) {
 
-            String uploadDir = uploadDirPath + "/guidance/";
-            Files.createDirectories(Paths.get(uploadDir));
+//            String uploadDir = uploadDirPath + "/guidance/";
+//            Files.createDirectories(Paths.get(uploadDir));
+//
+//            String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
+//            Path filePath = Paths.get(uploadDir, fileName);
+//
+//            Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
-            Path filePath = Paths.get(uploadDir, fileName);
-
-            Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            guidance.setImageUrl("/images/guidance/" + fileName);
+//            guidance.setImageUrl("/images/guidance/" + fileName);
+            String imageUrl = cloudinaryService.uploadFile(imageFile, "guidance");
+            guidance.setImageUrl(imageUrl);
 
             // OPTIONAL: delete old image
             if (existing != null && existing.getImageUrl() != null) {
@@ -120,8 +124,8 @@ public class GuidanceController {
     }
     private void deleteOldFile(String imageUrl) {
         try {
-            String filePath = uploadDirPath + imageUrl.replace("/uploads/guidance/", "");
-            Files.deleteIfExists(Paths.get(filePath));
+//            String filePath = uploadDirPath + imageUrl.replace("/uploads/guidance/", "");
+//            Files.deleteIfExists(Paths.get(filePath));
         } catch (Exception e) {
             // log only, don't break save
         }
