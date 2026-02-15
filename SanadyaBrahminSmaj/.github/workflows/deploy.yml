@@ -1,0 +1,36 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: 194.35.120.80
+        username: root
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          cd /root/SanadyaBrahminSmaj
+          git pull
+          docker build -t sanadya-app .
+          docker stop sanadya-container || true
+          docker rm sanadya-container || true
+          docker run -d \
+            -p 80:8080 \
+            --name sanadya-container \
+            --restart always \
+            -e DB_HOST=194.35.120.80 \
+            -e DB_NAME=hst_samaj \
+            -e DB_USER=hstuser \
+            -e DB_PASS=StrongPassword123! \
+            -e CLOUDINARY_NAME=ddyoi5pl3 \
+            -e CLOUDINARY_KEY=491572819866443 \
+            -e CLOUDINARY_SECRET=eg6hovf3Uc1_NZBD-ykLutuFaiI \
+            sanadya-app
