@@ -46,7 +46,15 @@
 			<artifactId>spring-boot-admin-starter-client</artifactId>
 			<version>3.4.1</version>
 		</dependency>
--->		<dependency>
+-->		
+<!-- ADD THIS DEPENDENCY (REQUIRED FOR JSP COMPILATION ON EXTERNAL TOMCAT) -->
+<dependency>
+    <groupId>org.apache.tomcat.embed</groupId>
+    <artifactId>tomcat-embed-jasper</artifactId>
+    <scope>provided</scope>
+</dependency>
+
+<dependency>
 			<groupId>de.codecentric</groupId>
 			<artifactId>spring-boot-admin-starter-server</artifactId>
 			<version>3.4.1</version>
