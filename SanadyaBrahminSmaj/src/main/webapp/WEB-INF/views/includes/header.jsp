@@ -267,7 +267,7 @@
 <nav class="navbar navbar-expand-lg navbar-custom sticky-top" style="font-weight: bold;">
   <div class="container-fluid">
     <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
-      <img src="/images/logo/logo.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top me-2">
+      <img src="https://res.cloudinary.com/ddyoi5pl3/image/upload/v1771295856/logo_upybpp.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top me-2">
       <span class="d-none d-sm-inline">सनाढ्य ब्राह्मण सभा, कोटा</span>
       <span class="d-inline d-sm-none">सनाढ्य सभा</span>
     </a>
