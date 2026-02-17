@@ -351,7 +351,7 @@ public class ViewVivhaController {
 
 	public void generateBiodataPdf(VivhaUser p, HttpServletResponse response) throws Exception {
 
-		String template = Files.readString(Paths.get("src/main/resources/templates/biodata.fo"),
+		String template = Files.readString(Paths.get("src/main/resources/templatesFont/biodata.fo"),
 				StandardCharsets.UTF_8);
 //		String imageUri = "";
 
