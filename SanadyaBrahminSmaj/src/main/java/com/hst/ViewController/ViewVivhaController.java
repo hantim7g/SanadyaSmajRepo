@@ -40,6 +40,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -348,47 +349,65 @@ public class ViewVivhaController {
 
 		generateBiodataPdf(p, response);
 	}
-
 	public void generateBiodataPdf(VivhaUser p, HttpServletResponse response) throws Exception {
 
-		String template = Files.readString(Paths.get("src/main/resources/templatesFont/biodata.fo"),
-				StandardCharsets.UTF_8);
-//		String imageUri = "";
+	    // Load FO template from classpath
+	    ClassPathResource foResource = new ClassPathResource("templatesFont/biodata.fo");
+	    String template;
+	    try (InputStream is = foResource.getInputStream()) {
+	        template = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+	    }
 
-//		if (p.getProfileImagePath() != null && !p.getProfileImagePath().isBlank()) {
-//		    imageUri = new File(
-//		            uploadDir.replaceAll("/images", "")
-//		            + p.getProfileImagePath()
-//		    ).toURI().toString();
-//		}
-		template = template.replace("${name}", p.getName()).replace("${gender}", p.getGender())
-				.replace("${dob}", p.getDob().toString()).replace("${birthTime}", p.getBirthTime())
-				.replace("${father}", p.getFatherName()).replace("${mother}", p.getMotherName())
-				.replace("${education}", p.getQualification()).replace("${occupation}", p.getOccupation())
-				.replace("${income}", p.getIncome()).replace("${height}", p.getHeight())
-				.replace("${manglik}", p.getManglik()).replace("${marital}", p.getMaritalStatus())
-				.replace("${address}", p.getHouseAddress() + ", " + p.getCity()).replace("${mobile}", p.getMobile())
-				.replace("${gotra}", p.getGotra()).replace("${motherGotra}", p.getMotherGotra())
-				.replace("${dadiGotra}", p.getDadiGotra()).replace("${naniGotra}", p.getNaniGotra())
-				.replace("${photoPath}", p.getProfileImagePath());
+	    template = template.replace("${name}", p.getName())
+	            .replace("${gender}", p.getGender())
+	            .replace("${dob}", p.getDob().toString())
+	            .replace("${birthTime}", p.getBirthTime())
+	            .replace("${father}", p.getFatherName())
+	            .replace("${mother}", p.getMotherName())
+	            .replace("${education}", p.getQualification())
+	            .replace("${occupation}", p.getOccupation())
+	            .replace("${income}", p.getIncome())
+	            .replace("${height}", p.getHeight())
+	            .replace("${manglik}", p.getManglik())
+	            .replace("${marital}", p.getMaritalStatus())
+	            .replace("${address}", p.getHouseAddress() + ", " + p.getCity())
+	            .replace("${mobile}", p.getMobile())
+	            .replace("${gotra}", p.getGotra())
+	            .replace("${motherGotra}", p.getMotherGotra())
+	            .replace("${dadiGotra}", p.getDadiGotra())
+	            .replace("${naniGotra}", p.getNaniGotra())
+	            .replace("${photoPath}", p.getProfileImagePath());
 
-		response.setContentType("application/pdf");
-		response.setHeader("Content-Disposition", "attachment; filename=biodata_" + p.getName() + ".pdf");
+	    response.setContentType("application/pdf");
+	    response.setHeader("Content-Disposition",
+	            "attachment; filename=biodata_" + p.getName() + ".pdf");
 
-		FopFactory fopFactory = FopFactory.newInstance(new File("src/main/resources/fop-config.xml"));
+	    // Load FOP config from classpath
+	    ClassPathResource fopConfig = new ClassPathResource("fop-config.xml");
 
-		FOUserAgent userAgent = fopFactory.newFOUserAgent();
+	    FopFactory fopFactory = FopFactory.newInstance(
+	            new File(".").toURI(),
+	            fopConfig.getInputStream()
+	    );
 
-		OutputStream out = response.getOutputStream();
-		Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, userAgent, out);
+	    FOUserAgent userAgent = fopFactory.newFOUserAgent();
 
-		Transformer transformer = TransformerFactory.newInstance().newTransformer();
-		Source src = new StreamSource(new StringReader(template));
-		Result res = new SAXResult(fop.getDefaultHandler());
+	    OutputStream out = response.getOutputStream();
 
-		transformer.transform(src, res);
+	    Fop fop = fopFactory.newFop(
+	            MimeConstants.MIME_PDF,
+	            userAgent,
+	            out
+	    );
+
+	    Transformer transformer = TransformerFactory.newInstance().newTransformer();
+
+	    Source src = new StreamSource(new StringReader(template));
+
+	    Result res = new SAXResult(fop.getDefaultHandler());
+
+	    transformer.transform(src, res);
 	}
-
 	@GetMapping("/user/matrimony/my-profiles")
 	public String getUserProfiles(Model model, Authentication authentication) {
 		if (authentication == null || !authentication.isAuthenticated()) {

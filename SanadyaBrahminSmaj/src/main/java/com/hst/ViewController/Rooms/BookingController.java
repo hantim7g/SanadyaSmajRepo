@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -325,36 +326,39 @@ public class BookingController {
 
         response.setContentType("application/pdf");
         response.setHeader(
-            "Content-Disposition",
-            "attachment; filename=Invoice-" + booking.getBookingCode() + ".pdf"
+                "Content-Disposition",
+                "attachment; filename=Invoice-" + booking.getBookingCode() + ".pdf"
         );
 
-        // ================= FOP SETUP =================
-        FopFactory fopFactory = FopFactory.newInstance(
-        	    new File("src/main/resources/fop-config.xml")
-        	);
+        // FOP config from classpath
+        ClassPathResource fopConfig = new ClassPathResource("fop-config.xml");
 
-//        FopFactory fopFactory = FopFactory.newInstance(
-//                new File(".").toURI());
+        FopFactory fopFactory = FopFactory.newInstance(
+                new File(".").toURI(),
+                fopConfig.getInputStream()
+        );
+
         FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
 
         OutputStream out = response.getOutputStream();
+
         Fop fop = fopFactory.newFop(
                 MimeConstants.MIME_PDF,
                 foUserAgent,
                 out
         );
 
-        // ================= XML DATA =================
+        // XML data
         String xml = InvoiceXmlBuilder.build(booking, guests);
 
-        // ================= XSL TRANSFORM =================
+        // XSL from classpath
+        ClassPathResource xslResource = new ClassPathResource("invoice/invoice.xsl");
+
         TransformerFactory factory = TransformerFactory.newInstance();
-        Source xsl = new StreamSource(
-            getClass().getResourceAsStream("/invoice/invoice.xsl")
+        Transformer transformer = factory.newTransformer(
+                new StreamSource(xslResource.getInputStream())
         );
 
-        Transformer transformer = factory.newTransformer(xsl);
         Source src = new StreamSource(new StringReader(xml));
         Result res = new SAXResult(fop.getDefaultHandler());
 
@@ -362,6 +366,7 @@ public class BookingController {
 
         out.close();
     }
+
     private String generateBookingCode() {
 
         int year = LocalDate.now().getYear();

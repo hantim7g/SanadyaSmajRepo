@@ -40,7 +40,7 @@
                             left: 0;
                             width: 100%;
                             background-color: rgba(0, 0, 0, 0.4);
-                            padding: 15px 25px;
+                            padding: 5px 5px;
                             font-family: 'Noto Sans Devanagari', sans-serif;
                             color: #fff;
                             text-align: left;
@@ -224,7 +224,7 @@
                                                         <div  class="carousel-title">${event.title}</div>
                                                         <div class="carousel-subtitle">
                                                             <c:out
-                                                                value="${fn:length(event.content) > 100 ? fn:substring(event.content, 0, 100) : event.content}" />
+                                                                value="${fn:length(event.content) > 100 ? fn:substring(event.content, 0, 70) : event.content}" />
                                                             <c:if test="${fn:length(event.content) > 100}">...</c:if>
                                                         </div>
 
