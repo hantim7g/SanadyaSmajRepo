@@ -319,7 +319,7 @@
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">समाज सेवाएँ</a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item abc" href="/donate"><i class="fas fa-donate"></i> ऑनलाइन दान</a></li>
+            <li><a class="dropdown-item" href="/donate"><i class="fas fa-donate"></i> ऑनलाइन दान</a></li>
             <li><a class="dropdown-item" href="/volunteer"><i class="fas fa-hand-holding-heart"></i> स्वयंसेवा</a></li>
             <li><a class="dropdown-item" href="/sponsor"><i class="fas fa-handshake"></i> प्रायोजक</a></li>
             <li><a class="dropdown-item" href="/services/marriage"><i class="fas fa-heart"></i> वैवाहिक सहायता</a></li>
