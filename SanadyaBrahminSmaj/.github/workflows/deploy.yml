@@ -26,7 +26,7 @@ jobs:
             -p 80:8080 \
             --name sanadya-container \
             --restart always \
-            -e DB_HOST=194.35.120.80 \
+            -e DB_HOST=localhost \
             -e DB_NAME=hst_samaj \
             -e DB_USER=hstuser \
             -e DB_PASS=StrongPassword123! \
