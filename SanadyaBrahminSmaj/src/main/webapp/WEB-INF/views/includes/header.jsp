@@ -266,11 +266,26 @@
 
 <nav class="navbar navbar-expand-lg navbar-custom sticky-top" style="font-weight: bold;">
   <div class="container-fluid">
-    <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
-      <img src="https://res.cloudinary.com/ddyoi5pl3/image/upload/v1771295856/logo_upybpp.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top me-2">
-      <span class="d-none d-sm-inline">सनाढ्य ब्राह्मण सभा, कोटा</span>
-      <span class="d-inline d-sm-none">सनाढ्य सभा</span>
-    </a>
+	<a class="navbar-brand fw-bold d-flex flex-column align-items-start" href="/">
+	  <div class="d-flex align-items-center">
+	    <img src="https://res.cloudinary.com/ddyoi5pl3/image/upload/v1771295856/logo_upybpp.png" 
+	         alt="Logo" width="30" height="30" 
+	         class="d-inline-block align-text-top me-2">
+
+	    <span class="d-none d-sm-inline">
+	      सनाढ्य ब्राह्मण सभा
+	    </span>
+	    <span class="d-inline d-sm-none">
+	      सनाढ्य सभा
+	    </span>
+	  </div>
+
+	  <!-- New Small Bold Line Below -->
+	  <small class="fw-bold text-white ms-5" style="font-size: 12px;">
+	    महावीर नगर प्रथम, कोटा
+	  </small>
+	</a>
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
