@@ -7,7 +7,7 @@
 
                 <!-- ABOUT -->
                 <div class="col-lg-4 col-md-6">
-                    <h5 class="footer-title">सनाढ्य ब्राह्मण सभा, कोटा</h5>
+                    <h5 class="footer-title">सनाढ्य ब्राह्मण सभा  महावीर नगर प्रथम, कोटा</h5>
                     <p class="footer-text">
                         सनाढ्य ब्राह्मण समाज की आधिकारिक डिजिटल पहल,
                         जिसका उद्देश्य समाज को एक मंच पर लाना,
@@ -71,7 +71,7 @@
     <div class="footer-bottom text-center py-3">
         <div class="container">
             <small>
-                © <span id="currentYear"></span> सनाढ्य ब्राह्मण सभा, कोटा |
+                © <span id="currentYear"></span> सनाढ्य ब्राह्मण सभा महावीर नगर प्रथम, कोटा |
                 सर्वाधिकार सुरक्षित
             </small>
         </div>

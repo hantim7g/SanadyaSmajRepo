@@ -112,7 +112,7 @@
               <h3 class="mb-4">🙍‍♂️ आपकी प्रोफ़ाइल जानकारी</h3>
               <div class="row">
                 <div class="col-md-4 text-center mb-4 image-upload-wrapper">
-                  <img id="profilePic" src="${user.profileImagePath != null ? user.profileImagePath : '/logo/logo.png'}"
+                  <img id="profilePic" src="${user.profileImagePath != null ? user.profileImagePath : 'https://res.cloudinary.com/ddyoi5pl3/image/upload/v1771295856/logo_upybpp.png'}"
                     alt="Profile Image">
                   <div class="mt-2">
                     <input type="file" id="profileImageInput" accept="image/*" class="form-control mt-2"

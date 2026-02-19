@@ -13,7 +13,7 @@
             <div class="col-md-5 d-none d-md-block" style="background-color:#91402c; color: white; padding: 25px 20px;">
               <div class="d-flex flex-column justify-content-center align-items-center h-100 text-center">
                 <img src="https://res.cloudinary.com/ddyoi5pl3/image/upload/v1771295856/logo_upybpp.png" alt="Welcome" class="img-fluid mb-4" />
-                <h4 class="fw-bold">सनाढ्य ब्राह्मण सभा, कोटा</h4><br />
+                <h4 class="fw-bold">सनाढ्य ब्राह्मण महासभा महावीर नगर प्रथम, कोटा</h4><br />
                 <h5 class="fw-bold">आपका स्वागत करती है</h5><br />
                 <h4 class="fw-bold">स्वागतम</h4>
               </div>

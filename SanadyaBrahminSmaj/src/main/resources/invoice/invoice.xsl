@@ -56,7 +56,8 @@
               font-weight="bold"
               color="#7a4200"
               text-align="left">
-            सनाढ्य ब्राह्मण समाज
+            सनाढ्य ब्राह्मण महासभा
+
           </fo:block>
 
           <fo:block

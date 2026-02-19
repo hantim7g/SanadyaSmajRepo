@@ -6,7 +6,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>सनाढ्य ब्राह्मण सभा</title>
+  <title>सनाढ्य ब्राह्मण महासभा महावीर नगर प्रथम, कोटा</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;600;700&display=swap" rel="stylesheet">
 
@@ -273,10 +273,12 @@
 	         class="d-inline-block align-text-top me-2">
 
 	    <span class="d-none d-sm-inline">
-	      सनाढ्य ब्राह्मण सभा
+			सनाढ्य ब्राह्मण महासभा
+
 	    </span>
 	    <span class="d-inline d-sm-none">
-	      सनाढ्य सभा
+			सनाढ्य ब्राह्मण महासभा
+
 	    </span>
 	  </div>
 
