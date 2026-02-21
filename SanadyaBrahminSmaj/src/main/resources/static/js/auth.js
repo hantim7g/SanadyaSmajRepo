@@ -81,6 +81,7 @@ $(function () {
 
 $(function() {
 	$('#registrationForm').submit(function(e) {
+		debugger
 		e.preventDefault();
 		const errorBox = $('#errorBox');
 		errorBox.addClass("d-none");
@@ -88,11 +89,11 @@ $(function() {
 		const mobile = $('#mobile').val().trim();
 		const password = $('#password').val().trim();
 
-		if (!/^\d{10}$/.test(mobile)) {
+		/*if (!/^\d{10}$/.test(mobile)) {
 			return showError("मोबाइल नंबर 10 अंकों का होना चाहिए");
 		}
 
-		/*if (password.length < 6) {
+		if (password.length < 6) {
 			return showError("पासवर्ड कम से कम 6 अक्षरों का होना चाहिए");
 		}*/
 
