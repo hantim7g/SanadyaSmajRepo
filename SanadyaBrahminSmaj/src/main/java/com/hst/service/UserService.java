@@ -70,10 +70,18 @@ public class UserService {
 	public Page<User> filterUsersPaginated(String name, String mobile, String approved, String annualFeeStatus, int page, int size,List<Integer> years) {
 		Pageable pageable = PageRequest.of(page, size); // Optional: add Sort.by("fullName")
 		Page<User> users =null;
+		
+		if(annualFeeStatus.isEmpty()) 
 		users =userRepo.filterUsers(name, mobile, approved, pageable);
 //		users.forEach(this::updateFeeStatusForUser);
-		
-
+		else {
+			 users = userRepo.filterUsersAll(name, mobile, approved).stream()
+					.peek(user -> updateFeeStatusForUser(user,years))
+					.collect(Collectors.collectingAndThen(Collectors.toList(), list -> {
+						int pgSize = Math.max(1, list.size()); // size must be >= 1
+						return new PageImpl<>(list, PageRequest.of(0, pgSize), list.size());
+					}));
+		}
 		for(User user :users) {
 			updateFeeStatusForUser(user,years);
 		}
@@ -114,7 +122,7 @@ public class UserService {
 	    
 	    boolean hasPendingAnnual = payments.stream()
 	    	    .anyMatch(p ->
-	    	        "वार्षिक शुल्क".equalsIgnoreCase(p.getDescription())
+	    	        (p.getDescription().contains("वार्षिक"))
 	    	        && ("सत्यापित".equals(p.getValidated()) || "प्रक्रिया में".equals(p.getValidated()))
 	    	        && years.stream().anyMatch(y -> {
 	    	        	LocalDate from = p.getFeeFrom().toLocalDate();
@@ -125,20 +133,20 @@ public class UserService {
 
 	    boolean hasPendingValidateAnnual = payments.stream()
 	    	    .anyMatch(p ->
-	    	        "वार्षिक शुल्क".equalsIgnoreCase(p.getDescription())
+	    	        (p.getDescription().contains("वार्षिक"))
 	    	        && "प्रक्रिया में".equals(p.getValidated())
 	    	    );
 
 	    
 	    boolean hasPendingOther = payments.stream()
-	        .anyMatch(p ->!("वार्षिक शुल्क".equalsIgnoreCase(p.getDescription())) && "प्रक्रिया में".equals(p.getValidated())  && "सफल".equals(p.getStatus()));
+	        .anyMatch(p ->!(p.getDescription().contains("वार्षिक")) && "प्रक्रिया में".equals(p.getValidated())  && "सफल".equals(p.getStatus()));
 
 	    //boolean hasPendingAnnual = payments.stream().max(null)
 	    user.setAnnualFeeValidated(hasPendingValidateAnnual? "प्रक्रिया में" : "प्रतीक्षारत");
 	    user.setAnnualFeeStatus(hasPendingAnnual ? "सत्यापित/प्रक्रिया में" : "प्रतीक्षारत");
 	    user.setOtherFeeValidated(hasPendingOther ? "प्रक्रिया में" : "सत्यापित");
 	    payments.stream()
-        .filter(p -> "वार्षिक शुल्क".equalsIgnoreCase(p.getDescription()) &&
+        .filter(p -> (p.getDescription().contains("वार्षिक")) &&
                      "सत्यापित".equals(p.getValidated()))
         .max(Comparator.comparing(Payment::getPaymentDate))
         .ifPresent(latest -> {

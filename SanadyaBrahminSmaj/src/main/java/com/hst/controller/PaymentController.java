@@ -1,6 +1,7 @@
 package com.hst.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hst.dto.PaymentRequest;
 import com.hst.entity.Payment;
 import com.hst.entity.User;
 import com.hst.repository.UserRepository;
@@ -67,7 +68,7 @@ public class PaymentController {
     public ResponseEntity<?> addPayment(
             @RequestPart("payment") String paymentJson,
             @RequestPart(value = "receiptImage", required = false) MultipartFile receiptImage,
-            Authentication authentication,HttpServletRequest request) {
+            Authentication authentication, HttpServletRequest request) {
 
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
@@ -76,38 +77,53 @@ public class PaymentController {
         User user = userRepository.findByMobile(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Payment payment;
         try {
-            payment = objectMapper.readValue(paymentJson, Payment.class);
+            // Map to PaymentRequest DTO instead of Payment entity directly
+            PaymentRequest req = objectMapper.readValue(paymentJson, PaymentRequest.class);
+            
+            String imagePath = null;
+            if (receiptImage != null && !receiptImage.isEmpty()) {
+                imagePath = saveReceiptImage(receiptImage);
+            }
+
+            // Logical Branching
+            if ("वार्षिक शुल्क".equals(req.getDescription()) && req.getFinancialYears() != null && !req.getFinancialYears().isEmpty()) {
+                // Service handles the loop and splitting the amount
+                paymentService.saveAnnualMultiYearPayment(req, user, imagePath);
+            } else {
+                // Standard flow for single entries (Donations, Hall booking, etc.)
+                Payment payment = convertToEntity(req, user, imagePath);
+                paymentService.addPayment(payment);
+            }
+
+            auditLogService.log("PAYMENT_CREATED", "Payment", 0L, user.getId(), user.getMobile(), 
+                               "Payment processed for: " + req.getDescription(), request);
+
+            return ResponseEntity.ok("Payment saved successfully");
+
         } catch (IOException e) {
             return ResponseEntity.badRequest().body("Invalid payment data");
         }
-
-        payment.setUser(user);
-        payment.setCrtBy(user.getId());
-        payment.setCrtDt(Date.valueOf(LocalDate.now()));
-
-        if (receiptImage != null && !receiptImage.isEmpty()) {
-            String imagePath = saveReceiptImage(receiptImage);
-            payment.setReceiptImagePath(imagePath);
-        }
-
-        Payment savedPayment = paymentService.addPayment(payment);
-
-
-auditLogService.log(
-        "PAYMENT_CREATED",
-        "Payment",
-        savedPayment.getId(),
-        user.getId(),
-        user.getMobile(),
-        "Payment created with amount: " + savedPayment.getAmount(),
-        request
-);
-        
-        return ResponseEntity.ok(savedPayment.getId());
     }
 
+    // Helper to convert DTO to Entity for non-annual payments
+    private Payment convertToEntity(PaymentRequest req, User user, String imagePath) {
+        Payment p = new Payment();
+        p.setUser(user);
+        p.setTransactionId(req.getTransactionId());
+        p.setAmount(req.getAmount());
+        p.setPaymentMode(req.getPaymentMode());
+        p.setStatus(req.getStatus());
+        p.setDescription(req.getDescription());
+        p.setReason(req.getReason());
+        p.setPaymentDate(Date.valueOf(req.getPaymentDate()));
+        p.setFeeFrom(Date.valueOf(req.getFeeFrom()));
+        p.setFeeTo(Date.valueOf(req.getFeeTo()));
+        p.setReceiptImagePath(imagePath);
+        p.setCrtBy(user.getId());
+        p.setCrtDt(Date.valueOf(LocalDate.now()));
+        return p;
+    }
     /* =========================
        UPDATE PAYMENT (OWNER ONLY)
        ========================= */

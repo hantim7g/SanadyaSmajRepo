@@ -51,6 +51,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
     	                       Pageable pageable);
     
     
+    // Optional field filters (AND logic)
+    @Query("SELECT u FROM User u " +
+    	       "WHERE (:name IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+    	       "AND (:mobile IS NULL OR LOWER(u.mobile) LIKE LOWER(CONCAT('%', :mobile, '%'))) " +
+    	       "AND (:approved IS NULL OR u.approved = :approved) ")
+    	List<User> filterUsersAll(@Param("name") String name,
+    	                       @Param("mobile") String mobile,
+    	                       @Param("approved") String approved
+    	                       );
+    
     
     List<User>  findAllBySmajRole(String smajRole);
     List<User> findAllByOrderBySmajRolePriorityAsc();
