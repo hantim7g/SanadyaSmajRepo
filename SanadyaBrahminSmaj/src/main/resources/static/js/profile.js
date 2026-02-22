@@ -29,15 +29,15 @@ $(document).ready(function () {
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(formData),
-            success: function () { alert("✅ प्रोफ़ाइल अपडेट हो गई!"); location.reload(); },
-            error: function () { alert("❌ अपडेट में त्रुटि!"); }
+            success: function () { showSuccessAlert("✅ प्रोफ़ाइल अपडेट हो गई!"); location.reload(); },
+            error: function () { showErrorAlert("❌ अपडेट में त्रुटि!"); }
         });
     });
 
     // Image Upload
     $('#uploadImageBtn').click(function () {
         const fileInput = $('#profileImageInput')[0];
-        if (!fileInput.files.length) return alert("कृपया छवि चुनें।");
+        if (!fileInput.files.length) return showWarningAlert("कृपया छवि चुनें.");
         const fd = new FormData();
         fd.append("image", fileInput.files[0]);
 
@@ -50,7 +50,7 @@ $(document).ready(function () {
             success: function (res) {
                 latestImagePath = res.imagePath;
                 $('#profilePic').attr("src", latestImagePath);
-                alert("✅ फोटो अपलोड सफल!");
+                showSuccessAlert("✅ फोटो अपलोड सफल!");
                 $('#profileForm').submit();
             }
         });
@@ -81,7 +81,7 @@ $(document).ready(function () {
         if (formData.get('receiptImage')) finalFd.append('receiptImage', formData.get('receiptImage'));
 
         fetch('/api/payment/add', { method: 'POST', body: finalFd })
-        .then(() => { alert("✅ भुगतान सहेजा गया!"); location.reload(); });
+        .then(() => { showSuccessAlert("✅ भुगतान सहेजा गया!"); location.reload(); });
     });
 
     // Edit Payment Trigger
@@ -119,14 +119,14 @@ $(document).ready(function () {
 	        processData: false,
 	        contentType: false,
 	        success: function (response) {
-	            alert("✅ " + response);
+	            showSuccessAlert("✅ " + response);
 	            location.reload();
 	        },
 	        error: function (xhr) {
 	            submitBtn.prop('disabled', false).text(originalText);
 	            let errorMsg = "❌ अपडेट विफल!";
-	            if(xhr.responseText) errorMsg += "\nकारण: " + xhr.responseText;
-	            alert(errorMsg);
+            if(xhr.responseText) errorMsg += " कारण: " + xhr.responseText;
+            showErrorAlert(errorMsg);
 	        }
 	    });
 	});
