@@ -26,8 +26,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT COUNT(u) FROM User u")
     long countUsers();
     
-    Page<User> findAllByOrderByFullNameAsc(Pageable pageable);
-
 
     @Query("SELECT u FROM User u WHERE (:name IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) AND (:city IS NULL OR LOWER(u.homeDistrict) LIKE LOWER(CONCAT('%', :city, '%'))) AND (:approved IS NULL OR u.approved = :approved)")
      List<User> findFiltered(@Param("name") String name,
@@ -65,4 +63,52 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User>  findAllBySmajRole(String smajRole);
     List<User> findAllByOrderBySmajRolePriorityAsc();
 
-}
+    
+    @Query(value = "SELECT DISTINCT u FROM User u " +
+    	       "WHERE (:name IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+    	       "AND (:mobile IS NULL OR u.mobile LIKE CONCAT('%', :mobile, '%')) " +
+    	       "AND (:approved IS NULL OR u.approved = :approved) " +
+    	       "AND (" +
+    	       "  :feeStatus IS NULL OR :feeStatus = '' OR " +
+    	       "  (:feeStatus = 'सत्यापित/प्रक्रिया में' AND EXISTS (" +
+    	       "     SELECT 1 FROM Payment p2 WHERE p2.user.id = u.id " +
+    	       "     AND p2.description LIKE '%वार्षिक%' " +
+    	       "     AND (p2.validated = 'सत्यापित' OR p2.validated = 'प्रक्रिया में') " +
+    	       "     AND (:startYear IS NULL OR (YEAR(p2.feeFrom) <= :startYear AND YEAR(p2.feeTo) >= :startYear))" +
+    	       "  )) OR " +
+    	       "  (:feeStatus = 'प्रतीक्षारत' AND NOT EXISTS (" +
+    	       "     SELECT 1 FROM Payment p2 WHERE p2.user.id = u.id " +
+    	       "     AND p2.description LIKE '%वार्षिक%' " +
+    	       "     AND (p2.validated = 'सत्यापित' OR p2.validated = 'प्रक्रिया में') " +
+    	       "     AND (:startYear IS NULL OR (YEAR(p2.feeFrom) <= :startYear AND YEAR(p2.feeTo) >= :startYear))" +
+    	       "  ))" +
+    	       ")",
+    	       countQuery = "SELECT COUNT(DISTINCT u) FROM User u " +
+    	       "WHERE (:name IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+    	       "AND (:mobile IS NULL OR u.mobile LIKE CONCAT('%', :mobile, '%')) " +
+    	       "AND (:approved IS NULL OR u.approved = :approved) " +
+    	       "AND (" +
+    	       "  :feeStatus IS NULL OR :feeStatus = '' OR " +
+    	       "  (:feeStatus = 'सत्यापित/प्रक्रिया में' AND EXISTS (" +
+    	       "     SELECT 1 FROM Payment p2 WHERE p2.user.id = u.id " +
+    	       "     AND p2.description LIKE '%वार्षिक%' " +
+    	       "     AND (p2.validated = 'सत्यापित' OR p2.validated = 'प्रक्रिया में') " +
+    	       "     AND (:startYear IS NULL OR (YEAR(p2.feeFrom) <= :startYear AND YEAR(p2.feeTo) >= :startYear))" +
+    	       "  )) OR " +
+    	       "  (:feeStatus = 'प्रतीक्षारत' AND NOT EXISTS (" +
+    	       "     SELECT 1 FROM Payment p2 WHERE p2.user.id = u.id " +
+    	       "     AND p2.description LIKE '%वार्षिक%' " +
+    	       "     AND (p2.validated = 'सत्यापित' OR p2.validated = 'प्रक्रिया में') " +
+    	       "     AND (:startYear IS NULL OR (YEAR(p2.feeFrom) <= :startYear AND YEAR(p2.feeTo) >= :startYear))" +
+    	       "  ))" +
+    	       ")")
+    	Page<User> filterUsersWithPayments(
+    	        @Param("name") String name,
+    	        @Param("mobile") String mobile,
+    	        @Param("approved") String approved,
+    	        @Param("feeStatus") String feeStatus,
+    	        @Param("startYear") Integer startYear,
+    	        Pageable pageable);
+        Page<User> findAllByOrderByFullNameAsc(Pageable pageable);
+        }
+
