@@ -66,7 +66,17 @@ public class User {
 	private String smajRole ="सदस्य";
 	@Column(name = "smaj_role_priority")
 	private Integer smajRolePriority = 99;
-	
+	// Add this inside your User class
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+	private java.util.List<Payment> payments = new java.util.ArrayList<>();
+
+	public java.util.List<Payment> getPayments() {
+	    return payments;
+	}
+
+	public void setPayments(java.util.List<Payment> payments) {
+	    this.payments = payments;
+	}
 	public Double getLastAnnualFeeAmount() {
 		return lastAnnualFeeAmount;
 	}

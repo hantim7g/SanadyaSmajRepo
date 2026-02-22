@@ -16,7 +16,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     @Query("""
     	    SELECT p FROM Payment p
-    	    WHERE p.user.id = :userId AND p.status = 'सफल' AND p.description = 'वार्षिक शुल्क'
+    	    WHERE p.user.id = :userId AND p.status = 'सफल' AND p.description LIKE 'वार्षिक%'
     	    ORDER BY p.paymentDate DESC
     	""")
     	List<Payment> findLastAnnualFeePaymentByUserId(@Param("userId") Long userId);
