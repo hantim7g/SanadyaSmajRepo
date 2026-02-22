@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-SanadyaBrahminSmajApplication<SanadyaBrahminSmaj>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.hst.SanadyaBrahminSmajApplication",
+            "projectName": "SanadyaBrahminSmaj",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

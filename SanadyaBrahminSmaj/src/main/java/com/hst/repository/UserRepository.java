@@ -74,13 +74,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
     	       "     SELECT 1 FROM Payment p2 WHERE p2.user.id = u.id " +
     	       "     AND p2.description LIKE '%वार्षिक%' " +
     	       "     AND (p2.validated = 'सत्यापित' OR p2.validated = 'प्रक्रिया में') " +
-    	       "     AND (:startYear IS NULL OR (YEAR(p2.feeFrom) <= :startYear AND YEAR(p2.feeTo) >= :startYear))" +
+    	       "     AND (:startYear IS NULL OR YEAR(p2.feeFrom) <= :startYear AND YEAR(p2.feeTo) >= :startYear)" +
     	       "  )) OR " +
     	       "  (:feeStatus = 'प्रतीक्षारत' AND NOT EXISTS (" +
     	       "     SELECT 1 FROM Payment p2 WHERE p2.user.id = u.id " +
     	       "     AND p2.description LIKE '%वार्षिक%' " +
     	       "     AND (p2.validated = 'सत्यापित' OR p2.validated = 'प्रक्रिया में') " +
-    	       "     AND (:startYear IS NULL OR (YEAR(p2.feeFrom) <= :startYear AND YEAR(p2.feeTo) >= :startYear))" +
+    	       "     AND (:startYear IS NULL OR YEAR(p2.feeFrom) <= :startYear AND YEAR(p2.feeTo) >= :startYear)" +
     	       "  ))" +
     	       ")",
     	       countQuery = "SELECT COUNT(DISTINCT u) FROM User u " +
@@ -93,13 +93,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
     	       "     SELECT 1 FROM Payment p2 WHERE p2.user.id = u.id " +
     	       "     AND p2.description LIKE '%वार्षिक%' " +
     	       "     AND (p2.validated = 'सत्यापित' OR p2.validated = 'प्रक्रिया में') " +
-    	       "     AND (:startYear IS NULL OR (YEAR(p2.feeFrom) <= :startYear AND YEAR(p2.feeTo) >= :startYear))" +
+    	       "     AND (:startYear IS NULL OR YEAR(p2.feeFrom) <= :startYear AND YEAR(p2.feeTo) >= :startYear)" +
     	       "  )) OR " +
     	       "  (:feeStatus = 'प्रतीक्षारत' AND NOT EXISTS (" +
     	       "     SELECT 1 FROM Payment p2 WHERE p2.user.id = u.id " +
     	       "     AND p2.description LIKE '%वार्षिक%' " +
     	       "     AND (p2.validated = 'सत्यापित' OR p2.validated = 'प्रक्रिया में') " +
-    	       "     AND (:startYear IS NULL OR (YEAR(p2.feeFrom) <= :startYear AND YEAR(p2.feeTo) >= :startYear))" +
+    	       "     AND (:startYear IS NULL OR YEAR(p2.feeFrom) <= :startYear AND YEAR(p2.feeTo) >= :startYear)" +
     	       "  ))" +
     	       ")")
     	Page<User> filterUsersWithPayments(

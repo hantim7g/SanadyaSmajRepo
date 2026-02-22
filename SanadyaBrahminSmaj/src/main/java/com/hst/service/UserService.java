@@ -73,12 +73,13 @@ public class UserService {
         Integer startYear = (years != null && !years.isEmpty()) ? years.stream().min(Integer::compare).orElse(null) : null;
 //        Integer endYear = (years != null && !years.isEmpty()) ? years.stream().max(Integer::compare).orElse(null) : null;
 
-       System.out.println("Filtering with: name=" + name + ", mobile=" + mobile + ", approved=" + approved + ", annualFeeStatus=" + annualFeeStatus + ", years=" + years);
+       System.out.println("Filtering with: name=" + name + ", mobile=" + mobile + ", approved=" + approved + ", annualFeeStatus=" + annualFeeStatus + ", years=" + years + ", startYear=" + startYear);
         // DB does the heavy filtering and pagination
         Page<User> userPage = userRepo.filterUsersWithPayments(
                 name, mobile, approved, annualFeeStatus, startYear, pageable
         );
 
+        System.out.println("Query returned " + userPage.getTotalElements() + " total users");
         // Enrich only the current page content
         userPage.getContent().forEach(user -> updateFeeStatusForUser(user, years));
 
