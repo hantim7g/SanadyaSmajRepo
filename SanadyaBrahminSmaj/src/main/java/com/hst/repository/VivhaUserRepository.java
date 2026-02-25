@@ -110,26 +110,33 @@ public interface VivhaUserRepository extends JpaRepository<VivhaUser, Long> {
 			    Pageable pageable
 			);
 	
-	
-	
 	@Query("""
-			SELECT v FROM VivhaUser v
-			WHERE v.approved = true
-			AND (:gender IS NULL OR v.gender = :gender)
-			AND (:manglik IS NULL OR v.manglik = :manglik)
-			AND (:city IS NULL OR v.city LIKE %:city%)
-			AND (:district IS NULL OR v.district LIKE %:district%)
-			AND (:gotra IS NULL OR v.gotra LIKE %:gotra%)
-			AND (:qualification IS NULL OR v.qualification LIKE %:qualification%)
-			AND (:occupation IS NULL OR v.occupation LIKE %:occupation%)
-			AND (:income IS NULL OR v.income LIKE %:income%)
-			AND (:minAge IS NULL OR FUNCTION('YEAR', CURRENT_DATE) - FUNCTION('YEAR', v.dob) >= :minAge)
-			AND (:maxAge IS NULL OR FUNCTION('YEAR', CURRENT_DATE) - FUNCTION('YEAR', v.dob) <= :maxAge)
-			""")
-	Page<VivhaUser> searchWithPaginationAndAge(String gender, String manglik, String city, String district,
-			String gotra, String qualification, String occupation, String income, Integer minAge, Integer maxAge,
-			Pageable pageable);
-
+SELECT v FROM VivhaUser v
+WHERE v.approved = true
+AND (:gender IS NULL OR v.gender = :gender)
+AND (:manglik IS NULL OR v.manglik = :manglik)
+AND (:city IS NULL OR v.city LIKE %:city%)
+AND (:district IS NULL OR v.district LIKE %:district%)
+AND (:gotra IS NULL OR v.gotra LIKE %:gotra%)
+AND (:qualification IS NULL OR v.qualification LIKE %:qualification%)
+AND (:occupation IS NULL OR v.occupation LIKE %:occupation%)
+AND (:income IS NULL OR v.income LIKE %:income%)
+AND (:minAge IS NULL OR FUNCTION('timestampdiff', YEAR, v.dob, CURRENT_DATE) >= :minAge)
+AND (:maxAge IS NULL OR FUNCTION('timestampdiff', YEAR, v.dob, CURRENT_DATE) <= :maxAge)
+""")
+Page<VivhaUser> searchWithPaginationAndAge(
+    String gender,
+    String manglik,
+    String city,
+    String district,
+    String gotra,
+    String qualification,
+    String occupation,
+    String income,
+    Integer minAge,
+    Integer maxAge,
+    Pageable pageable
+);
 	
 	
 	@Transactional

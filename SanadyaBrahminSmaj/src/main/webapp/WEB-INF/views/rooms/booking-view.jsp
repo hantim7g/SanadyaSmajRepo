@@ -134,7 +134,7 @@ ${booking.nationality}
 <c:if test="${not empty booking.idProofFileUrl}">
   <c:set var="file" value="${booking.idProofFileUrl}" />
 
-      <a href="/images/id-proof/${file}" target="_blank"
+      <a href="${file}" target="_blank"
          class="btn btn-outline-primary btn-sm">
         📄 ID प्रूफ देखें
       </a>
