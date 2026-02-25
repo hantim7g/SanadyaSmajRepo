@@ -6,10 +6,15 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.hibernate.envers.RelationTargetAuditMode;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
 @Entity
+@Audited
 @Table(name = "rooms")
 public class Room {
 
@@ -18,8 +23,9 @@ public class Room {
     private Long id;
 
     // ========== RELATIONS ==========
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RoomImage> images = new ArrayList<>();
+@OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+@NotAudited
+private List<RoomImage> images = new ArrayList<>();
 
     // ========== BASIC INFO ==========
     @NotBlank(message = "कमरे का नंबर अनिवार्य है")

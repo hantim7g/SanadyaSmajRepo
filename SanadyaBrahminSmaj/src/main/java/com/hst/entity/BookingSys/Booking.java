@@ -4,10 +4,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.hibernate.envers.Audited;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
 @Entity
+@Audited
 @Table(name = "bookings")
 public class Booking {
 
