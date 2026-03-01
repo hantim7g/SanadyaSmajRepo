@@ -54,13 +54,13 @@ $(document).on('click', '.validate-payment-btn', function () {
   $btn.prop("disabled", true).text("⏳ सत्यापन...");
 
   $.post(`/admin/validatePayment/${paymentId}/${encodeURIComponent(reason)}`, function () {
-    alert('भुगतान सत्यापित हुआ');
+    showSuccessAlert('भुगतान सत्यापित हुआ');
     $btn.closest('tr').find('td:eq(5) span')
       .removeClass().addClass('badge bg-success').text('सत्यापित');
     $btn.siblings().remove(); // remove reject + input
     $btn.remove();
   }).fail(function () {
-    alert('सत्यापन में त्रुटि!');
+    showErrorAlert('सत्यापन में त्रुटि!');
     $btn.prop("disabled", false).text("✔️ सत्यापित करें");
   });
 });
@@ -70,7 +70,7 @@ $(document).on('click', '.reject-payment-btn', function () {
   const reason = $(this).closest('tr').find('.reason-input').val();
 
   if (!reason) {
-    alert('कृपया अस्वीकृति का कारण दर्ज करें।');
+    showWarningAlert('कृपया अस्वीकृति का कारण दर्ज करें।');
     return;
   }
 
@@ -78,13 +78,13 @@ $(document).on('click', '.reject-payment-btn', function () {
   $btn.prop("disabled", true).text("⏳ अस्वीकृति...");
 
   $.post(`/admin/rejectPayment/${paymentId}/${encodeURIComponent(reason)}`, function () {
-    alert('भुगतान अस्वीकृत किया गया');
+    showSuccessAlert('भुगतान अस्वीकृत किया गया');
     $btn.closest('tr').find('td:eq(5) span')
       .removeClass().addClass('badge bg-danger').text('अस्वीकृत');
     $btn.siblings().remove();
     $btn.remove();
   }).fail(function () {
-    alert('अस्वीकृति में त्रुटि!');
+    showErrorAlert('अस्वीकृति में त्रुटि!');
     $btn.prop("disabled", false).text("❌ अस्वीकृत करें");
   });
 });
@@ -93,7 +93,7 @@ $(document).on('click', '.reject-payment-btn', function () {
  /*   $(document).on('click', '.validate-other-btn', function () {
       const userId = $(this).data('user-id');
       $.post('/admin/validateOtherFee/' + userId, function () {
-        alert('अन्य शुल्क सत्यापित हुआ');
+        showSuccessAlert('अन्य शुल्क सत्यापित हुआ');
         fetchFilteredUsers();
       });
     });
@@ -102,7 +102,7 @@ $(document).on('click', '.reject-payment-btn', function () {
 $(document).on('click', '.validate-profile-btn', function () {
   const userId = $(this).data('user-id');
   $.post('/admin/approveProfile/' + userId, function () {
-    alert('प्रोफाइल सत्यापित किया गया');
+    showSuccessAlert('प्रोफाइल सत्यापित किया गया');
     fetchFilteredUsers();
   });
 });
@@ -110,12 +110,22 @@ $(document).on('click', '.validate-profile-btn', function () {
 // Reject profile
 $(document).on('click', '.reject-profile-btn', function () {
   const userId = $(this).data('user-id');
-  if (confirm('क्या आप वाकई इस प्रोफाइल को अस्वीकृत करना चाहते हैं?')) {
-    $.post('/admin/rejectProfile/' + userId, function () {
-      alert('प्रोफाइल अस्वीकृत किया गया');
-      fetchFilteredUsers();
-    });
-  }
+  bootbox.confirm({
+    title: '⚠️ पुष्टि करें',
+    message: 'क्या आप वाकई इस प्रोफाइल को अस्वीकृत करना चाहते हैं?',
+    buttons: {
+      confirm: { label: 'हाँ, अस्वीकृत करें', className: 'btn-danger' },
+      cancel: { label: 'नहीं', className: 'btn-secondary' }
+    },
+    callback: function(result) {
+      if (result) {
+        $.post('/admin/rejectProfile/' + userId, function () {
+          showSuccessAlert('प्रोफाइल अस्वीकृत किया गया');
+          fetchFilteredUsers();
+        });
+      }
+    }
+  });
 });
 
 
@@ -137,7 +147,7 @@ $(document).on('click', '.reject-profile-btn', function () {
         $('#userCardListContainer').html(html);
       },
       error: function () {
-        alert("डेटा लाने में त्रुटि!");
+        showErrorAlert("डेटा लाने में त्रुटि!");
       }
     });
   }

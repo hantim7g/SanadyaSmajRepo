@@ -14,12 +14,15 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+//===== Spring MVC =====
 import org.springframework.web.bind.annotation.*;
 
+//===== Your Project Entities =====
 import com.hst.entity.BookingSys.*;
 import com.hst.repository.BookingGuestRepository;
 import com.hst.repository.BookingRepository;
 import com.hst.repository.RoomRepository;
+import com.hst.service.CloudinaryService;
 import com.hst.util.InvoiceXmlBuilder;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Font;
@@ -43,9 +46,6 @@ import java.util.List;
 //===== Servlet =====
 import jakarta.servlet.http.HttpServletResponse;
 
-//===== Spring MVC =====
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 //===== XML / XSLT =====
@@ -62,10 +62,6 @@ import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.MimeConstants;
 
-//===== Your Project Entities =====
-import com.hst.entity.BookingSys.Booking;
-import com.hst.entity.BookingSys.BookingGuest;
-
 //===== Repositories =====
 import com.hst.repository.BookingRepository;
 import com.hst.repository.BookingGuestRepository;
@@ -77,7 +73,8 @@ public class BookingController {
 	private String uploadDir;
     @Autowired
     private BookingRepository bookingRepo;
-
+	@Autowired
+	private CloudinaryService cloudinaryService;
     @Autowired
     private BookingGuestRepository guestRepo;
 
@@ -145,13 +142,15 @@ public class BookingController {
 
         /* ===== FILE UPLOAD ===== */
 //        String uploadDir = "uploads/id-proof/";
-        File dir = new File(uploadDir+"/id-proof/");
-        if (!dir.exists()) dir.mkdirs();
+        // File dir = new File(uploadDir+"/id-proof/");
+        // if (!dir.exists()) dir.mkdirs();
 
-        String fileName = System.currentTimeMillis() + "_" + idProofFile.getOriginalFilename();
-        File dest = new File(uploadDir+"/id-proof/" + fileName);
-        idProofFile.transferTo(dest);
-        booking.setIdProofFileUrl(fileName);
+        // String fileName = System.currentTimeMillis() + "_" + idProofFile.getOriginalFilename();
+        // File dest = new File(uploadDir+"/id-proof/" + fileName);
+        // idProofFile.transferTo(dest);
+        String imageUrl = cloudinaryService.uploadFile(idProofFile, "id-proof");
+			
+        booking.setIdProofFileUrl(imageUrl);
 
         /* ===== PRICE CALCULATION ===== */
         long nights = ChronoUnit.DAYS.between(

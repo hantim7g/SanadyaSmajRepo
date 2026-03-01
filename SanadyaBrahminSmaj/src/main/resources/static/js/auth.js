@@ -175,7 +175,7 @@ debugger;
 						
 						},
 						error: function() {
-							alert("⚠️ पंजीकरण सफल, लेकिन छवि अपलोड विफल।");
+							showWarningAlert("⚠️ पंजीकरण सफल, लेकिन छवि अपलोड विफल।");
 							resetForm();
 						}
 					});

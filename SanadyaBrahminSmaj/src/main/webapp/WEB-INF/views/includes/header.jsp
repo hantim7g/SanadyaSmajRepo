@@ -31,6 +31,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootbox@6.0.0/dist/bootbox.min.js"></script>
   <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+  <script src="${pageContext.request.contextPath}/js/alertUtils.js"></script>
 
   <style>
     body {

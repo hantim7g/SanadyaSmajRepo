@@ -259,8 +259,7 @@
                 <select name="annualFeeStatus" class="form-select">
                   <option value="">वार्षिक शुल्क स्थिति</option>
                   <option value="प्रतीक्षारत">प्रतीक्षारत</option>
-                  <option value="प्रक्रिया में">सत्यापित/प्रक्रिया में</option>
-                  <!-- <option value="सत्यापित">सत्यापित/प्रक्रिया में</option> -->
+                  <option value="सत्यापित/प्रक्रिया में">सत्यापित/प्रक्रिया में</option>
                   <option value="अस्वीकृत">अस्वीकृत</option>
                 </select>
               </div>

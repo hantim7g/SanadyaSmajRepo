@@ -8,7 +8,7 @@ $(document).ready(function () {
     const remarks = form.find('input[name="adminRemarks"]').val().trim();
 
     if (!remarks) {
-      alert("कृपया टिप्पणी भरें।");
+      showWarningAlert("कृपया टिप्पणी भरें।");
       return;
     }
 debugger;
