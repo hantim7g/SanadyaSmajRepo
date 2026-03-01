@@ -17,18 +17,9 @@ jobs:
         username: root
         key: ${{ secrets.VPS_SSH_KEY }}
         script: |
-          # 1. Create a separate folder for UAT if it doesn't exist
-          mkdir -p /root/SanadyaBrahminSmaj-uat
-          cd /root/SanadyaBrahminSmaj-uat
-          
-          # 2. Clone if empty, otherwise pull the uat branch
-          if [ ! -d ".git" ]; then
-            git clone -b uat https://github.com/hantim7g/SanadyaSmajRepo.git .
-          else
-            git checkout uat
-            git pull origin uat
-          fi
-
+          cd /root//SanadyaBrahminSmaj-uat/SanadyaSmajRepo/SanadyaBrahminSmaj
+          git pull origin uat
+         
           # 3. Build and Run on a DIFFERENT port (e.g., 8081)
           docker build -t sanadya-app-uat .
           docker stop sanadya-container-uat || true
