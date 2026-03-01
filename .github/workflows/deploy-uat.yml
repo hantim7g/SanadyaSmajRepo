@@ -23,7 +23,7 @@ jobs:
           
           # 2. Clone if empty, otherwise pull the uat branch
           if [ ! -d ".git" ]; then
-            git clone -b uat https://github.com/YOUR_USERNAME/YOUR_REPO.git .
+            git clone -b uat https://github.com/hantim7g/SanadyaSmajRepo.git .
           else
             git checkout uat
             git pull origin uat
