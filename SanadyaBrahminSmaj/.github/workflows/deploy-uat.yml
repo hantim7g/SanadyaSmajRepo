@@ -1,0 +1,48 @@
+name: Deploy UAT to VPS
+
+on:
+  push:
+    branches:
+      - uat  # Trigger only on pushes to the uat branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: 194.35.120.80
+        username: root
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          # 1. Create a separate folder for UAT if it doesn't exist
+          mkdir -p /root/SanadyaBrahminSmaj-uat
+          cd /root/SanadyaBrahminSmaj-uat
+          
+          # 2. Clone if empty, otherwise pull the uat branch
+          if [ ! -d ".git" ]; then
+            git clone -b uat https://github.com/YOUR_USERNAME/YOUR_REPO.git .
+          else
+            git checkout uat
+            git pull origin uat
+          fi
+
+          # 3. Build and Run on a DIFFERENT port (e.g., 8081)
+          docker build -t sanadya-app-uat .
+          docker stop sanadya-container-uat || true
+          docker rm sanadya-container-uat || true
+          
+          docker run -d \
+            -p 8081:8080 \
+            --name sanadya-container-uat \
+            --restart always \
+            -e DB_HOST=localhost \
+            -e DB_NAME=hst_samaj \
+            -e DB_USER=hstuser \
+            -e DB_PASS=StrongPassword123! \
+            -e CLOUDINARY_NAME=ddyoi5pl3 \
+            -e CLOUDINARY_KEY=491572819866443 \
+            -e CLOUDINARY_SECRET=eg6hovf3Uc1_NZBD-ykLutuFaiI \
+            sanadya-app-uat
