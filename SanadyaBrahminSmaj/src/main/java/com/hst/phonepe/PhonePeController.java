@@ -74,6 +74,23 @@ public class PhonePeController {
         }
     }
 
+    @PostMapping("/pay/offline")
+    public ResponseEntity<?> initiateOfflinePayment(
+			@RequestBody PaymentRequest req,
+			Authentication authentication) {
+
+		if (authentication == null || !authentication.isAuthenticated()) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+		}
+
+		User user = userRepository.findByMobile(authentication.getName())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+
+		// This service will save the 'Pending' state and return a confirmation message
+	//	paymentService.initiateOfflineTransaction(user, req);
+
+		return ResponseEntity.ok(Map.of("message", "Offline payment initiated. Please complete the payment and contact support."));
+	}
     @PostMapping("/webhook")
     public ResponseEntity<String> handleWebhook(
             @RequestHeader("Authorization") String auth,
