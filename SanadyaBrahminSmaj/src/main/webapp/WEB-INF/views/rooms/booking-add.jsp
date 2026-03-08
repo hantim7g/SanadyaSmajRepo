@@ -207,16 +207,62 @@ body{
 <textarea name="remarks" class="form-control" rows="3"></textarea>
 
 <!-- ================= ACTION ================= -->
-<div class="text-end mt-4">
+<!--<div class="text-end mt-4">
   <button class="btn btnn px-4">बुकिंग सहेजें</button>
   <a href="/rooms/view" class="btn btn-secondary ms-2">वापस</a>
-</div>
+</div>-->
+<div class="text-end mt-4">
+  <button type="submit" class="btn btnn px-4">बुकिंग सहेजें</button>
 
+  <button type="button"
+          class="btn btn-warning ms-2"
+          onclick="payBooking()">
+      💳 बुक करें और भुगतान करें
+  </button>
+
+  <a href="/rooms/view" class="btn btn-secondary ms-2">वापस</a>
+</div>
 </form:form>
 </div>
 
 <!-- ================= JS ================= -->
 <script>
+	function payBooking(){
+
+	  const amount =
+	      document.getElementById("estimatedAmount")
+	      .value.replace("₹","");
+
+	  const checkIn =
+	      document.querySelector("input[name='checkInDate']").value;
+
+	  const checkOut =
+	      document.querySelector("input[name='checkOutDate']").value;
+
+	  const paymentData = {
+	      amount: parseFloat(amount),
+	      description: "Room Booking Payment",
+	      feeFrom: checkIn,
+	      feeTo: checkOut
+	  };
+
+	  const formData = new FormData();
+	  formData.append("payment", JSON.stringify(paymentData));
+
+	  fetch("/pay",{
+	      method:"POST",
+	      body:formData
+	  })
+	  .then(res => res.text())
+	  .then(url=>{
+	      window.location.href = url;
+	  })
+	  .catch(err=>{
+	      alert("Payment initiation failed");
+	      console.error(err);
+	  });
+
+	}
 (function(){
   const inD="${booking.checkInDate}";
   const outD="${booking.checkOutDate}";

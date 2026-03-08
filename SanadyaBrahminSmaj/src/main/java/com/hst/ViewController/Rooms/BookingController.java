@@ -17,11 +17,17 @@ import org.springframework.validation.BindingResult;
 //===== Spring MVC =====
 import org.springframework.web.bind.annotation.*;
 
+import com.hst.dto.PaymentRequest;
+import com.hst.entity.Payment;
+import com.hst.entity.User;
 //===== Your Project Entities =====
 import com.hst.entity.BookingSys.*;
+import com.hst.phonepe.PPPaymentService;
 import com.hst.repository.BookingGuestRepository;
 import com.hst.repository.BookingRepository;
+import com.hst.repository.PaymentRepository;
 import com.hst.repository.RoomRepository;
+import com.hst.repository.UserRepository;
 import com.hst.service.CloudinaryService;
 import com.hst.util.InvoiceXmlBuilder;
 import com.itextpdf.text.Document;
@@ -77,10 +83,15 @@ public class BookingController {
 	private CloudinaryService cloudinaryService;
     @Autowired
     private BookingGuestRepository guestRepo;
-
+    @Autowired
+    private UserRepository userRepository;
     @Autowired
     private RoomRepository roomRepo;
+    @Autowired
+    private PPPaymentService paymentService;
 
+    @Autowired
+    private PaymentRepository paymentRepo;
     /* =========================================================
        ADD BOOKING (FROM ROOM CARD)
        ========================================================= */
@@ -126,6 +137,7 @@ public class BookingController {
             Model model) throws Exception {
 
         /* ===== FORM VALIDATION ===== */
+
         if (booking.getCheckOutDate().isBefore(booking.getCheckInDate())
                 || booking.getCheckOutDate().isEqual(booking.getCheckInDate())) {
             result.rejectValue("checkOutDate", "", "चेक-आउट तिथि अमान्य है");
@@ -141,18 +153,12 @@ public class BookingController {
         }
 
         /* ===== FILE UPLOAD ===== */
-//        String uploadDir = "uploads/id-proof/";
-        // File dir = new File(uploadDir+"/id-proof/");
-        // if (!dir.exists()) dir.mkdirs();
 
-        // String fileName = System.currentTimeMillis() + "_" + idProofFile.getOriginalFilename();
-        // File dest = new File(uploadDir+"/id-proof/" + fileName);
-        // idProofFile.transferTo(dest);
         String imageUrl = cloudinaryService.uploadFile(idProofFile, "id-proof");
-			
         booking.setIdProofFileUrl(imageUrl);
 
         /* ===== PRICE CALCULATION ===== */
+
         long nights = ChronoUnit.DAYS.between(
                 booking.getCheckInDate(),
                 booking.getCheckOutDate());
@@ -168,15 +174,19 @@ public class BookingController {
         booking.setPaidAmount(BigDecimal.ZERO);
         booking.setBalanceAmount(total);
 
-        booking.setStatus(BookingStatus.CONFIRMED);
+        /* ===== BOOKING STATUS PENDING ===== */
+
+        booking.setStatus(BookingStatus.PENDING_PAYMENT);
         booking.setLoginUserMobile(principal != null ? principal.getName() : "SYSTEM");
         booking.setBookingCode(generateBookingCode());
 
         bookingRepo.save(booking);
 
         /* ===== EXTRA GUESTS ===== */
+
         if (guestNames != null) {
             for (int i = 0; i < guestNames.length; i++) {
+
                 if (guestNames[i] == null || guestNames[i].isBlank()) continue;
 
                 BookingGuest g = new BookingGuest();
@@ -184,14 +194,64 @@ public class BookingController {
                 g.setName(guestNames[i]);
                 g.setAge(guestAges != null && guestAges.length > i ? guestAges[i] : null);
                 g.setGender(guestGenders != null && guestGenders.length > i ? guestGenders[i] : null);
+
                 guestRepo.save(g);
             }
         }
 
-        return "redirect:/bookings/admin";
+        /* ===== CREATE PAYMENT REQUEST ===== */
+
+        PaymentRequest req = new PaymentRequest();
+        req.setAmount(total.doubleValue());
+        req.setDescription("Room Booking " + booking.getBookingCode());
+        req.setFeeFrom(booking.getCheckInDate().toString());
+        req.setFeeTo(booking.getCheckOutDate().toString());
+
+        User user = userRepository.findByMobile(principal.getName()).get();
+
+        String redirectUrl = paymentService.initiatePhonePeTransaction(
+                user,
+                req,
+                "http://194.35.120.80:8081/bookings/payment/response?bookingId=" + booking.getId()
+        );
+
+        return "redirect:" + redirectUrl;
     }
 
 
+    @GetMapping("/payment/response")
+    public String paymentResponse(
+            @RequestParam String merchantOrderId,
+            @RequestParam Long bookingId,
+            Model model) {
+
+        Booking booking = bookingRepo.findById(bookingId).orElseThrow();
+
+        Payment payment = paymentRepo.findByTransactionId(merchantOrderId).get();
+
+        boolean success = paymentService.verifyPayment(merchantOrderId);
+
+        if (success) {
+
+            payment.setStatus("SUCCESS");
+
+            booking.setStatus(BookingStatus.CONFIRMED);
+            booking.setPaidAmount(booking.getTotalAmount());
+            booking.setBalanceAmount(BigDecimal.ZERO);
+
+        } else {
+
+            payment.setStatus("FAILED");
+            booking.setStatus(BookingStatus.PAYMENT_FAILED);
+        }
+
+        paymentRepo.save(payment);
+        bookingRepo.save(booking);
+
+        model.addAttribute("booking", booking);
+
+        return "rooms/payment-result";
+    }
     /* =========================================================
        ADMIN LIST + FILTER
        ========================================================= */

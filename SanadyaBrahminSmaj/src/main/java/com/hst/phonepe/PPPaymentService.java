@@ -169,6 +169,26 @@ public class PPPaymentService {
         OrderStatusResponse response = client.getOrderStatus(merchantOrderId);
         return response.getState(); // Returns COMPLETED, FAILED, or PENDING
     }
+    
+    public boolean verifyPayment(String merchantOrderId) {
+
+        try {
+
+            OrderStatusResponse response =
+                    client.getOrderStatus(merchantOrderId);
+
+            if (response != null &&
+                response.getState().equals("COMPLETED")) {
+
+                return true;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 
     // 3. Webhook/Callback Validation
     public CallbackResponse validateWebhook(String authHeader, String responseBody) {
