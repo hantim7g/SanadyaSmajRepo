@@ -64,7 +64,7 @@ public class PPPaymentService {
         return client.pay(StandardCheckoutPayRequest.builder()
                 .merchantOrderId(mTxnId)
                 .amount(paise)
-                .redirectUrl(redirectUrl)
+                .redirectUrl(redirectUrl+"?merchantOrderId=" + mTxnId) // Optional: pass ID back to UI
                 .build()).getRedirectUrl();
     }
 
