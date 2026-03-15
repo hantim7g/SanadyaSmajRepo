@@ -273,31 +273,21 @@ ${payment.status}
 
 <div class="row mt-4">
 
-<div class="col-md-6">
-<!--
-<div class="section">QR सत्यापन</div>
+<div class="col-md-8">
+
+<!--<div class="section">QR सत्यापन</div>
 
 <div id="qrcode"></div>
+-->
+</div>
 
-</div>-->
-
-<div class="col-md-6 text-end">
+<div class="col-md-4 text-end">
 <button>	<a href="/bookings/invoice/pdf/${booking.id}"
 	         class="btn btn-secondary btn-action"
 	         title="इनवॉइस">
 	         🧾इनवॉइस
 	      </a></button>
-		  <bu
-<!--<button onclick="downloadPDF()" class="btn btn-warning">
-PDF डाउनलोड
-</button>
-
-<br><br>
-
-<button onclick="window.print()" class="btn btn-secondary">
-प्रिंट
-</button>-->
-
+	
 </div>
 
 </div>
