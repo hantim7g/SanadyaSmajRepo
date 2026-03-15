@@ -15,6 +15,7 @@ public class SanadyaBrahminSmajApplication extends SpringBootServletInitializer 
         SpringApplication.run(SanadyaBrahminSmajApplication.class, args);
     }
 
+    
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
         return application.sources(SanadyaBrahminSmajApplication.class);
