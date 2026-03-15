@@ -212,13 +212,13 @@ body{
   <a href="/rooms/view" class="btn btn-secondary ms-2">वापस</a>
 </div>-->
 <div class="text-end mt-4">
-  <button type="submit" class="btn btnn px-4">बुकिंग सहेजें</button>
+  <button type="submit" class="btn btnn px-4">बुक करें और भुगतान करें</button>
 
-  <button type="button"
+ <!-- <button type="button"
           class="btn btn-warning ms-2"
           onclick="payBooking()">
       💳 बुक करें और भुगतान करें
-  </button>
+  </button>-->
 
   <a href="/rooms/view" class="btn btn-secondary ms-2">वापस</a>
 </div>

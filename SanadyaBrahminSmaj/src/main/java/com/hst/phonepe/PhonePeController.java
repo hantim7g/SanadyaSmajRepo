@@ -65,7 +65,7 @@ public class PhonePeController {
             
             // This service will save the 'Pending' state and return the PhonePe URL
             String redirectUrl = "https://yourwebsite.com/payment-completion";
-            String gatewayUrl = paymentService.initiatePhonePeTransaction(user, req, redirectUrl);
+            String gatewayUrl = "";//paymentService.initiatePhonePeTransaction(user, req, redirectUrl);
 
             return ResponseEntity.ok(Map.of("redirectUrl", gatewayUrl));
 

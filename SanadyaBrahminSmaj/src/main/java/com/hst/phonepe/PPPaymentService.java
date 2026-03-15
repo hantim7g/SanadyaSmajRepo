@@ -31,7 +31,7 @@ public class PPPaymentService {
     /**
      * Step 1: Create a Pending record and get PhonePe URL
      */
-    public String initiatePhonePeTransaction(User user, PaymentRequest req, String redirectUrl) {
+    public String initiatePhonePeTransaction(User user, PaymentRequest req, String redirectUrl, String parentTransactionId) {
         String mTxnId = "MT" + System.currentTimeMillis();
 
         Payment payment = new Payment();
@@ -56,7 +56,7 @@ public class PPPaymentService {
         // 4. Safe Date Parsing for feeFrom and feeTo
         payment.setFeeFrom(parseSafeDate(req.getFeeFrom()));
         payment.setFeeTo(parseSafeDate(req.getFeeTo()));
-
+        payment.setParentTransactionId(parentTransactionId); // Link to parent if provided
         paymentRepository.save(payment);
 
         // Call PhonePe SDK...
@@ -198,5 +198,9 @@ public class PPPaymentService {
         
         return client.validateCallback(username, password, authHeader, responseBody);
     }
-   
+    public Payment findPaymentByTransactionId(String mTxnId) {
+		return
+    paymentRepository.findByTransactionId(mTxnId)
+				.orElseThrow(() -> new RuntimeException("Transaction not found"));
+    }
 }

@@ -212,7 +212,8 @@ public class BookingController {
         String redirectUrl = paymentService.initiatePhonePeTransaction(
                 user,
                 req,
-                "http://194.35.120.80:8081/bookings/payment/response?bookingId=" + booking.getId()
+                "http://194.35.120.80:8081/bookings/payment/response?bookingId=" + booking.getId(),
+                booking.getBookingCode()
         );
 
         return "redirect:" + redirectUrl;
@@ -238,19 +239,42 @@ public class BookingController {
             booking.setStatus(BookingStatus.CONFIRMED);
             booking.setPaidAmount(booking.getTotalAmount());
             booking.setBalanceAmount(BigDecimal.ZERO);
+            booking.setPaymentTransactionId(payment.getTransactionId());
+            
 
         } else {
 
             payment.setStatus("FAILED");
             booking.setStatus(BookingStatus.PAYMENT_FAILED);
+            booking.setPaymentTransactionId(payment.getTransactionId());
         }
 
         paymentRepo.save(payment);
         bookingRepo.save(booking);
 
-        model.addAttribute("booking", booking);
+        
+//        
+//        model.addAttribute("booking", booking);
+//
+//        return "rooms/payment-result";
 
-        return "rooms/payment-result";
+
+        List<BookingGuest> guests =
+        		guestRepo.findByBookingId(booking.getId());
+
+
+        long nights = ChronoUnit.DAYS.between(
+                booking.getCheckInDate(),
+                booking.getCheckOutDate()
+        );
+
+        model.addAttribute("booking", booking);
+        model.addAttribute("guests", guests);
+        model.addAttribute("payment", payment);
+        model.addAttribute("nights", nights);
+
+        return "receipt";
+    
     }
     /* =========================================================
        ADMIN LIST + FILTER
@@ -435,5 +459,37 @@ public class BookingController {
         return String.format("SSB-%d-%04d", year, count);
     }
 
+    @GetMapping("/receipt/{bookingCode}")
+    public String receipt(@PathVariable String bookingCode, Model model) {
 
+        Booking booking = bookingRepo.findByBookingCode(bookingCode);
+
+        List<BookingGuest> guests =
+        		guestRepo.findByBookingId(booking.getId());
+
+        Payment payment =
+                paymentService.findPaymentByTransactionId(bookingCode);
+
+        long nights = ChronoUnit.DAYS.between(
+                booking.getCheckInDate(),
+                booking.getCheckOutDate()
+        );
+
+        model.addAttribute("booking", booking);
+        model.addAttribute("guests", guests);
+        model.addAttribute("payment", payment);
+        model.addAttribute("nights", nights);
+
+        return "receipt";
+    }
+    
+    @GetMapping("/verify-booking/{code}")
+    public String verify(@PathVariable String code, Model model) {
+
+        Booking booking = bookingRepo.findByBookingCode(code);
+
+        model.addAttribute("booking", booking);
+
+        return "verifyBooking";
+    }
 }
