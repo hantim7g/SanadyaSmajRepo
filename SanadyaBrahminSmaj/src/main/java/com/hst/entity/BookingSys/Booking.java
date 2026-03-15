@@ -23,6 +23,7 @@ public class Booking {
     @ManyToOne(optional = false)
     private Room room;
 
+    private String paymentTransactionId;
     /* ================= GUEST ================= */
     @NotBlank(message = "अतिथि का नाम अनिवार्य है")
     private String guestName;
@@ -417,6 +418,14 @@ public class Booking {
 
 	public synchronized void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
+	}
+
+	public synchronized String getPaymentTransactionId() {
+		return paymentTransactionId;
+	}
+
+	public synchronized void setPaymentTransactionId(String paymentTransactionId) {
+		this.paymentTransactionId = paymentTransactionId;
 	}
 
     /* ===== GETTERS / SETTERS ===== */

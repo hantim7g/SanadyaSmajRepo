@@ -70,4 +70,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 	        @Param("fromDate") LocalDate fromDate, 
 	        @Param("toDate") LocalDate toDate
 	    );
+		Booking	findByBookingCode(String bookingCode);
 }

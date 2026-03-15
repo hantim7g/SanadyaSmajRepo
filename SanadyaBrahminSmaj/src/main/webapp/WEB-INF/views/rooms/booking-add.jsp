@@ -152,6 +152,10 @@ body{
            readonly>
   </div>
   <div class="col-md-4">
+    <label>जीएसटी (12%)</label>
+    <input id="gstAmount" class="form-control readonly" value="₹${booking.room.basePrice*0.12}" readonly>
+	    </div>
+  <div class="col-md-4">
     <label>कुल राशि (₹)</label>
     <input id="estimatedAmount" class="form-control readonly" readonly>
   </div>
@@ -207,16 +211,62 @@ body{
 <textarea name="remarks" class="form-control" rows="3"></textarea>
 
 <!-- ================= ACTION ================= -->
-<div class="text-end mt-4">
+<!--<div class="text-end mt-4">
   <button class="btn btnn px-4">बुकिंग सहेजें</button>
   <a href="/rooms/view" class="btn btn-secondary ms-2">वापस</a>
-</div>
+</div>-->
+<div class="text-end mt-4">
+  <button type="submit" class="btn btnn px-4">बुक और भुगतान करें</button>
 
+ <!-- <button type="button"
+          class="btn btn-warning ms-2"
+          onclick="payBooking()">
+      💳 बुक करें और भुगतान करें
+  </button>-->
+
+  <a href="/rooms/view" class="btn btn-secondary ms-2">वापस</a>
+</div>
 </form:form>
 </div>
 
 <!-- ================= JS ================= -->
 <script>
+	function payBooking(){
+
+	  const amount =
+	      document.getElementById("estimatedAmount")
+	      .value.replace("₹","");
+
+	  const checkIn =
+	      document.querySelector("input[name='checkInDate']").value;
+
+	  const checkOut =
+	      document.querySelector("input[name='checkOutDate']").value;
+
+	  const paymentData = {
+	      amount: parseFloat(amount),
+	      description: "Room Booking Payment",
+	      feeFrom: checkIn,
+	      feeTo: checkOut
+	  };
+
+	  const formData = new FormData();
+	  formData.append("payment", JSON.stringify(paymentData));
+
+	  fetch("/pay",{
+	      method:"POST",
+	      body:formData
+	  })
+	  .then(res => res.text())
+	  .then(url=>{
+	      window.location.href = url;
+	  })
+	  .catch(err=>{
+	      alert("Payment initiation failed");
+	      console.error(err);
+	  });
+
+	}
 (function(){
   const inD="${booking.checkInDate}";
   const outD="${booking.checkOutDate}";
@@ -226,7 +276,8 @@ body{
   const b=new Date(outD+"T12:00");
   const n=(b-a)/(1000*60*60*24);
   document.getElementById("totalNights").value=n;
-  document.getElementById("estimatedAmount").value="₹"+(n*price).toFixed(2);
+  document.getElementById("estimatedAmount").value="₹"+(n*price*1.12).toFixed(2);
+  document.getElementById("gstAmount").value="₹"+(n*price*0.12).toFixed(2);
 })();
 
 function addGuest(){

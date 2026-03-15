@@ -17,11 +17,17 @@ import org.springframework.validation.BindingResult;
 //===== Spring MVC =====
 import org.springframework.web.bind.annotation.*;
 
+import com.hst.dto.PaymentRequest;
+import com.hst.entity.Payment;
+import com.hst.entity.User;
 //===== Your Project Entities =====
 import com.hst.entity.BookingSys.*;
+import com.hst.phonepe.PPPaymentService;
 import com.hst.repository.BookingGuestRepository;
 import com.hst.repository.BookingRepository;
+import com.hst.repository.PaymentRepository;
 import com.hst.repository.RoomRepository;
+import com.hst.repository.UserRepository;
 import com.hst.service.CloudinaryService;
 import com.hst.util.InvoiceXmlBuilder;
 import com.itextpdf.text.Document;
@@ -77,10 +83,15 @@ public class BookingController {
 	private CloudinaryService cloudinaryService;
     @Autowired
     private BookingGuestRepository guestRepo;
-
+    @Autowired
+    private UserRepository userRepository;
     @Autowired
     private RoomRepository roomRepo;
+    @Autowired
+    private PPPaymentService paymentService;
 
+    @Autowired
+    private PaymentRepository paymentRepo;
     /* =========================================================
        ADD BOOKING (FROM ROOM CARD)
        ========================================================= */
@@ -126,6 +137,7 @@ public class BookingController {
             Model model) throws Exception {
 
         /* ===== FORM VALIDATION ===== */
+
         if (booking.getCheckOutDate().isBefore(booking.getCheckInDate())
                 || booking.getCheckOutDate().isEqual(booking.getCheckInDate())) {
             result.rejectValue("checkOutDate", "", "चेक-आउट तिथि अमान्य है");
@@ -141,18 +153,12 @@ public class BookingController {
         }
 
         /* ===== FILE UPLOAD ===== */
-//        String uploadDir = "uploads/id-proof/";
-        // File dir = new File(uploadDir+"/id-proof/");
-        // if (!dir.exists()) dir.mkdirs();
 
-        // String fileName = System.currentTimeMillis() + "_" + idProofFile.getOriginalFilename();
-        // File dest = new File(uploadDir+"/id-proof/" + fileName);
-        // idProofFile.transferTo(dest);
         String imageUrl = cloudinaryService.uploadFile(idProofFile, "id-proof");
-			
         booking.setIdProofFileUrl(imageUrl);
 
         /* ===== PRICE CALCULATION ===== */
+
         long nights = ChronoUnit.DAYS.between(
                 booking.getCheckInDate(),
                 booking.getCheckOutDate());
@@ -165,18 +171,24 @@ public class BookingController {
 
         booking.setRoomPrice(room.getBasePrice());
         booking.setTotalAmount(total);
+        booking.setTaxAmount(total.multiply(new BigDecimal("0.12"))); // 12% GST
+        booking.setTotalAmount(total.add(booking.getTaxAmount()));
         booking.setPaidAmount(BigDecimal.ZERO);
-        booking.setBalanceAmount(total);
+        booking.setBalanceAmount(booking.getTotalAmount());
 
-        booking.setStatus(BookingStatus.CONFIRMED);
+        /* ===== BOOKING STATUS PENDING ===== */
+
+        booking.setStatus(BookingStatus.PENDING_PAYMENT);
         booking.setLoginUserMobile(principal != null ? principal.getName() : "SYSTEM");
         booking.setBookingCode(generateBookingCode());
 
         bookingRepo.save(booking);
 
         /* ===== EXTRA GUESTS ===== */
+
         if (guestNames != null) {
             for (int i = 0; i < guestNames.length; i++) {
+
                 if (guestNames[i] == null || guestNames[i].isBlank()) continue;
 
                 BookingGuest g = new BookingGuest();
@@ -184,14 +196,88 @@ public class BookingController {
                 g.setName(guestNames[i]);
                 g.setAge(guestAges != null && guestAges.length > i ? guestAges[i] : null);
                 g.setGender(guestGenders != null && guestGenders.length > i ? guestGenders[i] : null);
+
                 guestRepo.save(g);
             }
         }
 
-        return "redirect:/bookings/admin";
+        /* ===== CREATE PAYMENT REQUEST ===== */
+
+        PaymentRequest req = new PaymentRequest();
+        req.setAmount(total.doubleValue());
+        req.setDescription("Room Booking " + booking.getBookingCode());
+        req.setFeeFrom(booking.getCheckInDate().toString());
+        req.setFeeTo(booking.getCheckOutDate().toString());
+
+        User user = userRepository.findByMobile(principal.getName()).get();
+
+        String redirectUrl = paymentService.initiatePhonePeTransaction(
+                user,
+                req,
+                "https://sanadhyabrahminkota.ddns.net/bookings/payment/response?bookingId=" + booking.getId(),
+                booking.getBookingCode()
+        );
+
+        return "redirect:" + redirectUrl;
     }
 
 
+    @GetMapping("/payment/response")
+    public String paymentResponse(
+            @RequestParam String merchantOrderId,
+            @RequestParam Long bookingId,
+            Model model) {
+
+        Booking booking = bookingRepo.findById(bookingId).orElseThrow();
+
+        Payment payment = paymentRepo.findByTransactionId(merchantOrderId).get();
+
+        boolean success = paymentService.verifyPayment(merchantOrderId);
+
+        if (success) {
+
+            payment.setStatus("SUCCESS");
+
+            booking.setStatus(BookingStatus.CONFIRMED);
+            booking.setPaidAmount(booking.getTotalAmount());
+            booking.setBalanceAmount(BigDecimal.ZERO);
+            booking.setPaymentTransactionId(payment.getTransactionId());
+            
+
+        } else {
+
+            payment.setStatus("FAILED");
+            booking.setStatus(BookingStatus.PAYMENT_FAILED);
+            booking.setPaymentTransactionId(payment.getTransactionId());
+        }
+
+        paymentRepo.save(payment);
+        bookingRepo.save(booking);
+
+        
+//        
+//        model.addAttribute("booking", booking);
+//
+//        return "rooms/payment-result";
+
+
+        List<BookingGuest> guests =
+        		guestRepo.findByBookingId(booking.getId());
+
+
+        long nights = ChronoUnit.DAYS.between(
+                booking.getCheckInDate(),
+                booking.getCheckOutDate()
+        );
+
+        model.addAttribute("booking", booking);
+        model.addAttribute("guests", guests);
+        model.addAttribute("payment", payment);
+        model.addAttribute("nights", nights);
+
+        return "receipt";
+    
+    }
     /* =========================================================
        ADMIN LIST + FILTER
        ========================================================= */
@@ -375,5 +461,37 @@ public class BookingController {
         return String.format("SSB-%d-%04d", year, count);
     }
 
+    @GetMapping("/receipt/{bookingCode}")
+    public String receipt(@PathVariable String bookingCode, Model model) {
 
+        Booking booking = bookingRepo.findByBookingCode(bookingCode);
+
+        List<BookingGuest> guests =
+        		guestRepo.findByBookingId(booking.getId());
+
+        Payment payment =
+                paymentService.findPaymentByTransactionId(bookingCode);
+
+        long nights = ChronoUnit.DAYS.between(
+                booking.getCheckInDate(),
+                booking.getCheckOutDate()
+        );
+
+        model.addAttribute("booking", booking);
+        model.addAttribute("guests", guests);
+        model.addAttribute("payment", payment);
+        model.addAttribute("nights", nights);
+
+        return "receipt";
+    }
+    
+    @GetMapping("/verify-booking/{code}")
+    public String verify(@PathVariable String code, Model model) {
+
+        Booking booking = bookingRepo.findByBookingCode(code);
+
+        model.addAttribute("booking", booking);
+
+        return "verifyBooking";
+    }
 }
