@@ -171,8 +171,10 @@ public class BookingController {
 
         booking.setRoomPrice(room.getBasePrice());
         booking.setTotalAmount(total);
+        booking.setTaxAmount(total.multiply(new BigDecimal("0.12"))); // 12% GST
+        booking.setTotalAmount(total.add(booking.getTaxAmount()));
         booking.setPaidAmount(BigDecimal.ZERO);
-        booking.setBalanceAmount(total);
+        booking.setBalanceAmount(booking.getTotalAmount());
 
         /* ===== BOOKING STATUS PENDING ===== */
 

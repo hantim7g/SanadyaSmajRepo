@@ -12,10 +12,10 @@ public class InvoiceXmlBuilder {
 
 	 public static String build(Booking booking, List<BookingGuest> guests) {
 
-	        BigDecimal gst = booking.getTotalAmount()
-	                .multiply(new BigDecimal("0.12"));
-
-	        BigDecimal total = booking.getTotalAmount().add(gst);
+//	        BigDecimal gst = booking.getTotalAmount()
+//	                .multiply(new BigDecimal("0.12"));
+//
+//	        BigDecimal total = booking.getTotalAmount().add(gst);
 
 	        long nights = ChronoUnit.DAYS.between(
 	                booking.getCheckInDate(),
@@ -93,8 +93,8 @@ public class InvoiceXmlBuilder {
 	                booking.getStatus(),
 
 	                booking.getRoomPrice(),
-	                gst,
-	                total,
+	                booking.getTaxAmount(),
+	                booking.getTotalAmount(),
 
 	                booking.getPaymentTransactionId(), // transactionId fallback
 	                booking.getPayAtHotel() ? "Pay At Hotel" : "Online",

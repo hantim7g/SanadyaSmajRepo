@@ -152,6 +152,10 @@ body{
            readonly>
   </div>
   <div class="col-md-4">
+    <label>जीएसटी (12%)</label>
+    <input id="gstAmount" class="form-control readonly" value="₹${booking.room.basePrice*0.12}" readonly>
+	    </div>
+  <div class="col-md-4">
     <label>कुल राशि (₹)</label>
     <input id="estimatedAmount" class="form-control readonly" readonly>
   </div>
@@ -212,7 +216,7 @@ body{
   <a href="/rooms/view" class="btn btn-secondary ms-2">वापस</a>
 </div>-->
 <div class="text-end mt-4">
-  <button type="submit" class="btn btnn px-4">बुक करें और भुगतान करें</button>
+  <button type="submit" class="btn btnn px-4">बुक और भुगतान करें</button>
 
  <!-- <button type="button"
           class="btn btn-warning ms-2"
@@ -272,7 +276,8 @@ body{
   const b=new Date(outD+"T12:00");
   const n=(b-a)/(1000*60*60*24);
   document.getElementById("totalNights").value=n;
-  document.getElementById("estimatedAmount").value="₹"+(n*price).toFixed(2);
+  document.getElementById("estimatedAmount").value="₹"+(n*price*1.12).toFixed(2);
+  document.getElementById("gstAmount").value="₹"+(n*price*0.12).toFixed(2);
 })();
 
 function addGuest(){

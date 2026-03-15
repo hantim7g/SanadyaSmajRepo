@@ -150,9 +150,9 @@ content-width="90px"/>
 
 <!-- PAYMENT DETAILS -->
 
-<fo:block space-before="16pt"
-font-weight="bold"
-font-size="13pt">
+<fo:block 
+font-weight="bold" padding="6pt"
+font-size="13pt" background-color="#ffe0b3">
 
 भुगतान विवरण
 
@@ -207,7 +207,7 @@ font-size="13pt">
 
 </fo:table-row>
 
-<fo:table-row>
+<fo:table-row >
 
 <fo:table-cell padding="5pt">
 <fo:block>भुगतान तिथि</fo:block>

@@ -131,11 +131,15 @@ margin-top:20px;
 </thead>
 
 <tbody>
-
+	<tr>
+	<td>${s.index+1}</td>
+	<td>${booking.guestName}</td>
+	<td>NA</td>
+	</tr>
 <c:forEach items="${guests}" var="g" varStatus="s">
 
 <tr>
-<td>${s.index+1}</td>
+<td>${s.index+2}</td>
 <td>${g.name}</td>
 <td>${g.age}</td>
 </tr>
@@ -278,11 +282,12 @@ ${payment.status}
 </div>-->
 
 <div class="col-md-6 text-end">
-	<a href="/bookings/admin/invoice/pdf/${booking.id}"
+<button>	<a href="/bookings/invoice/pdf/${booking.id}"
 	         class="btn btn-secondary btn-action"
 	         title="इनवॉइस">
-	         🧾
-	      </a>
+	         🧾इनवॉइस
+	      </a></button>
+		  <bu
 <!--<button onclick="downloadPDF()" class="btn btn-warning">
 PDF डाउनलोड
 </button>
