@@ -199,7 +199,7 @@ margin-top:20px;
 <td>
 
 <span class="badge 
-${payment.status=='Success'?'bg-success':
+${payment.status=='SUCCESS'?'bg-success':
 payment.status=='Pending'?'bg-warning':'bg-danger'}">
 
 ${payment.status}
