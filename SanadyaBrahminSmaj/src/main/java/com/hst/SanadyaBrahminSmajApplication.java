@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class SanadyaBrahminSmajApplication extends SpringBootServletInitializer {
 
+	
     public static void main(String[] args) {
         SpringApplication.run(SanadyaBrahminSmajApplication.class, args);
     }
