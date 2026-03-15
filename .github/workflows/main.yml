@@ -3,50 +3,34 @@ name: Deploy to VPS
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-
-    # 🔍 Optional Debug - Check if SSH secret exists
-    - name: Debug Secret
-      run: |
-        if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then
-          echo "❌ SECRET IS EMPTY"
-          exit 1
-        else
-          echo "✅ SECRET EXISTS"
-        fi
-
-    # 🚀 Deploy to VPS
     - name: Deploy via SSH
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: 194.35.120.80
         username: root
-        port: 22
         key: ${{ secrets.VPS_SSH_KEY }}
         script: |
-          echo "✅ Connected to VPS"
-          
-          cd /root/SanadyaSmajRepo/SanadyaBrahminSmaj || exit 1
-          git pull origin master
-
-          echo "🛑 Stopping old container"
+          cd /root/SanadyaBrahminSmaj
+          git pull
+          docker build -t sanadya-app .
           docker stop sanadya-container || true
           docker rm sanadya-container || true
-
-          echo "🐳 Building image"
-          docker build -t sanadya-app .
-
-          echo "🚀 Starting container"
           docker run -d \
-            -p 8080:8080 \
+            -p 80:8080 \
             --name sanadya-container \
+            --restart always \
+            -e DB_HOST=localhost \
+            -e DB_NAME=hst_samaj \
+            -e DB_USER=hstuser \
+            -e DB_PASS=StrongPassword123! \
+            -e CLOUDINARY_NAME=ddyoi5pl3 \
+            -e CLOUDINARY_KEY=491572819866443 \
+            -e CLOUDINARY_SECRET=eg6hovf3Uc1_NZBD-ykLutuFaiI \
             sanadya-app
-
-          echo "📦 Running containers:"
-          docker ps
