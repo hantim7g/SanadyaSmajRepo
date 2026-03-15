@@ -218,6 +218,7 @@ public class BookingController {
                 booking.getBookingCode()
         );
 
+        
         return "redirect:" + redirectUrl;
     }
 
