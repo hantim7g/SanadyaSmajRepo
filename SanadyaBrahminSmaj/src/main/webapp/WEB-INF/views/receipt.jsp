@@ -282,7 +282,7 @@ ${payment.status}
 </div>
 
 <div class="col-md-4 text-end">
-	<button class="view-button" onclick="window.location.href='/my-bookings'">मेरी बुकिंग्स</button>
+	<button class="btn-success" onclick="window.location.href='/my-bookings'">मेरी बुकिंग्स</button>
 <button>	<a href="/bookings/invoice/pdf/${booking.id}"
 	         class="btn btn-secondary btn-action"
 	         title="इनवॉइस">
