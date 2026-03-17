@@ -238,7 +238,8 @@ public class BookingController {
 
             payment.setStatus("SUCCESS");
 
-            booking.setStatus(BookingStatus.CONFIRMED);
+//            booking.setStatus(BookingStatus.CONFIRMED);
+            booking.setStatus(BookingStatus.PAYMENT_RECIVED_AWAITING_CONFIRMATION);
             booking.setPaidAmount(booking.getTotalAmount());
             booking.setBalanceAmount(BigDecimal.ZERO);
             booking.setPaymentTransactionId(payment.getTransactionId());
