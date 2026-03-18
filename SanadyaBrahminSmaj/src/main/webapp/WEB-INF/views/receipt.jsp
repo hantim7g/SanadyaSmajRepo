@@ -287,7 +287,7 @@ ${payment.status}
 	         title="इनवॉइस">
 	         🧾इनवॉइस
 	      </a></button>
-		  <bu
+		  
 <!--<button onclick="downloadPDF()" class="btn btn-warning">
 PDF डाउनलोड
 </button>
