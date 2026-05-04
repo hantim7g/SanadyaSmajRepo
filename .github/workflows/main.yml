@@ -31,7 +31,7 @@ jobs:
 
             docker run -d \
               --name $CONTAINER \
-              -p $PORT:80 \
+              -p $PORT:8080 \
               --restart always \
               -e DB_HOST=localhost \
               -e DB_NAME=hst_samaj \
