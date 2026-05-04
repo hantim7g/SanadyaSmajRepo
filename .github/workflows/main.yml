@@ -20,7 +20,7 @@ jobs:
             APP_DIR=/root/SanadyaSmajRepo/SanadyaBrahminSmaj
             CONTAINER=sanadya-container
             IMAGE=sanadya-app
-            PORT=8080
+            PORT=80
 
             cd $APP_DIR
             git pull origin master
