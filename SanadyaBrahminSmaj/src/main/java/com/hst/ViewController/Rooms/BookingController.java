@@ -214,7 +214,7 @@ public class BookingController {
         String redirectUrl = paymentService.initiatePhonePeTransaction(
                 user,
                 req,
-                "https://sanadhyabrahmin.ddns.net/bookings/payment/response?bookingId=" + booking.getId(),
+                "http://sanadhyabrahmin.ddns.net/bookings/payment/response?bookingId=" + booking.getId(),
                 booking.getBookingCode()
         );
 
