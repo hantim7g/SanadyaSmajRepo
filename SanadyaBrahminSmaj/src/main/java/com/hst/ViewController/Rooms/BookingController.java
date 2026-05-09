@@ -233,6 +233,7 @@ public class BookingController {
         Payment payment = paymentRepo.findByTransactionId(merchantOrderId).get();
 
         boolean success = paymentService.verifyPayment(merchantOrderId);
+        System.out.println("Payment verification result: " + success);
 
         if (success) {
 
