@@ -17,11 +17,32 @@ jobs:
         username: root
         key: ${{ secrets.VPS_SSH_KEY }}
         script: |
-          cd /root/SanadyaBrahminSmaj-uat/SanadyaSmajRepo/SanadyaBrahminSmaj
-          git fetch origin
-          git reset --hard origin/uat
-         
-          # 3. Build and Run on a DIFFERENT port (e.g., 8081)
+          # 1. Create a separate folder for UAT if it doesn't exist
+          mkdir -p /root/SanadyaBrahminSmaj-uat
+          cd /root/SanadyaBrahminSmaj-uat
+          
+          # 2. Clone if empty, otherwise pull the uat branch
+          if [ ! -d ".git" ]; then
+            git clone -b uat https://github.com/hantim7g/SanadyaSmajRepo.git .
+          else
+            git checkout uat
+            git pull origin uat
+          fi
+
+          # 3. Create directories for monitoring agents
+          mkdir -p /opt/glowroot
+          mkdir -p /opt/logs/glowroot
+
+          # 4. Download Glowroot Agent if not already present
+          if [ ! -f "/opt/glowroot/glowroot.jar" ]; then
+            echo "Downloading Glowroot agent..."
+            wget -q https://github.com/glowroot/glowroot/releases/download/v0.14.6/glowroot-0.14.6-dist.zip -O /tmp/glowroot.zip
+            unzip -q /tmp/glowroot.zip -d /opt/glowroot
+            rm /tmp/glowroot.zip
+            chmod +x /opt/glowroot/glowroot.sh
+          fi
+
+          # 5. Build and Run on a DIFFERENT port (e.g., 8081)
           docker build -t sanadya-app-uat .
           docker stop sanadya-container-uat || true
           docker rm sanadya-container-uat || true
@@ -30,6 +51,8 @@ jobs:
             -p 8081:8080 \
             --name sanadya-container-uat \
             --restart always \
+            -v /opt/glowroot:/opt/glowroot:ro \
+            -v /opt/logs/glowroot:/var/log/glowroot \
             -e DB_HOST=localhost \
             -e DB_NAME=hst_samaj \
             -e DB_USER=hstuser \
@@ -37,4 +60,26 @@ jobs:
             -e CLOUDINARY_NAME=ddyoi5pl3 \
             -e CLOUDINARY_KEY=491572819866443 \
             -e CLOUDINARY_SECRET=eg6hovf3Uc1_NZBD-ykLutuFaiI \
+            -e JAVA_OPTS="-javaagent:/opt/glowroot/glowroot.jar" \
             sanadya-app-uat
+
+          # 6. Start Glowroot UI (if not running)
+          if ! docker ps | grep -q glowroot-ui; then
+            docker run -d \
+              -p 4000:4000 \
+              --name glowroot-ui \
+              --restart always \
+              -v /opt/glowroot/data:/opt/glowroot/data \
+              glowroot/glowroot:latest
+            echo "Glowroot UI started on http://194.35.120.80:4000"
+          fi
+
+          # 7. Deployment Summary
+          echo "================================"
+          echo "UAT Deployment Completed"
+          echo "================================"
+          echo "Application URL: http://194.35.120.80:8081"
+          echo "Glowroot UI: http://194.35.120.80:4000"
+          echo "Timestamp: $(date)"
+          echo "Container Status:"
+          docker ps | grep sanadya
