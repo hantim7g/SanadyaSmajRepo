@@ -1,7 +1,11 @@
 package com.hst.phonepe;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hst.dto.PaymentRequest;
 import com.hst.entity.Payment;
 import com.hst.entity.User;
@@ -9,24 +13,28 @@ import com.hst.repository.PaymentRepository;
 import com.hst.service.PaymentService;
 import com.phonepe.sdk.pg.common.models.response.CallbackResponse;
 import com.phonepe.sdk.pg.common.models.response.OrderStatusResponse;
+import com.phonepe.sdk.pg.common.tokenhandler.TokenService;
 import com.phonepe.sdk.pg.payments.v2.StandardCheckoutClient;
 import com.phonepe.sdk.pg.payments.v2.models.request.StandardCheckoutPayRequest;
 import com.phonepe.sdk.pg.payments.v2.models.response.StandardCheckoutPayResponse;
 
 import jakarta.transaction.Transactional;
-
+import org.springframework.http.*;
+import org.springframework.web.client.RestTemplate;
 @Service
 public class PPPaymentService {
 
     @Autowired
     private StandardCheckoutClient client;
 
-    
+    @Autowired
+    private PhonePeAuthService tokenService;
     @Autowired
     private PaymentRepository paymentRepository;
     @Autowired
     private PaymentService offlinePaymentService;
-
+//    @Autowired
+//    private PPPaymentService ppPaymentService;
     
     /**
      * Step 1: Create a Pending record and get PhonePe URL
@@ -166,19 +174,32 @@ public class PPPaymentService {
 
     // 2. Check Order Status
     public String checkStatus(String merchantOrderId) {
-        OrderStatusResponse response = client.getOrderStatus(merchantOrderId);
-        return response.getState(); // Returns COMPLETED, FAILED, or PENDING
+//        OrderStatusResponse response = client.getOrderStatus(merchantOrderId);
+        
+//        return response.getState(); // Returns COMPLETED, FAILED, or PENDING
+    
+    return orderStatus(merchantOrderId)	;
     }
     
     public boolean verifyPayment(String merchantOrderId) {
 
         try {
 
-            OrderStatusResponse response =
-                    client.getOrderStatus(merchantOrderId);
+//            OrderStatusResponse response =
+//                    client.getOrderStatus(merchantOrderId);
 
-            if (response != null &&
-                response.getState().equals("COMPLETED")) {
+            String phonePeState = orderStatus(merchantOrderId);
+            
+            
+//            if (response != null &&
+//                    response.getState().equals("COMPLETED")) {
+//
+//                    return true;
+//                }
+
+
+            
+            if ("COMPLETED".equalsIgnoreCase(phonePeState)) {
 
                 return true;
             }
@@ -202,5 +223,65 @@ public class PPPaymentService {
 		return
     paymentRepository.findByTransactionId(mTxnId)
 				.orElseThrow(() -> new RuntimeException("Transaction not found"));
+    }
+    public String getAuthToken() {
+    	
+    return tokenService.generateToken();
+	}
+    public String  orderStatus(String transactionId) {
+
+        String url =
+                "https://api-preprod.phonepe.com/apis/pg-sandbox/checkout/v2/order/MT1778346459015/status?details=false";
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = null;
+        HttpHeaders headers = new HttpHeaders();
+        String state = null;
+        String auth=getAuthToken();
+
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        headers.set("x-source", "API");
+        headers.set("x-source-version", "V2");
+        headers.set("x-source-platform", "BACKEND_JAVA_SDK");
+        headers.set("x-source-platform-version", "2.2.2");
+
+        headers.set(
+                "Authorization",
+                "O-Bearer " + auth
+        );
+
+        HttpEntity<String> entity =
+                new HttpEntity<>(headers);
+
+        try {
+        	response =
+                    restTemplate.exchange(
+                            url,
+                            HttpMethod.GET,
+                            entity,
+                            String.class
+                    );
+
+            System.out.println("Status Code : "
+                    + response.getStatusCode());
+
+            System.out.println("Response : ");
+            System.out.println(response.getBody());
+            ObjectMapper objectMapper =
+                    new ObjectMapper();
+
+            JsonNode jsonNode =
+                    objectMapper.readTree(response.getBody());
+             state =
+                    jsonNode
+                            .get("state")
+                            .asText();
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+		return state.toString();
+    
     }
 }

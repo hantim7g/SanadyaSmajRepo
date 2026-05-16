@@ -44,7 +44,8 @@ public class PhonePeController {
     private PaymentRepository paymentRepository;
     @Autowired
     private UserRepository userRepository;
-		
+    @Autowired
+    private PPPaymentService ppPaymentService;
     
     @PostMapping(value = "/pay", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> initiateOnlinePayment(
@@ -129,9 +130,10 @@ public class PhonePeController {
     public ResponseEntity<Map<String, String>> manualCheckStatus(@PathVariable String txnId) {
         try {
             // 1. Query PhonePe SDK
-            OrderStatusResponse response = client.getOrderStatus(txnId);
+//            OrderStatusResponse response = client.getOrderStatus(txnId);
+            String phonePeState = ppPaymentService.orderStatus(txnId);
             
-            String state = response.getState(); // COMPLETED, FAILED, or PENDING
+            String state = phonePeState; // COMPLETED, FAILED, or PENDING
 
             // 2. Find and Update the Payment entity in DB
             Optional<Payment> paymentOpt = paymentRepository.findByTransactionId(txnId);

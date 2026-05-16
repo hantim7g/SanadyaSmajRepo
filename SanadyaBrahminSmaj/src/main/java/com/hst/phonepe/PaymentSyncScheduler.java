@@ -17,7 +17,8 @@ public class PaymentSyncScheduler {
 
     @Autowired
     private StandardCheckoutClient phonePeClient;
-
+    @Autowired
+    private PPPaymentService ppPaymentService;
     /**
      * Runs every 30 minutes (1800000 ms)
      * You can also use cron: @Scheduled(cron = "0 0/30 * * * *")
@@ -32,17 +33,17 @@ public class PaymentSyncScheduler {
         for (Payment payment : pendingPayments) {
             try {
                 // 2. Query PhonePe for the actual status
-                OrderStatusResponse response = phonePeClient.getOrderStatus(payment.getTransactionId());
-                
-                String phonePeState = response.getState(); // COMPLETED, FAILED, or PENDING
-
+////                OrderStatusResponse response = phonePeClient.getOrderStatus(payment.getTransactionId());
+////                
+////                String phonePeState = response.getState(); // COMPLETED, FAILED, or PENDING
+            	 String phonePeState = ppPaymentService.orderStatus(payment.getTransactionId());
                 // 3. Update database if the status has changed
                 if ("COMPLETED".equalsIgnoreCase(phonePeState)) {
                     updatePaymentStatus(payment, "SUCCESS", "सफल");
                 } else if ("FAILED".equalsIgnoreCase(phonePeState)) {
                     updatePaymentStatus(payment, "FAILED", "विफल");
                 }
-                
+//            	ppPaymentService.orderStatus(payment.getTransactionId());
                 // If still PENDING, we leave it for the next run
                 
             } catch (Exception e) {
