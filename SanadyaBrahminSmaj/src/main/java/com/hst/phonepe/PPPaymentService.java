@@ -33,8 +33,8 @@ public class PPPaymentService {
     private PaymentRepository paymentRepository;
     @Autowired
     private PaymentService offlinePaymentService;
-    @Autowired
-    private PPPaymentService ppPaymentService;
+//    @Autowired
+//    private PPPaymentService ppPaymentService;
     
     /**
      * Step 1: Create a Pending record and get PhonePe URL
@@ -188,7 +188,7 @@ public class PPPaymentService {
 //            OrderStatusResponse response =
 //                    client.getOrderStatus(merchantOrderId);
 
-            String phonePeState = ppPaymentService.orderStatus(merchantOrderId);
+            String phonePeState = orderStatus(merchantOrderId);
             
             
 //            if (response != null &&
