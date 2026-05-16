@@ -199,7 +199,7 @@ margin-top:20px;
 <td>
 
 <span class="badge 
-${payment.status=='Success'?'bg-success':
+${payment.status=='SUCCESS'?'bg-success':
 payment.status=='Pending'?'bg-warning':'bg-danger'}">
 
 ${payment.status}
@@ -273,31 +273,22 @@ ${payment.status}
 
 <div class="row mt-4">
 
-<div class="col-md-6">
-<!--
-<div class="section">QR सत्यापन</div>
+<div class="col-md-8">
+
+<!--<div class="section">QR सत्यापन</div>
 
 <div id="qrcode"></div>
+-->
+</div>
 
-</div>-->
-
-<div class="col-md-6 text-end">
+<div class="col-md-4 text-end">
+	<button class="btn btn-success" onclick="window.location.href='/my-bookings'">मेरी बुकिंग्स</button>
 <button>	<a href="/bookings/invoice/pdf/${booking.id}"
 	         class="btn btn-secondary btn-action"
 	         title="इनवॉइस">
 	         🧾इनवॉइस
 	      </a></button>
-		  
-<!--<button onclick="downloadPDF()" class="btn btn-warning">
-PDF डाउनलोड
-</button>
-
-<br><br>
-
-<button onclick="window.print()" class="btn btn-secondary">
-प्रिंट
-</button>-->
-
+	
 </div>
 
 </div>
