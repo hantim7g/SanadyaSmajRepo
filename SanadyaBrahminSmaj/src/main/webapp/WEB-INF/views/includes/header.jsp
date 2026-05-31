@@ -269,7 +269,7 @@
   <div class="container-fluid">
 	<a class="navbar-brand fw-bold d-flex flex-column align-items-start" href="/">
 	  <div class="d-flex align-items-center">
-	    <img src="https://res.cloudinary.com/ddyoi5pl3/image/upload/v1771295856/logo_upybpp.png" 
+	    <img src="https://res.cloudinary.com/ddyoi5pl3/image/upload/v1780195222/alogo_upybpp_huy0u8.png" 
 	         alt="Logo" width="30" height="30" 
 	         class="d-inline-block align-text-top me-2">
 
