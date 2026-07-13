@@ -162,6 +162,15 @@
       padding-left: 20px;
     }
 
+label {
+     font-family: 'Segoe UI', sans-serif;
+      font-weight: bold;
+    }
+    title {
+      font-family: 'Segoe UI', sans-serif;
+      font-weight: bold;
+    }
+
     .dropdown-item i {
       width: 20px;
       text-align: center;

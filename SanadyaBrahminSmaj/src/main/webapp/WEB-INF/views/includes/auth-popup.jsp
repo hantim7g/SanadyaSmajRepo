@@ -12,7 +12,8 @@
             <!-- 🔸 Left Panel -->
             <div class="col-md-5 d-none d-md-block" style="background-color:#91402c; color: white; padding: 25px 20px;">
               <div class="d-flex flex-column justify-content-center align-items-center h-100 text-center">
-                <img src="https://res.cloudinary.com/ddyoi5pl3/image/upload/v1771295856/logo_upybpp.png" alt="Welcome" class="img-fluid mb-4" />
+                <img src="https://res.cloudinary.com/ddyoi5pl3/image/upload/v1771295856/logo_upybpp.png" alt="Welcome"
+                  class="img-fluid mb-4" />
                 <h4 class="fw-bold">सनाढ्य ब्राह्मण महासभा महावीर नगर प्रथम, कोटा</h4><br />
                 <h5 class="fw-bold">आपका स्वागत करती है</h5><br />
                 <h4 class="fw-bold">स्वागतम</h4>
@@ -60,15 +61,31 @@
                     <div class="row">
 
                       <!-- Required Fields -->
-                      <div class="col-md-6 mb-3"><label>पूरा नाम *</label><input id="fullName" type="text"
+                      <div class="col-md-6 mb-3"><label>पूरा नाम <span class="required-asterisk">*</span></label><input id="fullName" type="text"
                           class="form-control" required></div>
-                      <div class="col-md-6 mb-3"><label>पिता का नाम *</label><input id="fatherName" type="text"
+                      <div class="col-md-6 mb-3"><label>पिता का नाम <span class="required-asterisk">*</span></label><input id="fatherName" type="text"
                           class="form-control" required></div>
-                      <div class="col-md-6 mb-3"><label>गोत्र *</label><input id="gotra" type="text"
+                      <div class="col-md-6 mb-3"><label>गोत्र <span class="required-asterisk">*</span></label>
+                        <select id="gotra" name="gotra" class="form-select" required>
+                          <option value="">-- गोत्र चुनें --</option>
+
+                          <c:forEach items="${gotraList}" var="g">
+                            <option value="${g.gotraName}" >
+                              ${g.gotraName}
+                            </option>
+                          </c:forEach>
+
+                          <option value="OTHER">अन्य</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6" id="selfGotraDiv" style="display:none">
+                        <label>अपना गोत्र लिखें <span class="required-asterisk">*</span></label>
+                        <input id="customGotra" type="text" name="customGotra" class="form-control">
+                      </div>
+
+                      <div class="col-md-6 mb-3"><label>जन्म तिथि <span class="required-asterisk">*</span></label><input id="dateOfBirth" type="date"
                           class="form-control" required></div>
-                      <div class="col-md-6 mb-3"><label>जन्म तिथि *</label><input id="dateOfBirth" type="date"
-                          class="form-control" required></div>
-                      <div class="col-md-6 mb-3"><label>लिंग *</label>
+                      <div class="col-md-6 mb-3"><label>लिंग <span class="required-asterisk">*</span></label>
                         <select id="gender" class="form-select" required>
                           <option value="">लिंग चुनें</option>
                           <option>पुरुष</option>
@@ -76,23 +93,27 @@
                           <option>अन्य</option>
                         </select>
                       </div>
-                      <div class="col-md-6 mb-3"><label>पता *</label><input id="address" type="text"
+                      <div class="col-md-6 mb-3"><label>पता <span class="required-asterisk">*</span></label><input id="address" type="text"
                           class="form-control" required></div>
-                      <div class="col-md-6 mb-3"><label>मोबाइल नंबर *</label><input id="mobile" type="text"
+                             <div class="col-md-6 mb-3"><label>शहर<span class="required-asterisk">*</span></label><input id="city" type="text"
                           class="form-control" required></div>
-                      <div class="col-md-6 mb-3"><label>ईमेल</label><input id="email" type="email" class="form-control">
+                           <div class="col-md-6 mb-3"><label>जिला<span class="required-asterisk">*</span></label><input id="homeDistrict" type="text"
+                          class="form-control" required></div>
+                       
+                      <div class="col-md-6 mb-3"><label>मोबाइल नंबर <span class="required-asterisk">*</span></label><input id="mobile" type="text"
+                          class="form-control" required></div>
+                      <div class="col-md-6 mb-3"><label>ईमेल <span class="required-asterisk">*</span></label><input id="email" type="email" class="form-control" required>
                       </div>
-                      <div class="col-md-6 mb-3"><label>पासवर्ड *</label><input id="password" onkeyup="passwordCheck()" type="password"
-                          class="form-control" required></div>
-<div id="password-errors" style="color: red;"></div>
+                      <div class="col-md-6 mb-3"><label>पासवर्ड <span class="required-asterisk">*</span></label><input id="password" onkeyup="passwordCheck()"
+                          type="password" class="form-control" required></div>
+                      <div id="password-errors" style="color: red;"></div>
 
                       <!-- Optional Fields -->
                       <div class="col-md-6 mb-3"><label>शैक्षणिक योग्यता</label><input id="education" type="text"
                           class="form-control"></div>
                       <div class="col-md-6 mb-3"><label>पेशा / कार्य</label><input id="occupation" type="text"
                           class="form-control"></div>
-                      <div class="col-md-6 mb-3"><label>जिला</label><input id="homeDistrict" type="text"
-                          class="form-control"></div>
+                     
                       <div class="col-md-6 mb-3"><label>आधार नंबर</label><input id="aadharNumber" type="text"
                           class="form-control"></div>
                       <div class="col-md-6 mb-3"><label>ब्लड ग्रुप</label><input id="bloodGroup" type="text"
@@ -117,7 +138,7 @@
                       <!-- ✔️ Terms -->
                       <div class="col-12 mb-3 form-check">
                         <input type="checkbox" class="form-check-input" id="agreeToTerms" required>
-                        <label class="form-check-label" for="agreeToTerms">मैं शर्तों और नियमों से सहमत हूं *</label>
+                        <label class="form-check-label" for="agreeToTerms">मैं शर्तों और नियमों से सहमत हूं <span class="required-asterisk">*</span></label>
                       </div>
 
                       <!-- 📤 Submit -->
@@ -153,7 +174,7 @@
               <div class="mb-3">
                 <label>नया पासवर्ड *</label>
                 <input type="password" id="fpNewPassword" onkeyup="modalPasswordCheck()" class="form-control" required>
-              <div id="password-errors-modal" style="color: red;"></div>
+                <div id="password-errors-modal" style="color: red;"></div>
 
               </div>
               <div class="mb-3">
@@ -179,15 +200,15 @@
           return;
         }
 
-const result = validatePassword(newPassword);
+        const result = validatePassword(newPassword);
 
-if (result.valid) {
-  console.log("पासवर्ड मान्य है ✅");
-} else {
-  bootbox.alert("पासवर्ड अमान्य ❌:");
-  result.errors.forEach(err => console.log("- " + err));
-  return;
-}
+        if (result.valid) {
+          console.log("पासवर्ड मान्य है ✅");
+        } else {
+          bootbox.alert("पासवर्ड अमान्य ❌:");
+          result.errors.forEach(err => console.log("- " + err));
+          return;
+        }
         $.post("/api/auth/forgot-password", {
           mobile,
           newPassword,
@@ -212,6 +233,12 @@ if (result.valid) {
 
       #authModal .nav-link {
         color: #666;
+      }
+
+   
+
+      #registrationForm .required-asterisk {
+        color: #dc3545;
       }
     </style>
 

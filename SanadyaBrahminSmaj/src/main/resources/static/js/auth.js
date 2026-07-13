@@ -81,13 +81,18 @@ $(function () {
 
 $(function() {
 	$('#registrationForm').submit(function(e) {
-		debugger
 		e.preventDefault();
 		const errorBox = $('#errorBox');
 		errorBox.addClass("d-none");
 
 		const mobile = $('#mobile').val().trim();
 		const password = $('#password').val().trim();
+		const selectedGotra = $('#gotra').val();
+		const customGotra = $('#customGotra').val().trim();
+
+		if (selectedGotra === 'OTHER' && !customGotra) {
+			return showError('Please enter your custom Gotra.');
+		}
 
 		/*if (!/^\d{10}$/.test(mobile)) {
 			return showError("मोबाइल नंबर 10 अंकों का होना चाहिए");
@@ -112,7 +117,7 @@ if (result.valid) {
 			fullName: $('#fullName').val(),
 			fatherName: $('#fatherName').val(),
 			dateOfBirth: $('#dateOfBirth').val(),
-			gotra:$('#gotra').val(),
+			gotra: selectedGotra === 'OTHER' ? customGotra : selectedGotra,
 			gender: $('#gender').val(),
 			address: $('#address').val(),
 			mobile: mobile,
@@ -121,6 +126,7 @@ if (result.valid) {
 			education: $('#education').val(),
 			occupation: $('#occupation').val(),
 			homeDistrict: $('#homeDistrict').val(),
+			city: $('#city').val(),
 			aadharNumber: $('#aadharNumber').val(),
 			bloodGroup: $('#bloodGroup').val(),
 			maritalStatus: $('#maritalStatus').val(),
@@ -138,7 +144,6 @@ if (result.valid) {
 			data: JSON.stringify(jsonData),
 			success: function(response) {
 				const userId = response.data.userId || response.data.id || null;
-debugger;
 				// 2. If image selected, send it separately using FormData
 				const fileInput = $('#profileImage')[0];
 				if (fileInput.files.length > 0 && userId) {
@@ -208,7 +213,7 @@ debugger;
 			error: function(err) {
 				console.error(err);
 				
-				const msg = err.responseJSON.message || "❌ पंजीकरण विफल रहा। कृपया विवरण जांचें।";
+				const msg = err.responseJSON?.message || "❌ पंजीकरण विफल रहा। कृपया विवरण जांचें।";
 				bootbox.alert({
 					title: "<h4 class='text-danger text-center'>⚠️ त्रुटि</h4>",
 					message: `<div class='text-center fs-5'>${msg}</div>`,
@@ -233,6 +238,14 @@ debugger;
 			errorBox.removeClass("d-none").text(msg);
 		}
 	});
+	function toggleCustomGotra() {
+		const isOther = $('#gotra').val() === 'OTHER';
+		$('#selfGotraDiv').toggle(isOther);
+		$('#customGotra').prop('required', isOther);
+	}
+
+	$('#gotra').on('change', toggleCustomGotra);
+	toggleCustomGotra();
 });
 
 
@@ -328,3 +341,4 @@ function passwordCheck() {
       result.errors.forEach(error => $errorBox.append(`<div>• ${error}</div>`));
     }
   };
+  

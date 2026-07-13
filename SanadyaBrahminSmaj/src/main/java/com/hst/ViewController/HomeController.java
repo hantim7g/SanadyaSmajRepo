@@ -1,10 +1,12 @@
 package com.hst.ViewController;
 
 import com.hst.entity.Event;
+import com.hst.entity.GotraMaster;
 import com.hst.entity.Testimonial;
 import com.hst.entity.User;
 import com.hst.repository.UserRepository;
 import com.hst.service.EventService;
+import com.hst.service.GotraMasterService;
 import com.hst.service.PaymentService;
 import com.hst.service.TestimonialService;
 
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
 
 @Controller
 public class HomeController {
+private final GotraMasterService gotraMasterService;
 @Autowired
     private  UserRepository userRepository;
 @Autowired
@@ -37,6 +40,10 @@ public class HomeController {
 
 @Autowired
 private  TestimonialService testimonialService;
+
+HomeController(GotraMasterService gotraMasterService) {
+    this.gotraMasterService = gotraMasterService;
+}
 
     // Map both / and /home
 @GetMapping({"/","/home"})
@@ -50,7 +57,8 @@ public String home(Model model) {
     // Add testimonials for home page
     List<Testimonial> testimonials = testimonialService.getApprovedTestimonials();
     List<Testimonial> testimonialActive=  testimonials.stream().filter(t->t.isActive()).collect(Collectors.toList());
-    
+    List<GotraMaster> gotraList = gotraMasterService.findAllActive();
+    model.addAttribute("gotraList",gotraList);
     model.addAttribute("testimonials", testimonialActive);
     
     return "home";
