@@ -3,6 +3,8 @@ package com.hst.entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
+import com.hst.util.EncryptedStringConverter;
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -39,6 +41,9 @@ public class User {
 	private String education;
 	private String occupation;
 	private String homeDistrict;
+
+	@Convert(converter = EncryptedStringConverter.class)
+	@Column(columnDefinition = "VARCHAR(512)")
 	private String aadharNumber;
 	private String bloodGroup;
 	private String maritalStatus;
@@ -246,6 +251,22 @@ public class User {
 
 	public String getAadharNumber() {
 		return aadharNumber;
+	}
+
+	
+	/**
+	 * Returns masked Aadhaar for display: "293926382492" → "XXXX-XXXX-2492"
+	 * Only the last 4 digits are visible; everything else is masked.
+	 */
+	 @Transient
+	 private String maskedAadharNumber;
+	 
+		
+	public String getMaskedAadharNumber() {
+		if (aadharNumber == null || aadharNumber.length() < 4) {
+			return aadharNumber;
+		}
+		return "XXXX-XXXX-" + aadharNumber.substring(aadharNumber.length() - 4);
 	}
 
 	public void setAadharNumber(String aadharNumber) {

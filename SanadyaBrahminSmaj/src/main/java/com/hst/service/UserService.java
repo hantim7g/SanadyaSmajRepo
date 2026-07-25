@@ -4,42 +4,31 @@ import com.hst.entity.Payment;
 import com.hst.entity.User;
 import com.hst.repository.UserRepository;
 import com.hst.repository.PaymentRepository;
-import com.hst.service.UserService;
 
-import io.swagger.v3.oas.models.media.IntegerSchema;
 import jakarta.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.time.Year;
-import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 @Service
 public class UserService {
-	private static final int ANNUAL_FEE = 100;
-	private static final int START_YEAR = 2020;
 
 	private final UserRepository userRepo;
+	private final PaymentRepository paymentRepo;
 
-	
-	@Autowired
-	private PaymentRepository paymentRepo;
-
-	public UserService(UserRepository userRepo) {
+	public UserService(UserRepository userRepo, PaymentRepository paymentRepo) {
 		this.userRepo = userRepo;
+		this.paymentRepo = paymentRepo;
 	}
 
 	public User findByMobile(String mobile) {
@@ -64,6 +53,7 @@ public class UserService {
 		user.setOccupation(updated.getOccupation());
 		user.setBloodGroup(updated.getBloodGroup());
 		user.setMaritalStatus(updated.getMaritalStatus());
+		user.setAadharNumber(updated.getAadharNumber());
 
 		userRepo.save(user);
 	}

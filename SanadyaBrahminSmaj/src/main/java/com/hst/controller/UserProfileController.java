@@ -10,30 +10,24 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
+ 
 
-// If using @Autowired or Repository
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.hst.entity.Payment;
 import com.hst.entity.User;
 import com.hst.repository.UserRepository;
 
-import com.hst.entity.User;
-import com.hst.repository.UserRepository;
+
 import com.hst.response.ApiResponse;
 import com.hst.security.JwtTokenProvider;
 import com.hst.service.CloudinaryService;
 import com.hst.service.PaymentService;
 import com.hst.service.UserService;
-
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.web.bind.annotation.*;
@@ -42,16 +36,20 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/user")
 public class UserProfileController {
 	
-	@Autowired
-	private PaymentService paymentService;
-	@Autowired
-	private CloudinaryService cloudinaryService;
-	@Autowired
-	private UserService userService;
-	@Autowired
-	private UserRepository userRepository;
-	@Autowired
-	private JwtTokenProvider jwtTokenProvider;
+	private final PaymentService paymentService;
+	private final CloudinaryService cloudinaryService;
+	private final UserService userService;
+	private final UserRepository userRepository;
+	private final JwtTokenProvider jwtTokenProvider;
+
+	public UserProfileController(PaymentService paymentService, CloudinaryService cloudinaryService,
+			UserService userService, UserRepository userRepository, JwtTokenProvider jwtTokenProvider) {
+		this.paymentService = paymentService;
+		this.cloudinaryService = cloudinaryService;
+		this.userService = userService;
+		this.userRepository = userRepository;
+		this.jwtTokenProvider = jwtTokenProvider;
+	}
 
 	@GetMapping("/profile")
 	public User getProfile(HttpServletRequest request) {
@@ -73,6 +71,12 @@ public class UserProfileController {
 		existingUser.setOccupation(user.getOccupation());
 		existingUser.setBloodGroup(user.getBloodGroup());
 		existingUser.setMaritalStatus(user.getMaritalStatus());
+
+		// Only update Aadhaar if a valid 12-digit number is provided (skip masked/null/blank)
+		String aadhar = user.getAadharNumber();
+		if (aadhar != null && !aadhar.isBlank() && aadhar.matches("^[0-9]{12}$")) {
+			existingUser.setAadharNumber(aadhar);
+		}
 
 		userRepository.save(existingUser);
 		return ResponseEntity.ok(new ApiResponse<>(true, "प्रोफ़ाइल सफलतापूर्वक सहेजी गई।", null));
