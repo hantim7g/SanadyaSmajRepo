@@ -30,13 +30,14 @@ public class PaymentSyncScheduler {
         // 1. Fetch all payments with status 'PENDING'
         List<Payment> pendingPayments = paymentRepository.findByStatus("PENDING");
 
+
         for (Payment payment : pendingPayments) {
             try {
                 // 2. Query PhonePe for the actual status
-////                OrderStatusResponse response = phonePeClient.getOrderStatus(payment.getTransactionId());
-////                
-////                String phonePeState = response.getState(); // COMPLETED, FAILED, or PENDING
-            	 String phonePeState = ppPaymentService.orderStatus(payment.getTransactionId());
+               OrderStatusResponse response = phonePeClient.getOrderStatus(payment.getTransactionId());
+               
+               String phonePeState = response.getState(); // COMPLETED, FAILED, or PENDING
+            	//  String phonePeState = ppPaymentService.orderStatus(payment.getTransactionId());
                 // 3. Update database if the status has changed
                 if ("COMPLETED".equalsIgnoreCase(phonePeState)) {
                     updatePaymentStatus(payment, "SUCCESS", "सफल");
