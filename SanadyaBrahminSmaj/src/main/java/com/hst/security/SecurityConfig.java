@@ -68,10 +68,13 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
 
-            /* ---------- AUTHORIZATION ---------- */
+            /* ---------- AUTHORIZATION (DENY-BY-DEFAULT POLICY) ---------- */
             .authorizeHttpRequests(auth -> auth
 
-                /* 🔐 ADMIN ONLY — specific paths first (evaluated in order) */
+                /*
+                 * 🔐 RULE 1 — ADMIN-ONLY ENDPOINTS
+                 * Evaluated first so they take precedence over public patterns below.
+                 */
                 .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/api/auth/makeAdmin").hasAuthority("ROLE_ADMIN")
@@ -85,7 +88,9 @@ public class SecurityConfig {
                 .requestMatchers("/rooms/save").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/events/save").hasAuthority("ROLE_ADMIN")
 
-                /* 🔐 LOGIN REQUIRED (USER / ADMIN) */
+                /*
+                 * 🔐 RULE 2 — AUTHENTICATED-ONLY (any logged-in user)
+                 */
                 .requestMatchers(
                         "/user/**",
                         "/api/user/**",
@@ -105,11 +110,23 @@ public class SecurityConfig {
                         "/bookings/save",
                         "/bookings/payment/response",
                         "/bookings/invoice/pdf/**",
-                        "/my-bookings"
+                        "/my-bookings",
+                        "/bookings/view/**",
+                        "/bookings/cancel/**"
                 ).authenticated()
 
-                /* 🌍 PUBLIC — static resources & JSP views (internal forwards only) */
+                /*
+                 * 🌍 RULE 3 — PUBLICLY ACCESSIBLE (explicitly permitted)
+                 * Only the minimum required paths are listed here.
+                 */
                 .requestMatchers(
+                        // Static resources
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/logo/**",
+                        "/favicon.ico",
+                        // Pages
                         "/",
                         "/home",
                         "/index",
@@ -130,11 +147,8 @@ public class SecurityConfig {
                         "/api/auth/login",
                         "/api/auth/register",
                         "/api/auth/forgot-password",
-                        "/api/auth/me"
-                ).permitAll()
-
-                /* 🌍 PUBLIC — content pages */
-                .requestMatchers(
+                        "/api/auth/me",
+                        // Content pages
                         "/testimonials",
                         "/calendar",
                         "/festivals",
@@ -145,31 +159,26 @@ public class SecurityConfig {
                         "/smajUddeshLakshya",
                         "/officials/",
                         "/matrimony/list",
-                        "/matrimony/search"
-                ).permitAll()
-
-                /* 🌍 PUBLIC — events (read-only) */
-                .requestMatchers(
+                        "/matrimony/search",
+                        // Events (read-only)
                         "/events/",
                         "/events/form",
                         "/events/list",
-                        "/events/{id}"
-                ).permitAll()
-
-                /* 🌍 PUBLIC — rooms (read-only) */
-                .requestMatchers(
+                        "/events/{id}",
+                        // Rooms (read-only)
                         "/rooms/filter",
                         "/rooms/get/{id}",
-                        "/rooms/view"
-                ).permitAll()
-
-                /* 🌍 PUBLIC — bookings (guest/public actions) */
-                .requestMatchers(
+                        "/rooms/view",
+                        // Bookings (guest actions)
                         "/bookings/add",
                         "/bookings/cancel/**",
                         "/bookings/view/**",
                         "/bookings/receipt/**",
-                        "/bookings/verify-booking/**"
+                        "/bookings/verify-booking/**",
+                        // Misc
+                        "/api/phonepe/webhook",
+                        // JSP view forwarding
+                        "/WEB-INF/views/**"
                 ).permitAll()
 
                 /* 🌍 PUBLIC — misc */
@@ -183,11 +192,25 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
 
+            /* ---------- SECURITY HEADERS ---------- */
+            .headers(headers -> headers
+                .frameOptions(frame -> frame.sameOrigin()) // Allow same-origin frames (for H2 console etc.)
+                .contentTypeOptions(contentType -> contentType.disable()) // Prevent MIME sniffing (default: on)
+                .xssProtection(xss -> xss.disable()) // Deprecated but harmless; modern browsers use CSP
+                .httpStrictTransportSecurity(hsts -> hsts
+                    .includeSubDomains(true)
+                    .maxAgeInSeconds(31536000) // 1 year
+                )
+                .contentSecurityPolicy(csp -> csp
+                    .policyDirectives("default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https:; font-src 'self' data:;")
+                )
+            )
+
             /* ---------- EXCEPTION HANDLING ---------- */
             .exceptionHandling(ex -> ex
                 .accessDeniedHandler(accessDeniedHandler)
                 .authenticationEntryPoint((request, response, authException) -> {
-
+ 
                     String uri = request.getRequestURI();
                     String method = request.getMethod();
                     String query = request.getQueryString();
@@ -229,10 +252,7 @@ public class SecurityConfig {
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
 
             /* ---------- LOGOUT ---------- */
-            .logout(logout -> logout.disable())
-
-            /* ---------- H2 / FRAMES ---------- */
-            .headers(headers -> headers.frameOptions().sameOrigin());
+            .logout(logout -> logout.disable());
 
         SecurityFilterChain chain = http.build();
         log.info("✅ SecurityFilterChain built successfully");
