@@ -20,8 +20,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Configuration
 public class SecurityConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtFilter;
@@ -38,10 +43,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
+        log.info("🔐 Initializing SecurityFilterChain...");
+
         http
             /* ---------- CORS ---------- */
         .cors(cors -> cors.configurationSource(request -> {
             CorsConfiguration config = new CorsConfiguration();
+            String origin = request.getHeader("Origin");
+            if (origin != null && !origin.isBlank()) {
+                log.debug("🌐 CORS request from origin: {}", origin);
+            }
             config.addAllowedOriginPattern("*");
             config.addAllowedMethod("*");
             config.addAllowedHeader("*");
@@ -60,14 +71,24 @@ public class SecurityConfig {
             /* ---------- AUTHORIZATION ---------- */
             .authorizeHttpRequests(auth -> auth
 
-                /* 🔐 ADMIN ONLY */
+                /* 🔐 ADMIN ONLY — specific paths first (evaluated in order) */
                 .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/api/auth/makeAdmin").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/bookings/admin/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/bookings/checkin/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/bookings/checkout/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/officials/admin/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/rooms/admin").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/rooms/admin/**").hasAuthority("ROLE_ADMIN")
-                
+                .requestMatchers("/rooms/delete/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/rooms/save").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/events/save").hasAuthority("ROLE_ADMIN")
+
                 /* 🔐 LOGIN REQUIRED (USER / ADMIN) */
                 .requestMatchers(
                         "/user/**",
+                        "/api/user/**",
                         "/member/**",
                         "/matrimony/**",
                         "/testimonial/my-testimonials",
@@ -75,10 +96,19 @@ public class SecurityConfig {
                         "/member/save-testimonial",
                         "/member/edit-testimonial/**",
                         "/member/update-testimonial/**",
-                        "/member/testimonial/delete/**"
+                        "/member/testimonial/delete/**",
+                        "/api/auth/upload-profile-image",
+                        "/api/auth/upload-aadhar-image",
+                        "/api/upload-image",
+                        "/api/phonepe/check-status/**",
+                        "/api/payment/**",
+                        "/bookings/save",
+                        "/bookings/payment/response",
+                        "/bookings/invoice/pdf/**",
+                        "/my-bookings"
                 ).authenticated()
 
-                /* 🌍 PUBLIC */
+                /* 🌍 PUBLIC — static resources & JSP views (internal forwards only) */
                 .requestMatchers(
                         "/",
                         "/home",
@@ -89,15 +119,68 @@ public class SecurityConfig {
                         "/css/**",
                         "/js/**",
                         "/images/**",
+                        "/logo/**",
                         "/favicon.ico",
-                        "/event/**",
+                        "/events/**",
+                        "/WEB-INF/views/**"
+                ).permitAll()
+
+                /* 🌍 PUBLIC — auth endpoints (login, register, forgot-password, me) */
+                .requestMatchers(
+                        "/api/auth/login",
+                        "/api/auth/register",
+                        "/api/auth/forgot-password",
+                        "/api/auth/me"
+                ).permitAll()
+
+                /* 🌍 PUBLIC — content pages */
+                .requestMatchers(
                         "/testimonials",
+                        "/calendar",
+                        "/festivals",
+                        "/gotra",
+                        "/guidance",
+                        "/shubhkamna",
+                        "/smajHistory",
+                        "/smajUddeshLakshya",
+                        "/officials/",
                         "/matrimony/list",
                         "/matrimony/search"
                 ).permitAll()
 
-                /* 🌍 DEFAULT */
-                .anyRequest().permitAll()
+                /* 🌍 PUBLIC — events (read-only) */
+                .requestMatchers(
+                        "/events/",
+                        "/events/form",
+                        "/events/list",
+                        "/events/{id}"
+                ).permitAll()
+
+                /* 🌍 PUBLIC — rooms (read-only) */
+                .requestMatchers(
+                        "/rooms/filter",
+                        "/rooms/get/{id}",
+                        "/rooms/view"
+                ).permitAll()
+
+                /* 🌍 PUBLIC — bookings (guest/public actions) */
+                .requestMatchers(
+                        "/bookings/add",
+                        "/bookings/cancel/**",
+                        "/bookings/view/**",
+                        "/bookings/receipt/**",
+                        "/bookings/verify-booking/**"
+                ).permitAll()
+
+                /* 🌍 PUBLIC — misc */
+                .requestMatchers(
+                        "/error",
+                        "/logout",
+                        "/api/phonepe/webhook"
+                ).permitAll()
+
+                /* 🔒 DEFAULT: require authentication for everything else (secure by default) */
+                .anyRequest().authenticated()
             )
 
             /* ---------- EXCEPTION HANDLING ---------- */
@@ -105,12 +188,23 @@ public class SecurityConfig {
                 .accessDeniedHandler(accessDeniedHandler)
                 .authenticationEntryPoint((request, response, authException) -> {
 
+                    String uri = request.getRequestURI();
+                    String method = request.getMethod();
+                    String query = request.getQueryString();
                     String accept = request.getHeader("Accept");
                     String xhr = request.getHeader("X-Requested-With");
+                    String referer = request.getHeader("Referer");
 
                     boolean isApiCall =
                             (accept != null && accept.contains("application/json")) ||
                             ("XMLHttpRequest".equalsIgnoreCase(xhr));
+
+                    log.warn("⛔ AUTH FAILED — URI: {} | Method: {} | Query: {} | Accept: {} | X-Requested-With: {} | Referer: {} | API: {} | Reason: {}",
+                            uri, method, (query != null ? query : "none"),
+                            (accept != null ? accept : "none"),
+                            (xhr != null ? xhr : "none"),
+                            (referer != null ? referer : "none"),
+                            isApiCall, authException.getMessage());
 
                     if (isApiCall) {
                         // 🔹 AJAX / API → JSON
@@ -118,9 +212,11 @@ public class SecurityConfig {
                         response.setContentType("application/json; charset=UTF-8");
                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                         response.getWriter().write("{\"message\":\"कृपया लॉगिन करें।\"}");
+                        log.info("✅ AUTH FAILED — returned 401 JSON for API call: {}", uri);
                     } else {
                         // 🔹 BROWSER → REDIRECT WITH FLASH MESSAGE
                     	 response.sendRedirect("/?error=login_required");
+                    	 log.info("✅ AUTH FAILED — redirected to /?error=login_required for browser: {}", uri);
                     }
                 })
 
@@ -138,7 +234,9 @@ public class SecurityConfig {
             /* ---------- H2 / FRAMES ---------- */
             .headers(headers -> headers.frameOptions().sameOrigin());
 
-        return http.build();
+        SecurityFilterChain chain = http.build();
+        log.info("✅ SecurityFilterChain built successfully");
+        return chain;
     }
 
     /* ---------- AUTH PROVIDER ---------- */

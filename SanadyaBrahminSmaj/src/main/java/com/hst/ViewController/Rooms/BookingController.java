@@ -227,9 +227,14 @@ public class BookingController {
     public String paymentResponse(
             @RequestParam String merchantOrderId,
             @RequestParam Long bookingId,
-            Model model) {
+            Model model, Principal principal) {
 
         Booking booking = bookingRepo.findById(bookingId).orElseThrow();
+
+        // IDOR FIX: Verify the booking belongs to the authenticated user
+        if (principal == null || !booking.getLoginUserMobile().equals(principal.getName())) {
+            return "redirect:/error?code=403";
+        }
 
         Payment payment = paymentRepo.findByTransactionId(merchantOrderId).get();
 
@@ -407,7 +412,9 @@ public class BookingController {
     @GetMapping({"/admin/invoice/pdf/{id}" , "/invoice/pdf/{id}"})
     public void generateInvoicePdf(
             @PathVariable Long id,
-            HttpServletResponse response) throws Exception {
+            HttpServletResponse response,
+            java.security.Principal principal,
+            jakarta.servlet.http.HttpServletRequest request) throws Exception {
 
         Booking booking = bookingRepo.findById(id).orElseThrow();
         List<BookingGuest> guests = guestRepo.findByBookingId(id);
