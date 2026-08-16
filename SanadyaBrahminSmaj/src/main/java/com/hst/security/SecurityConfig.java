@@ -1,6 +1,8 @@
 package com.hst.security;
 
 import com.hst.filter.JwtAuthenticationFilter;
+import com.hst.security.CustomOAuth2UserService;
+import com.hst.security.OAuth2LoginSuccessHandler;
 import com.hst.service.CustomUserDetailsService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
@@ -31,13 +33,19 @@ public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtFilter;
     private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     public SecurityConfig(CustomUserDetailsService userDetailsService,
                           JwtAuthenticationFilter jwtFilter,
-                          CustomAccessDeniedHandler accessDeniedHandler) {
+                          CustomAccessDeniedHandler accessDeniedHandler,
+                          CustomOAuth2UserService customOAuth2UserService,
+                          OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
         this.userDetailsService = userDetailsService;
         this.jwtFilter = jwtFilter;
         this.accessDeniedHandler = accessDeniedHandler;
+        this.customOAuth2UserService = customOAuth2UserService;
+        this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
     }
 
     @Bean
@@ -177,6 +185,11 @@ public class SecurityConfig {
                         "/bookings/verify-booking/**",
                         // Misc
                         "/api/phonepe/webhook",
+                        // Google OAuth2
+                        "/oauth2/**",
+                        "/login/oauth2/**",
+                        // City/Village master data API
+                        "/api/cities/**",
                         // JSP view forwarding
                         "/WEB-INF/views/**"
                 ).permitAll()
@@ -202,8 +215,18 @@ public class SecurityConfig {
                     .maxAgeInSeconds(31536000) // 1 year
                 )
                 .contentSecurityPolicy(csp -> csp
-                    .policyDirectives("default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https:; font-src 'self' data:;")
+                    .policyDirectives("default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.datatables.net; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://code.jquery.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.datatables.net; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;")
                 )
+            )
+
+            /* ---------- OAUTH2 LOGIN (GOOGLE) ---------- */
+            .oauth2Login(oauth2 -> oauth2
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService)
+                )
+                .successHandler(oAuth2LoginSuccessHandler)
+                .failureUrl("/?error=oauth_failed")
+                .permitAll()
             )
 
             /* ---------- EXCEPTION HANDLING ---------- */

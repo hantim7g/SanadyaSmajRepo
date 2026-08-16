@@ -41,6 +41,8 @@ public class User {
 	private String education;
 	private String occupation;
 	private String homeDistrict;
+	private String city;
+	private String authProvider; // "GOOGLE" for OAuth users, null for normal registration
 
 	@Convert(converter = EncryptedStringConverter.class)
 	@Column(columnDefinition = "VARCHAR(512)")
@@ -247,6 +249,22 @@ public class User {
 
 	public void setHomeDistrict(String homeDistrict) {
 		this.homeDistrict = homeDistrict;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public String getAuthProvider() {
+		return authProvider;
+	}
+
+	public void setAuthProvider(String authProvider) {
+		this.authProvider = authProvider;
 	}
 
 	public String getAadharNumber() {

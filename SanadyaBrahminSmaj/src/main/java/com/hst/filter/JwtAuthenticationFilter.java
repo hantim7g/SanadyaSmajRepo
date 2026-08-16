@@ -12,15 +12,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
