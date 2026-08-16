@@ -286,34 +286,34 @@ $(document).ready(function() {
 	}
 });
 function validatePassword(password) {
-	  const pwd = String(password || ""); // avoid null/undefined issues
+  const pwd = String(password || ""); // avoid null/undefined issues
 
   const minLength = 8;
   const commonPasswords = ["123456", "password", "12345678", "qwerty", "abc123", "111111"];
 
   const errors = [];
 
-  if (password.length < minLength) {
+  if (pwd.length < minLength) {
     errors.push("कम से कम 8 अक्षरों का पासवर्ड होना चाहिए।");
   }
 
-  if (!/[A-Z]/.test(password)) {
+  if (!/[A-Z]/.test(pwd)) {
     errors.push("कम से कम एक बड़ा अक्षर होना चाहिए।");
   }
 
-  if (!/[a-z]/.test(password)) {
+  if (!/[a-z]/.test(pwd)) {
     errors.push("कम से कम एक छोटा अक्षर होना चाहिए।");
   }
 
-  if (!/[0-9]/.test(password)) {
+  if (!/[0-9]/.test(pwd)) {
     errors.push("कम से कम एक अंक होना चाहिए।");
   }
 
-  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) {
     errors.push("कम से कम एक विशेष अक्षर होना चाहिए (जैसे !@#$%^&*)।");
   }
 
-  if (commonPasswords.includes(password.toLowerCase())) {
+  if (commonPasswords.includes(pwd.toLowerCase())) {
     errors.push("यह पासवर्ड बहुत आम है, कृपया एक मजबूत पासवर्ड चुनें।");
   }
 
@@ -341,4 +341,14 @@ function passwordCheck() {
       result.errors.forEach(error => $errorBox.append(`<div>• ${error}</div>`));
     }
   };
+
+// Global logout handler used by the auth dropdown on every page
+function handleLogout(e) {
+  if (e) e.preventDefault();
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("userName");
+  fetch('/logout', { method: 'POST', credentials: 'include' })
+    .then(() => { window.location.href = "/"; })
+    .catch(() => { window.location.href = "/"; });
+}
   
