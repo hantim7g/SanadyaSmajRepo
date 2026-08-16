@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import com.hst.entity.Payment;
 import com.hst.entity.BookingSys.Booking;
 import com.hst.entity.BookingSys.BookingGuest;
 
@@ -70,7 +69,6 @@ public class InvoiceXmlBuilder {
 	            <paymentMode>%s</paymentMode>
 	            <paymentStatus>%s</paymentStatus>
 	            <paymentDate>%s</paymentDate>
-
 
 	            <guests>
 	                %s

@@ -17,13 +17,16 @@ public class RegistrationNumberService {
     }
 
     @Transactional
-    public String generateRegistrationNumber() {
+    public synchronized String generateRegistrationNumber() {
         RegistrationSequence seq;
 
-        if (sequenceRepo.count() == 0) {
+        // Use pessimistic write lock to prevent concurrent duplicate registration numbers
+        var lockedList = sequenceRepo.findAllWithPessimisticLock();
+
+        if (lockedList.isEmpty()) {
             seq = new RegistrationSequence(1L);
         } else {
-            seq = sequenceRepo.findAll().get(0);
+            seq = lockedList.get(0);
             seq.setLastNumber(seq.getLastNumber() + 1);
         }
 

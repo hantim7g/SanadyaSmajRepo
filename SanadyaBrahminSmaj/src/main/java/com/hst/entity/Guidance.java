@@ -1,10 +1,6 @@
 package com.hst.entity;
 import jakarta.persistence.*;
-import java.sql.Date;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 
 @Entity
 @Table(name = "GUIDANCE_MST")
@@ -22,7 +18,6 @@ public class Guidance {
 
     @Column(name = "IMAGE_URL")
     private String imageUrl;
-
 
     @Lob
     @Column(name = "CONTENT", nullable = false, columnDefinition = "LONGTEXT")

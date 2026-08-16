@@ -47,6 +47,20 @@
                     </div>
                     <button type="submit" class="btn btn-primary w-100">लॉगिन</button>
                   </form>
+
+                  <div class="d-flex align-items-center my-3">
+                    <hr class="flex-grow-1" />
+                    <span class="px-2 text-muted">— या —</span>
+                    <hr class="flex-grow-1" />
+                  </div>
+
+                  <a href="/oauth2/authorization/google" class="btn btn-danger w-100">
+                    <i class="fab fa-google me-2"></i>Google से लॉगिन करें
+                  </a>
+                  <p class="text-muted small mt-2 mb-1">
+                    नए उपयोगकर्ता: Google से लॉगिन करें, फिर प्रोफ़ाइल पूर्ण करें और अनुमोदन प्राप्त करें।
+                  </p>
+
                   <a href="#" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">🔑 पासवर्ड भूल गए?</a>
                   <div id="forgotPwdSuccess" class="alert alert-success d-none"></div>
                   <div id="forgotPwdError" class="alert alert-danger d-none"></div>
@@ -56,7 +70,7 @@
 
                 <!-- 📝 Registration -->
                 <div class="tab-pane fade" id="registerTab" role="tabpanel">
-                  <form id="registrationForm" enctype="multipart/form-data">
+                  <form id="registrationForm">
                     <div id="errorBox" class="alert alert-danger d-none" role="alert"></div>
                     <div class="row">
 
@@ -95,10 +109,14 @@
                       </div>
                       <div class="col-md-6 mb-3"><label>पता <span class="required-asterisk">*</span></label><input id="address" type="text"
                           class="form-control" required></div>
-                             <div class="col-md-6 mb-3"><label>शहर<span class="required-asterisk">*</span></label><input id="city" type="text"
-                          class="form-control" required></div>
-                           <div class="col-md-6 mb-3"><label>जिला<span class="required-asterisk">*</span></label><input id="homeDistrict" type="text"
-                          class="form-control" required></div>
+                             <div class="col-md-6 mb-3"><label>शहर<span class="required-asterisk">*</span></label>
+                        <select id="city" class="form-select" required>
+                          <option value="">-- शहर चुनें --</option>
+                        </select></div>
+                           <div class="col-md-6 mb-3"><label>जिला<span class="required-asterisk">*</span></label>
+                        <select id="homeDistrict" class="form-select" required>
+                          <option value="">-- जिला चुनें --</option>
+                        </select></div>
                        
                       <div class="col-md-6 mb-3"><label>मोबाइल नंबर <span class="required-asterisk">*</span></label><input id="mobile" type="text"
                           class="form-control" required></div>
@@ -189,38 +207,7 @@
     </div>
 
     <script>
-      $('#forgotPasswordForm').submit(function (e) {
-        e.preventDefault();
-        const mobile = $('#fpMobile').val().trim();
-        const newPassword = $('#fpNewPassword').val().trim();
-        const reason = $('#fpReason').val().trim();
-
-        if (!/^\d{10}$/.test(mobile)) {
-          bootbox.alert("मान्य 10 अंकों का मोबाइल नंबर दर्ज करें");
-          return;
-        }
-
-        const result = validatePassword(newPassword);
-
-        if (result.valid) {
-          console.log("पासवर्ड मान्य है ✅");
-        } else {
-          bootbox.alert("पासवर्ड अमान्य ❌:");
-          result.errors.forEach(err => console.log("- " + err));
-          return;
-        }
-        $.post("/api/auth/forgot-password", {
-          mobile,
-          newPassword,
-          reason
-        }).done(function (res) {
-          $('#forgotPasswordModal').modal('hide');
-          bootbox.alert("✅ " + res.message);
-        }).fail(function (xhr) {
-          const msg = xhr.responseJSON?.message || "❌ त्रुटि हुई";
-          bootbox.alert("⚠️ " + msg);
-        });
-      });
+      // Forgot-password submit is handled by /resources/js/auth.js
     </script>
 
     <!-- ✅ Styles -->
@@ -241,6 +228,10 @@
         color: #dc3545;
       }
     </style>
+
+    <!-- ✅ flatpickr for dd/mm/yyyy date display -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <!-- ✅ Scripts -->
     <script src="${pageContext.request.contextPath}/js/auth.js"></script>

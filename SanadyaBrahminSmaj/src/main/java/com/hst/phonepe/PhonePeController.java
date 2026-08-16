@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,10 +24,7 @@ import com.hst.repository.PaymentRepository;
 import com.hst.repository.UserRepository;
 import com.phonepe.sdk.pg.common.exception.PhonePeException;
 import com.phonepe.sdk.pg.common.models.response.CallbackResponse;
-import com.phonepe.sdk.pg.common.models.response.OrderStatusResponse;
 import com.phonepe.sdk.pg.payments.v2.StandardCheckoutClient;
-
-import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;

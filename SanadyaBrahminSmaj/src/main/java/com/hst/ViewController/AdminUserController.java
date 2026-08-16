@@ -4,16 +4,14 @@ import com.hst.dto.UserRoleUpdateRequest;
 import com.hst.entity.PasswordResetRequest;
 import com.hst.entity.Payment;
 import com.hst.entity.User;
+import com.hst.service.NotificationService;
 import com.hst.service.PasswordResetRequestService;
 import com.hst.service.UserService;
-
-import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +20,6 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin")
@@ -32,7 +29,10 @@ public class AdminUserController {
 	private UserService userService;
 
 	@Autowired
-	private 	PasswordResetRequestService passwordResetRequestService;
+	private PasswordResetRequestService passwordResetRequestService;
+
+	@Autowired
+	private NotificationService notificationService;
 	@GetMapping("/memberList")
 	public String listUsers(Model model, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) {
@@ -46,16 +46,29 @@ public class AdminUserController {
 		return "memberListAdmin"; // users.jsp
 	}
 
+	@Autowired
+	private com.hst.repository.UserRepository userRepo;
+
 	@PostMapping("/approveProfile/{id}")
 	@ResponseBody
-	public ResponseEntity<?> approveUser(@PathVariable Long id,Principal Principal ) {
-		userService.approveUser(id, "स्वीकृत",Principal.getName());
+	public ResponseEntity<?> approveUser(@PathVariable Long id, Principal principal) {
+		userService.approveUser(id, "स्वीकृत", principal.getName());
+
+		// Send approval notification
+		userRepo.findById(id).ifPresent(user ->
+			notificationService.notifyApproval(user, principal.getName()));
+
 		return ResponseEntity.ok().build();
 	}
 
 	@PostMapping("/rejectProfile/{id}")
-	public ResponseEntity<?> rejectProfile(@PathVariable Long id ,Principal Principal ) {
-		userService.approveUser(id, "अस्वीकृत", Principal.getName() );
+	public ResponseEntity<?> rejectProfile(@PathVariable Long id, Principal principal) {
+		userService.approveUser(id, "अस्वीकृत", principal.getName());
+
+		// Send rejection notification
+		userRepo.findById(id).ifPresent(user ->
+			notificationService.notifyRejection(user, principal.getName()));
+
 		return ResponseEntity.ok().build();
 	}
 

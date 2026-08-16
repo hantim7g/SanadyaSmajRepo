@@ -4,7 +4,6 @@ import com.hst.dto.RoomFilterDTO;
 import com.hst.entity.BookingSys.Room;
 import com.hst.entity.BookingSys.RoomBlock;
 import com.hst.entity.BookingSys.RoomImage;
-import com.hst.entity.BookingSys.RoomStatus;
 import com.hst.service.CloudinaryService;
 import com.hst.service.RoomBlockService;
 import com.hst.service.RoomService;
@@ -20,10 +19,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
 

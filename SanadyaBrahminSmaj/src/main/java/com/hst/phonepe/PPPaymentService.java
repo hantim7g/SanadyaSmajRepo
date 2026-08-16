@@ -21,7 +21,7 @@ import com.phonepe.sdk.pg.payments.v2.models.response.StandardCheckoutPayRespons
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.web.client.RestTemplate;
+
 @Service
 public class PPPaymentService {
 

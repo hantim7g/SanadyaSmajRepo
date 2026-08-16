@@ -1,8 +1,5 @@
 package com.hst.entity;
 import jakarta.persistence.*;
-import java.sql.Date;
-import java.util.ArrayList;
-import java.util.List;
 @Entity
 @Table(name = "OFFICE_BEARER")
 public class OfficeBearer {

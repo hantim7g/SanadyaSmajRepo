@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 
 @Service
 public class TestimonialService {
@@ -52,7 +50,6 @@ public class TestimonialService {
     public Optional<Testimonial> findById(Long id) {
         return testimonialRepository.findById(id);
     }
-
 
     @Transactional
     public Testimonial updateTestimonial(Long testimonialId, String message, String designation, User updatedBy) {

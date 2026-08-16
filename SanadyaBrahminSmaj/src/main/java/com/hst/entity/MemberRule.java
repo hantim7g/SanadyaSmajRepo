@@ -1,7 +1,5 @@
 package com.hst.entity;
 
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -9,9 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-
 
 @Entity
 @Table(name = "member_rules")
@@ -53,8 +49,6 @@ public class MemberRule {
 	public void setRuleDescription(String ruleDescription) {
 		this.ruleDescription = ruleDescription;
 	}
-
-
 
 	public LocalDateTime getCreatedDate() {
 		return createdDate;

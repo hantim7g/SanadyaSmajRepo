@@ -136,87 +136,57 @@ if (result.valid) {
 			role: "USER"
 		};
 
-		// 1. First send JSON data (excluding image)
+		// 📤 Send registration data + profile image together in a single multipart request
+		const formData = new FormData();
+		formData.append("data", new Blob([JSON.stringify(jsonData)], { type: "application/json" }));
+		const fileInput = $('#profileImage')[0];
+		if (fileInput.files.length > 0) {
+			formData.append("file", fileInput.files[0]);
+		}
+
 		$.ajax({
 			url: '/api/auth/register',
 			method: 'POST',
-			contentType: 'application/json',
-			data: JSON.stringify(jsonData),
+			data: formData,
+			processData: false,
+			contentType: false,
 			success: function(response) {
-				const userId = response.data.userId || response.data.id || null;
-				// 2. If image selected, send it separately using FormData
-				const fileInput = $('#profileImage')[0];
-				if (fileInput.files.length > 0 && userId) {
-					const formData = new FormData();
-					formData.append("file", fileInput.files[0]);
-					formData.append("userId", userId); // Optional
-
-					$.ajax({
-						url: `/api/auth/upload-profile-image`,
-						method: 'POST',
-						data: formData,
-						processData: false,
-						contentType: false,
-						success: function() {
-						
-							const dialog = bootbox.alert({
-						title: "<h4 class='text-success text-center'>पंजीकरण सफल!</h4>",
-						message: "<p class='text-center fs-5'>✅ पंजीकरण और छवि अपलोड सफल!</p>",
-						centerVertical: true,
-						buttons: {
-							ok: {
-								label: 'रोकें',
-								className: 'btn btn-light'
-							}
+				const dialog = bootbox.alert({
+					title: "<h4 class='text-success text-center'>पंजीकरण सफल!</h4>",
+					message: "<p class='text-center fs-5'>✅ पंजीकरण सफल! कृपया अनुमोदन की प्रतीक्षा करें।</p>",
+					centerVertical: true,
+					buttons: {
+						ok: {
+							label: 'रोकें',
+							className: 'btn btn-light'
 						}
-					});
+					}
+				});
 
-					setTimeout(() => {
-						dialog.modal('hide');
-						window.location.href = "/home"; // or your dashboard route
-					}, 3000);
-						
-						
-						
-						},
-						error: function() {
-							showWarningAlert("⚠️ पंजीकरण सफल, लेकिन छवि अपलोड विफल।");
-							resetForm();
-						}
-					});
-				} else {
-					
-					
-					
-							const dialog = bootbox.alert({
-						title: "<h4 class='text-success text-center'>पंजीकरण सफल!</h4>",
-						message: "<p class='text-center fs-5'>✅ पंजीकरण सफल!</p>",
-						centerVertical: true,
-						buttons: {
-							ok: {
-								label: 'रोकें',
-								className: 'btn btn-light'
-							}
-						}
-					});
-
-					setTimeout(() => {
-						dialog.modal('hide');
-						window.location.href = "/home"; // or your dashboard route
-					}, 3000);
-						
-					
-					
-					
-				}
+				setTimeout(() => {
+					dialog.modal('hide');
+					window.location.href = "/home"; // or your dashboard route
+				}, 3000);
 			},
 			error: function(err) {
 				console.error(err);
 				
-				const msg = err.responseJSON?.message || "❌ पंजीकरण विफल रहा। कृपया विवरण जांचें।";
+				const resp = err.responseJSON;
+				const msg = resp?.message ?? "❌ पंजीकरण विफल रहा। कृपया विवरण जांचें।";
+				const fieldErrors = resp?.data;
+				
+				let errorHtml = `<div class='text-center fs-5'>${msg}</div>`;
+				if (fieldErrors && typeof fieldErrors === 'object') {
+					errorHtml += "<ul class='text-start mt-3'>";
+					for (const [field, errorMsg] of Object.entries(fieldErrors)) {
+						errorHtml += `<li>${errorMsg}</li>`;
+					}
+					errorHtml += "</ul>";
+				}
+				
 				bootbox.alert({
 					title: "<h4 class='text-danger text-center'>⚠️ त्रुटि</h4>",
-					message: `<div class='text-center fs-5'>${msg}</div>`,
+					message: errorHtml,
 					centerVertical: true,
 					buttons: {
 						ok: {
@@ -227,12 +197,6 @@ if (result.valid) {
 				});
 			}
 		});
-
-		function resetForm() {
-			$('#authModal').modal('hide');
-			$('#registrationForm')[0].reset();
-			errorBox.addClass("d-none");
-		}
 
 		function showError(msg) {
 			errorBox.removeClass("d-none").text(msg);
@@ -246,6 +210,53 @@ if (result.valid) {
 
 	$('#gotra').on('change', toggleCustomGotra);
 	toggleCustomGotra();
+
+	// --- Date of birth: display dd/mm/yyyy, keep ISO value for backend ---
+	if (window.flatpickr) {
+		flatpickr('#dateOfBirth', {
+			dateFormat: 'Y-m-d',
+			altInput: true,
+			altFormat: 'd/m/Y',
+			maxDate: 'today',
+			allowInput: true,
+			onCreate: function (selectedDates, dateStr, instance) {
+				if (instance.altInput) instance.altInput.setAttribute('required', 'required');
+			}
+		});
+	}
+
+	// --- Populate city & homeDistrict dropdowns from master data ---
+	var citySelect = $('#city');
+	var districtSelect = $('#homeDistrict');
+
+	$.ajax({
+		url: '/api/cities',
+		method: 'GET',
+		success: function(items) {
+			var cities = [];
+			var districts = [];
+			items.forEach(function(item) {
+				if (item.city) {
+					cities.push(item.name);
+				} else {
+					districts.push(item.name);
+				}
+			});
+
+			cities.sort(function(a, b) { return a.localeCompare(b); });
+			districts.sort(function(a, b) { return a.localeCompare(b); });
+
+			cities.forEach(function(name) {
+				citySelect.append(new Option(name, name));
+			});
+			districts.forEach(function(name) {
+				districtSelect.append(new Option(name, name));
+			});
+		},
+		error: function(err) {
+			console.error('Failed to load cities/districts:', err);
+		}
+	});
 });
 
 

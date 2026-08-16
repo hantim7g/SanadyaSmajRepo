@@ -20,12 +20,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Controller
@@ -63,6 +61,11 @@ public String home(Model model) {
     
     return "home";
 }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
 
 
     @GetMapping("/member/profile")

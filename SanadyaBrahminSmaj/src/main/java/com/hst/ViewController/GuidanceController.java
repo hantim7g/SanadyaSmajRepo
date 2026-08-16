@@ -1,10 +1,6 @@
 package com.hst.ViewController;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,7 +126,6 @@ private CloudinaryService cloudinaryService;
             // log only, don't break save
         }
     }
-
 
     /* DELETE */
     @DeleteMapping("/admin/guidance/delete/{id}")

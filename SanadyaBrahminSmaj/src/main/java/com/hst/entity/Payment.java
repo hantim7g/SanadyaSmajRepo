@@ -3,7 +3,6 @@ package com.hst.entity;
 import jakarta.persistence.*;
 
 import java.sql.Date;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payment_history")
@@ -193,6 +192,5 @@ public class Payment {
 	public void setFeeTo(Date feeTo) {
 		this.feeTo = feeTo;
 	}
-
 
 }

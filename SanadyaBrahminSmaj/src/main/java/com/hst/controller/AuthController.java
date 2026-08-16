@@ -1,19 +1,18 @@
 package com.hst.controller;
 
 import com.hst.dto.LoginRequest;
-import com.hst.dto.RegistrationRequest; // Import the new DTO
+import com.hst.dto.RegistrationRequest;
 import com.hst.entity.PasswordResetRequest;
 import com.hst.entity.User;
 import com.hst.repository.UserRepository;
 import com.hst.response.ApiResponse;
 import com.hst.security.JwtTokenProvider;
+import com.hst.service.CityVillageMasterService;
 import com.hst.service.CloudinaryService;
 import com.hst.service.PasswordResetRequestService;
 import com.hst.service.RegistrationNumberService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,44 +24,56 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/auth/")
 public class AuthController {
-    @Autowired
-    private CloudinaryService cloudinaryService;
-	@Autowired
-	private PasswordResetRequestService passwordResetRequestService;
+	private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
-	@Autowired
-	private RegistrationNumberService registrationNumberService;
-	@Value("${upload.image.dir}")
-	private String uploadDir;
+	private final CloudinaryService cloudinaryService;
+	private final PasswordResetRequestService passwordResetRequestService;
+	private final RegistrationNumberService registrationNumberService;
+	private final CityVillageMasterService cityVillageMasterService;
 	private final AuthenticationManager authenticationManager;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	@Autowired
 	public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider,
-			UserRepository userRepository, PasswordEncoder passwordEncoder) {
+			UserRepository userRepository, PasswordEncoder passwordEncoder,
+			CloudinaryService cloudinaryService, PasswordResetRequestService passwordResetRequestService,
+			RegistrationNumberService registrationNumberService, CityVillageMasterService cityVillageMasterService) {
 		this.authenticationManager = authenticationManager;
 		this.jwtTokenProvider = jwtTokenProvider;
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
+		this.cloudinaryService = cloudinaryService;
+		this.passwordResetRequestService = passwordResetRequestService;
+		this.registrationNumberService = registrationNumberService;
+		this.cityVillageMasterService = cityVillageMasterService;
+	}
+
+	private static final String APPROVED = "स्वीकृत";
+	private static final String APPROVAL_PENDING = "प्रक्रिया में";
+	private static final long COOKIE_MAX_AGE_SECONDS = 7L * 24 * 60 * 60;
+
+	private ResponseEntity<ApiResponse<Map<String, Object>>> fieldError(String field, String message) {
+		Map<String, Object> errors = new HashMap<>();
+		errors.put(field, message);
+		return ResponseEntity.badRequest().body(new ApiResponse<>(false, message, errors));
 	}
 
 	@PostMapping("/login")
@@ -74,7 +85,7 @@ public class AuthController {
 		}
 
 		User user = optionalUser.get();
-		if (!(user.getApproved().equalsIgnoreCase("स्वीकृत"))) {
+		if (!APPROVED.equals(user.getApproved())) {
 			return ResponseEntity.badRequest()
 					.body(new ApiResponse<>(false, "आपका पंजीकरण अनुमोदित नहीं है।कृपया प्रतीक्षा करें।", null));
 		}
@@ -82,49 +93,47 @@ public class AuthController {
 			authenticationManager
 					.authenticate(new UsernamePasswordAuthenticationToken(request.getMobile(), request.getPassword()));
 		} catch (BadCredentialsException e) {
-//			return ResponseEntity.() 401
-//					.body(new ApiResponse<>(false, "लॉगिन करने में विफल . यूजरनेम पासवर्ड गलत है।", null));
-//			
-			
 			return ResponseEntity.badRequest()
 					.body(new ApiResponse<>(false, "लॉगिन करने में विफल . यूजरनेम पासवर्ड गलत है।", null));
 		}
 
 		String token = jwtTokenProvider.generateToken(request.getMobile(), List.of(user.getRole()));
 
-		// Create secure HttpOnly cookie with SameSite attribute using ResponseCookie
 		ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie.from("authToken", token)
 				.httpOnly(true)
 				.path("/")
-				.maxAge(7 * 24 * 60 * 60);
-
-		// Use Secure flag when request is secure
+				.maxAge(COOKIE_MAX_AGE_SECONDS)
+				.sameSite("Lax");
 		if (httpRequest.isSecure()) {
 			cookieBuilder.secure(true);
 		}
-		// Prefer Strict to mitigate CSRF when using cookies for auth
-		// Use Lax for better browser compatibility while still providing CSRF mitigation
-		cookieBuilder.sameSite("Lax");
+		response.addHeader("Set-Cookie", cookieBuilder.build().toString());
 
-		ResponseCookie responseCookie = cookieBuilder.build();
-		response.addHeader("Set-Cookie", responseCookie.toString());
-
-//		return ResponseEntity.ok(new ApiResponse<>(true, user.getFullName(), Map.of("token", token)));
 		return ResponseEntity.ok(new ApiResponse<>(true, user.getFullName(), null));
-		
 	}
 
-	@PostMapping("/register")
-	public ResponseEntity<ApiResponse<Map<String, Object>>> register(@Valid @RequestBody RegistrationRequest req, BindingResult bindingResult) {
-		// Handle validation errors
+	@PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<ApiResponse<Map<String, Object>>> register(
+			@Valid @RequestPart("data") RegistrationRequest req,
+			BindingResult bindingResult,
+			@RequestPart(value = "file", required = false) MultipartFile file) {
 		if (bindingResult.hasErrors()) {
 			Map<String, Object> errors = new HashMap<>();
 			bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-			return ResponseEntity.badRequest().body(new ApiResponse<Map<String, Object>>(false, errors.toString() ,errors));
+			return ResponseEntity.badRequest().body(new ApiResponse<>(false, "कृपया सभी आवश्यक फ़ील्ड सही से भरें।", errors));
 		}
 
 		if (userRepository.existsByMobile(req.getMobile())) {
-			return ResponseEntity.badRequest().body(new ApiResponse<Map<String, Object>>(false, "मोबाइल नंबर पहले से पंजीकृत है।", null));
+			return ResponseEntity.badRequest().body(new ApiResponse<>(false, "मोबाइल नंबर पहले से पंजीकृत है।", null));
+		}
+
+		if (req.getCity() != null && !req.getCity().isBlank()
+				&& !cityVillageMasterService.isValidCityOrVillage(req.getCity())) {
+			return fieldError("city", "दर्ज किया गया शहर/गाँव मान्य नहीं है। कृपया सूची से चुनें।");
+		}
+		if (req.getHomeDistrict() != null && !req.getHomeDistrict().isBlank()
+				&& !cityVillageMasterService.isValidCityOrVillage(req.getHomeDistrict())) {
+			return fieldError("homeDistrict", "दर्ज किया गया जिला मान्य नहीं है। कृपया सूची से चुनें।");
 		}
 
 		User user = new User();
@@ -147,15 +156,22 @@ public class AuthController {
 		user.setOrganizationAffiliation(req.getOrganizationAffiliation());
 		user.setContribution(req.getContribution());
 		user.setAgreeToTerms(req.isAgreeToTerms());
+		user.setRole("USER");
+		user.setApproved(APPROVAL_PENDING);
+		user.setRegistrationNo(registrationNumberService.generateRegistrationNumber());
 
-		user.setRole("USER"); // ✅ Add Spring Security compatible role format
-		user.setApproved("प्रक्रिया में");
+		// 🖼️ Upload profile image together with registration (no auth needed yet)
+		if (file != null && !file.isEmpty()) {
+			try {
+				String imageUrl = cloudinaryService.uploadFile(file, "profile_images");
+				user.setProfileImagePath(imageUrl);
+			} catch (IOException e) {
+				log.warn("⚠️ प्रोफ़ाइल छवि अपलोड विफल (पंजीकरण जारी): {}", e.getMessage());
+			}
+		}
 
-		String regNo = registrationNumberService.generateRegistrationNumber();
-		user.setRegistrationNo(regNo);
 		userRepository.save(user);
 
-		// ✅ Include userId in response data
 		Map<String, Object> responseData = new HashMap<>();
 		responseData.put("userId", user.getId());
 		responseData.put("registrationNo", user.getRegistrationNo());
@@ -210,7 +226,7 @@ public class AuthController {
 
 		PasswordResetRequest req = new PasswordResetRequest();
 		req.setMobile(mobile);
-		req.setNewPassword(passwordEncoder.encode(newPassword)); // Hash now, apply later
+		req.setNewPassword(passwordEncoder.encode(newPassword));
 		req.setReason(reason);
 		req.setStatus("PENDING");
 		req.setRequestDate(LocalDateTime.now());
@@ -219,20 +235,21 @@ public class AuthController {
 		return ResponseEntity
 				.ok(Map.of("message", "पासवर्ड रीसेट अनुरोध भेज दिया गया है। कृपया अनुमोदन की प्रतीक्षा करें।"));
 	}
-	@GetMapping("/makeAdmin")
-    public ResponseEntity<String> approveUser() {
-        Optional<User> userOpt = userRepository.findByMobile("8089101719");
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            user.setApprovedRejectDate(LocalDate.now());
-            user.setRole("ADMIN");
-            user.setApproved("स्वीकृत");
-            userRepository.save(user);
-            return ResponseEntity.ok("यूज़र को सफलतापूर्वक अनुमोदित किया गया।");
-        } else {
-            return ResponseEntity.status(404).body("यूज़र नहीं मिला।");
-        }
-    }
+
+	@PostMapping("/makeAdmin")
+	public ResponseEntity<ApiResponse<Map<String, String>>> approveUser() {
+		Optional<User> userOpt = userRepository.findByMobile("8089101719");
+		if (userOpt.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(new ApiResponse<>(false, "यूज़र नहीं मिला।", null));
+		}
+		User user = userOpt.get();
+		user.setApprovedRejectDate(LocalDate.now());
+		user.setRole("ADMIN");
+		user.setApproved(APPROVED);
+		userRepository.save(user);
+		return ResponseEntity.ok(new ApiResponse<>(true, "यूज़र को सफलतापूर्वक अनुमोदित किया गया।", null));
+	}
 	@GetMapping("/me")
 	public ResponseEntity<ApiResponse<Map<String, Object>>> me(Authentication authentication) {
 

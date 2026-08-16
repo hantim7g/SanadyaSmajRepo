@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
-import org.hibernate.envers.RelationTargetAuditMode;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -34,7 +33,6 @@ private List<RoomImage> images = new ArrayList<>();
 
     @NotBlank(message = "कमरे का प्रकार चुनना अनिवार्य है")
     private String roomType;          // ONLY_ROOM (केवल कमरा), HALL (हॉल), COMPLETE_FLOOR (पूरा फ्लोर)
-
 
     @NotBlank(message = "फ्लोर की जानकारी अनिवार्य है")
     private String floor;               // 1st, 2nd
@@ -315,6 +313,5 @@ private List<RoomImage> images = new ArrayList<>();
 	public String getPriceLabel() {
 	    return basePrice != null ? "₹" + basePrice + " / रात" : "";
 	}
-
 
 }

@@ -1,7 +1,6 @@
 package com.hst.phonepe;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import java.util.Base64;
 
 public class PhonePeUtil {
 

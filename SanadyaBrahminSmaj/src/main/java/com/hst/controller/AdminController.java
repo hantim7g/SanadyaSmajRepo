@@ -3,6 +3,7 @@ package com.hst.controller;
 import com.hst.entity.PasswordResetRequest;
 import com.hst.entity.User;
 import com.hst.repository.UserRepository;
+import com.hst.service.NotificationService;
 import com.hst.service.PasswordResetRequestService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,8 @@ public class AdminController {
     private  UserRepository userRepository;
     @Autowired
     private PasswordResetRequestService passwordResetRequestService;
+    @Autowired
+    private NotificationService notificationService;
 
     // ⏳ Get all users with approved = false
     @GetMapping("/pending-users")
@@ -41,7 +44,30 @@ public class AdminController {
             user.setApprovedRejectDate(LocalDate.now());
             user.setApproved("स्वीकृत");
             userRepository.save(user);
-            return ResponseEntity.ok("यूज़र को सफलतापूर्वक अनुमोदित किया गया।");
+
+            // Send approval notification
+            notificationService.notifyApproval(user, "Admin");
+
+            return ResponseEntity.ok("यूज़र को सफलतापूर्वक अनुमोदित किया गया। सूचना भेज दी गई है।");
+        } else {
+            return ResponseEntity.status(404).body("यूज़र नहीं मिला।");
+        }
+    }
+
+    // ❌ Reject a user by ID
+    @PutMapping("/reject/{id}")
+    public ResponseEntity<String> rejectUser(@PathVariable Long id) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setApprovedRejectDate(LocalDate.now());
+            user.setApproved("अस्वीकृत");
+            userRepository.save(user);
+
+            // Send rejection notification
+            notificationService.notifyRejection(user, "Admin");
+
+            return ResponseEntity.ok("यूज़र को अस्वीकृत कर दिया गया। सूचना भेज दी गई है।");
         } else {
             return ResponseEntity.status(404).body("यूज़र नहीं मिला।");
         }

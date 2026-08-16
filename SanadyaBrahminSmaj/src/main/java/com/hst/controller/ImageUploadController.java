@@ -12,7 +12,6 @@ import com.hst.service.CloudinaryService;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Map;
-import java.util.UUID;
 
 @Controller
 public class ImageUploadController {
