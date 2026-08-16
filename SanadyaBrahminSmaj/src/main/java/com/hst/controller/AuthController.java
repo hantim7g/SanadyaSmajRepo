@@ -166,38 +166,28 @@ public class AuthController {
 
 	@PostMapping("/upload-profile-image")
 	public ResponseEntity<?> uploadProfileImage(@RequestParam("file") MultipartFile file,
-			@RequestParam("userId") Long userId) {
+			@RequestParam("userId") Long userId, Authentication authentication) {
 
 		if (file.isEmpty()) {
 			return ResponseEntity.badRequest().body(Map.of("message", "⚠️ फ़ाइल खाली है"));
 		}
 
-		// Validate user exists
-		Optional<User> userOpt = userRepository.findById(userId);
-		if (userOpt.isEmpty()) {
+		// IDOR FIX: Verify the userId matches the authenticated user
+		String mobile = authentication.getName();
+		Optional<User> loggedInUserOpt = userRepository.findByMobile(mobile);
+		if (loggedInUserOpt.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "यूज़र नहीं मिला"));
+		}
+		User loggedInUser = loggedInUserOpt.get();
+		if (!loggedInUser.getId().equals(userId)) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "⚠️ आप केवल अपनी छवि अपलोड कर सकते हैं"));
 		}
 
 		try {
-			// Ensure directory exists
-//			Path uploadPath = Paths.get(uploadDir + "/profile_images");
-//			Files.createDirectories(uploadPath);
-//
-//			// Create unique file name
-//			String originalName = file.getOriginalFilename();
-//			String ext = originalName != null && originalName.contains(".")
-//					? originalName.substring(originalName.lastIndexOf('.'))
-//					: "";
-//			String fileName = "user_" + userId + "_" + System.currentTimeMillis() + ext;
-//
-//			// Save file
-//			Path targetPath = uploadPath.resolve(fileName);
-//			Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 			 String imageUrl = cloudinaryService.uploadFile(file, "profile_images");
 			// Update user
-			User user = userOpt.get();
-			user.setProfileImagePath(imageUrl);
-			userRepository.save(user);
+			loggedInUser.setProfileImagePath(imageUrl);
+			userRepository.save(loggedInUser);
 
 			return ResponseEntity.ok(
 					Map.of("message", "✅ छवि सफलतापूर्वक अपलोड हुई", "filePath", imageUrl));

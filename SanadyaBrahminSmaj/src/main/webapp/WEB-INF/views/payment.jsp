@@ -53,7 +53,7 @@
                             <div class="col-md-4"><label class="label-col">शैक्षणिक योग्यता</label><input name="education" type="text" class="form-control" value="${user.education}"></div>
                             <div class="col-md-4"><label class="label-col">पेशा / कार्य</label><input name="occupation" type="text" class="form-control" value="${user.occupation}"></div>
                             <div class="col-md-4"><label class="label-col">ब्लड ग्रुप</label><input name="bloodGroup" type="text" class="form-control" value="${user.bloodGroup}"></div>
-                            <div class="col-md-4"><label class="label-col">आधार नंबर</label><input name="aadharNumber" type="text" class="form-control" value="${user.aadharNumber}"></div>
+                            <div class="col-md-4"><label class="label-col">आधार नंबर</label><input name="aadharNumber" type="text" class="form-control" value="${user.maskedAadharNumber}" readonly style="background-color:#f0f0f0;"></div>
                             <div class="col-md-4"><label class="label-col">जिला</label><input name="homeDistrict" type="text" class="form-control" value="${user.homeDistrict}"></div>
                             <div class="col-md-4">
                                 <label class="label-col">वैवाहिक स्थिति</label>

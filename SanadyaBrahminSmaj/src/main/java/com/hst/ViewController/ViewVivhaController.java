@@ -127,6 +127,15 @@ public class ViewVivhaController {
 
 		String loggedInMobile = authentication.getName();
 
+		if (hasMissingCustomGotra(user.getGotra(), user.getCustomGotra())
+				|| hasMissingCustomGotra(user.getMotherGotra(), user.getMotherCustomGotra())
+				|| hasMissingCustomGotra(user.getDadiGotra(), user.getDadiCustomGotra())
+				|| hasMissingCustomGotra(user.getNaniGotra(), user.getNaniCustomGotra())) {
+			redirect.addFlashAttribute("error", "Please enter the custom Gotra selected as Other.");
+			return user.getId() == null ? "redirect:/user/vivhauser/form"
+					: "redirect:/user/vivhauser/form?id=" + user.getId();
+		}
+
 		if (user.getId() != null) {
 			Optional<VivhaUser> existing = userRepository.findById(user.getId());
 			if (existing.isPresent()) {
@@ -162,6 +171,10 @@ public class ViewVivhaController {
 		}
 
 		user.setLoginMobile(loggedInMobile);
+		user.setCustomGotra(normalizeCustomGotra(user.getGotra(), user.getCustomGotra()));
+		user.setMotherCustomGotra(normalizeCustomGotra(user.getMotherGotra(), user.getMotherCustomGotra()));
+		user.setDadiCustomGotra(normalizeCustomGotra(user.getDadiGotra(), user.getDadiCustomGotra()));
+		user.setNaniCustomGotra(normalizeCustomGotra(user.getNaniGotra(), user.getNaniCustomGotra()));
 		user.setGotra(resolveGotra(user.getGotra(), user.getCustomGotra()));
 		user.setMotherGotra(resolveGotra(user.getMotherGotra(), user.getMotherCustomGotra()));
 		user.setDadiGotra(resolveGotra(user.getDadiGotra(), user.getDadiCustomGotra()));
@@ -478,6 +491,14 @@ public class ViewVivhaController {
 
 	private String resolveGotra(String selected, String custom) {
 		return "OTHER".equals(selected) ? custom : selected;
+	}
+
+	private boolean hasMissingCustomGotra(String selected, String custom) {
+		return "OTHER".equals(selected) && (custom == null || custom.trim().isEmpty());
+	}
+
+	private String normalizeCustomGotra(String selected, String custom) {
+		return "OTHER".equals(selected) ? custom.trim() : null;
 	}
 
 	private boolean canEditProfile(VivhaUser user, Authentication auth) {

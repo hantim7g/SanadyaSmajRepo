@@ -41,22 +41,25 @@ public class RegistrationRequest {
     @NotBlank(message = "ईमेल आवश्यक है।")
     private String email;
 
-//    @NotBlank(message = "शिक्षा आवश्यक है।")
+    // @NotBlank(message = "शिक्षा आवश्यक है।")
     private String education;
 
-//    @NotBlank(message = "व्यवसाय आवश्यक है।")
+    // @NotBlank(message = "व्यवसाय आवश्यक है।")
     private String occupation;
 
-//    @NotBlank(message = "गृह जिला आवश्यक है।")
+    @NotBlank(message = "गृह जिला आवश्यक है।")
     private String homeDistrict;
+
+    @NotBlank(message = "शहर आवश्यक है।")
+    private String city;
 
     @Pattern(regexp = "^[0-9]{12}$", message = "कृपया एक वैध 12 अंकों का आधार नंबर दर्ज करें।")
     private String aadharNumber;
 
-//    @NotBlank(message = "रक्त समूह आवश्यक है।")
+    // @NotBlank(message = "रक्त समूह आवश्यक है।")
     private String bloodGroup;
 
-//    @NotBlank(message = "वैवाहिक स्थिति आवश्यक है।")
+    // @NotBlank(message = "वैवाहिक स्थिति आवश्यक है।")
     private String maritalStatus;
 
     private String organizationAffiliation;
@@ -208,5 +211,13 @@ public class RegistrationRequest {
 
     public void setAgreeToTerms(boolean agreeToTerms) {
         this.agreeToTerms = agreeToTerms;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 }

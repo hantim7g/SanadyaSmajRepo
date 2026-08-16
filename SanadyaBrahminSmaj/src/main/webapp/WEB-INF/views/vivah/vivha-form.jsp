@@ -176,7 +176,7 @@ class="form-control mt-2" accept="image/*">
 	      </option>
 	    </c:forEach>
 
-	    <option value="OTHER">अन्य</option>
+	    <option value="OTHER" ${not empty vivhauser.customGotra ? 'selected' : ''}>अन्य</option>
 	  </select>
 	</div>
 
@@ -226,7 +226,7 @@ class="form-control mt-2" accept="image/*">
         </option>
       </c:forEach>
 
-      <option value="OTHER">अन्य</option>
+      <option value="OTHER" ${not empty vivhauser.motherCustomGotra ? 'selected' : ''}>अन्य</option>
     </select>
   </div>
 
@@ -259,7 +259,7 @@ class="form-control mt-2" accept="image/*">
         </option>
       </c:forEach>
 
-      <option value="OTHER">अन्य</option>
+      <option value="OTHER" ${not empty vivhauser.dadiCustomGotra ? 'selected' : ''}>अन्य</option>
     </select>
   </div>
 
@@ -292,7 +292,7 @@ class="form-control mt-2" accept="image/*">
         </option>
       </c:forEach>
 
-      <option value="OTHER">अन्य</option>
+      <option value="OTHER" ${not empty vivhauser.naniCustomGotra ? 'selected' : ''}>अन्य</option>
     </select>
   </div>
 
@@ -432,12 +432,22 @@ document.getElementById("imageInput").addEventListener("change", function(e){
 <script>
 function toggleGotra(select, divId){
   const div = document.getElementById(divId);
+  const input = div.querySelector('input');
   if(select.value === 'OTHER'){
     div.style.display = 'block';
+    input.required = true;
   } else {
     div.style.display = 'none';
+    input.required = false;
   }
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('select[onchange^="toggleGotra"]').forEach(function (select) {
+    const divId = select.getAttribute('onchange').match(/'([^']+)'/)[1];
+    toggleGotra(select, divId);
+  });
+});
 </script>
 
 </body>

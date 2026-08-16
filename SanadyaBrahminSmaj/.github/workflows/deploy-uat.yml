@@ -3,46 +3,60 @@ name: Deploy UAT to VPS
 on:
   push:
     branches:
-      - uat  # Trigger only on pushes to the uat branch
+      - uat
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Deploy via SSH
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: 194.35.120.80
-        username: root
-        key: ${{ secrets.VPS_SSH_KEY }}
-        script: |
-          # 1. Create a separate folder for UAT if it doesn't exist
-          mkdir -p /root/SanadyaBrahminSmaj-uat
-          cd /root/SanadyaBrahminSmaj-uat
-          
-          # 2. Clone if empty, otherwise pull the uat branch
-          if [ ! -d ".git" ]; then
-            git clone -b uat https://github.com/hantim7g/SanadyaSmajRepo.git .
-          else
-            git checkout uat
-            git pull origin uat
-          fi
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 194.35.120.80
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            APP_DIR=/root/SanadyaBrahminSmaj-uat/SanadyaSmajRepo/SanadyaBrahminSmaj
+            CONTAINER=sanadya-container-uat
+            IMAGE=sanadya-app-uat
+            PORT=8081
+            GLOWROOT_PORT=4001
+            
+            # Persistent directory on VPS host to store Glowroot agent and data
+            GLOWROOT_HOST_DIR=/root/glowroot-uat-data
 
-          # 3. Build and Run on a DIFFERENT port (e.g., 8081)
-          docker build -t sanadya-app-uat .
-          docker stop sanadya-container-uat || true
-          docker rm sanadya-container-uat || true
-          
-          docker run -d \
-            -p 8081:8080 \
-            --name sanadya-container-uat \
-            --restart always \
-            -e DB_HOST=localhost \
-            -e DB_NAME=hst_samaj \
-            -e DB_USER=hstuser \
-            -e DB_PASS=StrongPassword123! \
-            -e CLOUDINARY_NAME=ddyoi5pl3 \
-            -e CLOUDINARY_KEY=491572819866443 \
-            -e CLOUDINARY_SECRET=eg6hovf3Uc1_NZBD-ykLutuFaiI \
-            sanadya-app-uat
+            # 1. Ensure Glowroot is downloaded and extracted on the VPS host machine
+            if [ ! -d "$GLOWROOT_HOST_DIR/glowroot" ]; then
+              echo "Glowroot not found. Downloading..."
+              mkdir -p $GLOWROOT_HOST_DIR
+              cd $GLOWROOT_HOST_DIR
+              wget https://github.com/glowroot/glowroot/releases/download/v0.14.2/glowroot-0.14.2-dist.zip
+              unzip -q glowroot-0.14.2-dist.zip
+              rm glowroot-0.14.2-dist.zip
+            fi
+
+            # 2. Build your Docker image as usual
+            cd $APP_DIR
+            git pull origin uat
+            docker build -t $IMAGE .
+
+            # 3. Clean up the old container instance
+            docker rm -f $CONTAINER 2>/dev/null || true
+
+            # 4. Spin up the container, mounting Glowroot and passing the javaagent flag
+            docker run -d \
+              --name $CONTAINER \
+              -p $PORT:8080 \
+              -p $GLOWROOT_PORT:4000 \
+              -v $GLOWROOT_HOST_DIR/glowroot:/glowroot \
+              --restart always \
+              -e JAVA_TOOL_OPTIONS="-javaagent:/glowroot/glowroot.jar" \
+              -e DB_HOST=localhost \
+              -e DB_NAME=hst_samaj \
+              -e DB_USER=hstuser \
+              -e DB_PASS=StrongPassword123! \
+              -e CLOUDINARY_NAME=ddyoi5pl3 \
+              -e CLOUDINARY_KEY=491572819866443 \
+              -e CLOUDINARY_SECRET=eg6hovf3Uc1_NZBD-ykLutuFaiI \
+              $IMAGE

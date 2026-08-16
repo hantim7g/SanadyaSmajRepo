@@ -160,7 +160,7 @@ body{background:#fffaf4;font-family:'Segoe UI','Noto Sans Devanagari',sans-serif
     </a>
 
     <!-- CONFIRM -->
-    <c:if test="${b.status=='PENDING'}">
+    <c:if test="${b.status=='PAYMENT_RECIVED_AWAITING_CONFIRMATION'}">
       <a href="/bookings/admin/confirm/${b.id}"
          class="btn btn-primary btn-action"
          title="कन्फर्म करें">
@@ -187,7 +187,7 @@ body{background:#fffaf4;font-family:'Segoe UI','Noto Sans Devanagari',sans-serif
     </c:if>
 
     <!-- INVOICE -->
-    <c:if test="${b.status=='CHECKED_IN' || b.status=='COMPLETED'}">
+    <c:if test="${b.status=='CHECKED_IN' || b.status=='COMPLETED' ||b.status=='PAYMENT_RECIVED_AWAITING_CONFIRMATION'}">
       <a href="/bookings/admin/invoice/pdf/${b.id}"
          class="btn btn-secondary btn-action"
          title="इनवॉइस">
@@ -196,7 +196,7 @@ body{background:#fffaf4;font-family:'Segoe UI','Noto Sans Devanagari',sans-serif
     </c:if>
 
     <!-- CANCEL -->
-    <c:if test="${b.status=='PENDING' || b.status=='CONFIRMED'}">
+    <c:if test="${b.status=='PENDING' || b.status=='PAYMENT_RECIVED_AWAITING_CONFIRMATION' || b.status=='CONFIRMED'}">
       <a href="/bookings/admin/cancel/${b.id}"
          onclick="return confirm('क्या बुकिंग रद्द करें?')"
          class="btn btn-danger btn-action"

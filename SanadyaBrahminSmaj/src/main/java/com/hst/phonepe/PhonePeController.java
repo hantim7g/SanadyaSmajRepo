@@ -30,6 +30,7 @@ import com.phonepe.sdk.pg.payments.v2.StandardCheckoutClient;
 
 import jakarta.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 @RestController
@@ -46,6 +47,12 @@ public class PhonePeController {
     private UserRepository userRepository;
     @Autowired
     private PPPaymentService ppPaymentService;
+
+    @Value("${phonepe.webhook.user}")
+    private String webhookUser;
+
+    @Value("${phonepe.webhook.pass}")
+    private String webhookPass;
     
     @PostMapping(value = "/pay", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> initiateOnlinePayment(
@@ -97,8 +104,8 @@ public class PhonePeController {
             @RequestHeader("Authorization") String auth,
             @RequestBody String body) {
         try {
-            // Validate request authenticity
-            CallbackResponse response = client.validateCallback("USER", "PASS", auth, body);
+            // Validate request authenticity using configured webhook credentials
+            CallbackResponse response = client.validateCallback(webhookUser, webhookPass, auth, body);
             
             String mTxnId = response.getPayload().getMerchantOrderId();
             String state = response.getPayload().getState(); // COMPLETED or FAILED
@@ -127,16 +134,26 @@ public class PhonePeController {
         }
     }
     @GetMapping("/check-status/{txnId}")
-    public ResponseEntity<Map<String, String>> manualCheckStatus(@PathVariable String txnId) {
+    public ResponseEntity<Map<String, String>> manualCheckStatus(
+            @PathVariable String txnId, Authentication authentication) {
         try {
+            // IDOR FIX: Verify the payment belongs to the authenticated user
+            Optional<Payment> paymentOpt = paymentRepository.findByTransactionId(txnId);
+            if (paymentOpt.isPresent()) {
+                Payment existingPayment = paymentOpt.get();
+                if (existingPayment.getUser() != null
+                        && !existingPayment.getUser().getMobile().equals(authentication.getName())) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body(Map.of("error", "Access denied"));
+                }
+            }
+
             // 1. Query PhonePe SDK
-//            OrderStatusResponse response = client.getOrderStatus(txnId);
             String phonePeState = ppPaymentService.orderStatus(txnId);
             
             String state = phonePeState; // COMPLETED, FAILED, or PENDING
 
             // 2. Find and Update the Payment entity in DB
-            Optional<Payment> paymentOpt = paymentRepository.findByTransactionId(txnId);
             if (paymentOpt.isPresent()) {
                 Payment payment = paymentOpt.get();
                 

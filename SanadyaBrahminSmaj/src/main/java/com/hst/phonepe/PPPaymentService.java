@@ -19,6 +19,7 @@ import com.phonepe.sdk.pg.payments.v2.models.request.StandardCheckoutPayRequest;
 import com.phonepe.sdk.pg.payments.v2.models.response.StandardCheckoutPayResponse;
 
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 @Service
@@ -26,6 +27,9 @@ public class PPPaymentService {
 
     @Autowired
     private StandardCheckoutClient client;
+
+    @Value("${phonepe.baseUrl}")
+    private String phonePeBaseUrl;
 
     @Autowired
     private PhonePeAuthService tokenService;
@@ -174,11 +178,11 @@ public class PPPaymentService {
 
     // 2. Check Order Status
     public String checkStatus(String merchantOrderId) {
-//        OrderStatusResponse response = client.getOrderStatus(merchantOrderId);
+       OrderStatusResponse response = client.getOrderStatus(merchantOrderId);
         
-//        return response.getState(); // Returns COMPLETED, FAILED, or PENDING
+       return response.getState(); // Returns COMPLETED, FAILED, or PENDING
     
-    return orderStatus(merchantOrderId)	;
+    // return orderStatus(merchantOrderId)	;
     }
     
     public boolean verifyPayment(String merchantOrderId) {
@@ -212,12 +216,10 @@ public class PPPaymentService {
     }
 
     // 3. Webhook/Callback Validation
-    public CallbackResponse validateWebhook(String authHeader, String responseBody) {
-        // Use your dashboard configured webhook credentials
-        String username = "WEBHOOK_USERNAME";
-        String password = "WEBHOOK_PASSWORD";
-        
-        return client.validateCallback(username, password, authHeader, responseBody);
+    // Note: Webhook validation is handled in PhonePeController directly using injected credentials.
+    // This method is kept for backward compatibility but no longer uses hardcoded values.
+    public CallbackResponse validateWebhook(String authHeader, String responseBody, String webhookUser, String webhookPass) {
+        return client.validateCallback(webhookUser, webhookPass, authHeader, responseBody);
     }
     public Payment findPaymentByTransactionId(String mTxnId) {
 		return
@@ -230,8 +232,7 @@ public class PPPaymentService {
 	}
     public String  orderStatus(String transactionId) {
 
-        String url =
-                "https://api-preprod.phonepe.com/apis/pg-sandbox/checkout/v2/order/MT1778346459015/status?details=false";
+        String url = phonePeBaseUrl + "/checkout/v2/order/" + transactionId + "/status?details=false";
 
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = null;
