@@ -294,7 +294,7 @@ label {
 
 	  <!-- New Small Bold Line Below -->
 	  <small class="fw-bold text-white ms-5" style="font-size: 12px;">
-	    महावीर नगर प्रथम, कोटा
+	    महावीर नगर प्रथम, कोटाUAT
 	  </small>
 	</a>
 
