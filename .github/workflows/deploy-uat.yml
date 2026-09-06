@@ -1,3 +1,4 @@
+```yaml
 name: Deploy UAT to VPS
 
 on:
@@ -16,44 +17,95 @@ jobs:
           host: 194.35.120.80
           username: root
           key: ${{ secrets.VPS_SSH_KEY }}
+
           script: |
-            APP_DIR=/root/SanadyaBrahminSmaj-uat/SanadyaSmajRepo/SanadyaBrahminSmaj
+            set -e
+
+            APP_DIR=/root/SanadyaBrahminSmaj-uat/SanadyaSmajRepo
             CONTAINER=sanadya-container-uat
             IMAGE=sanadya-app-uat
             PORT=8081
             GLOWROOT_PORT=4001
             GLOWROOT_HOST_DIR=/root/glowroot-uat-data
 
-            # 1. Ensure unzip is installed and download/extract Glowroot if missing
-            apt update && apt install unzip -y
-            if [ ! -d "$GLOWROOT_HOST_DIR/glowroot" ]; then
+            echo "=============================================="
+            echo "Starting UAT deployment"
+            echo "=============================================="
+
+            # 1. Ensure required packages are installed
+            echo "Installing required packages..."
+            apt update
+            apt install -y unzip wget
+
+            # 2. Install Glowroot if it does not already exist
+            if [ ! -f "$GLOWROOT_HOST_DIR/glowroot/glowroot.jar" ]; then
               echo "Glowroot not found. Downloading..."
-              mkdir -p $GLOWROOT_HOST_DIR
-              cd $GLOWROOT_HOST_DIR
-              wget https://github.com/glowroot/glowroot/releases/download/v0.14.2/glowroot-0.14.2-dist.zip
+
+              mkdir -p "$GLOWROOT_HOST_DIR"
+              cd "$GLOWROOT_HOST_DIR"
+
+              wget -q \
+                https://github.com/glowroot/glowroot/releases/download/v0.14.2/glowroot-0.14.2-dist.zip \
+                -O glowroot-0.14.2-dist.zip
+
               unzip -q glowroot-0.14.2-dist.zip
-              rm glowroot-0.14.2-dist.zip
+              rm -f glowroot-0.14.2-dist.zip
             fi
 
-            # 2. Force Glowroot to bind to 0.0.0.0 so it is accessible outside the container
-            mkdir -p $GLOWROOT_HOST_DIR/glowroot
-            echo '{"web":{"bindAddress":"0.0.0.0"}}' > $GLOWROOT_HOST_DIR/glowroot/admin.json
+            # 3. Configure Glowroot
+            mkdir -p "$GLOWROOT_HOST_DIR/glowroot"
 
-            # 3. Pull latest UAT code and build image
-            cd $APP_DIR
-            git reset --hard
-            git pull origin uat
-            docker build -t $IMAGE .
+            echo '{"web":{"bindAddress":"0.0.0.0"}}' \
+              > "$GLOWROOT_HOST_DIR/glowroot/admin.json"
 
-            # 4. Tear down the old container instance cleanly
-            docker rm -f $CONTAINER 2>/dev/null || true
+            # 4. Synchronize repository EXACTLY with GitHub UAT
+            echo "=============================================="
+            echo "Updating UAT source code"
+            echo "=============================================="
 
-            # 5. Spin up UAT container with Glowroot agent and volume mapping
+            cd "$APP_DIR"
+
+            git fetch origin uat
+            git checkout uat
+            git reset --hard origin/uat
+            git clean -fd
+
+            DEPLOY_COMMIT=$(git rev-parse --short HEAD)
+
+            echo "Deploying commit: $DEPLOY_COMMIT"
+            echo "Remote UAT commit: $(git rev-parse --short origin/uat)"
+
+            # Safety verification
+            if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/uat)" ]; then
+              echo "ERROR: Local commit does not match origin/uat"
+              exit 1
+            fi
+
+            echo "Git synchronization successful."
+
+            # 5. Build Docker image
+            echo "=============================================="
+            echo "Building Docker image"
+            echo "=============================================="
+
+            docker build \
+              -t "$IMAGE:latest" \
+              -t "$IMAGE:$DEPLOY_COMMIT" \
+              .
+
+            # 6. Remove old container
+            echo "Stopping old container..."
+
+            docker rm -f "$CONTAINER" 2>/dev/null || true
+
+            # 7. Start new UAT container
+            echo "Starting new UAT container..."
+
             docker run -d \
-              --name $CONTAINER \
-              -p $PORT:8080 \
-              -p $GLOWROOT_PORT:4000 \
-              -v $GLOWROOT_HOST_DIR/glowroot:/glowroot \
+              --name "$CONTAINER" \
+              -p "$PORT:8080" \
+              -p "$GLOWROOT_PORT:4000" \
+              -v "$GLOWROOT_HOST_DIR/glowroot:/glowroot" \
               --restart always \
               -e JAVA_TOOL_OPTIONS="-javaagent:/glowroot/glowroot.jar" \
               -e DB_HOST=localhost \
@@ -63,10 +115,33 @@ jobs:
               -e CLOUDINARY_NAME=ddyoi5pl3 \
               -e CLOUDINARY_KEY=491572819866443 \
               -e CLOUDINARY_SECRET=eg6hovf3Uc1_NZBD-ykLutuFaiI \
-              -e GOOGLE_CLIENT_ID=345067666190-gn3c0utcp2t0tar9rmeoi3qb8reqjh4g.apps.googleusercontent.com \
-              -e GOOGLE_CLIENT_SECRET=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 \
-              $IMAGE
+              "$IMAGE:latest"
 
-            # 6. Post-deployment sanity check
-            sleep 5
-            docker ps | grep $CONTAINER
+            # 8. Wait for container startup
+            echo "Waiting for application startup..."
+            sleep 10
+
+            # 9. Verify container is running
+            if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER}$"; then
+              echo "ERROR: UAT container is not running."
+              echo "Container logs:"
+              docker logs --tail 100 "$CONTAINER" || true
+              exit 1
+            fi
+
+            # 10. Show deployment information
+            echo "=============================================="
+            echo "UAT deployment successful"
+            echo "=============================================="
+
+            echo "Commit: $DEPLOY_COMMIT"
+            echo "Container:"
+            docker ps --filter "name=$CONTAINER"
+
+            echo "Recent logs:"
+            docker logs --tail 30 "$CONTAINER"
+
+            echo "=============================================="
+            echo "Deployment completed successfully"
+            echo "=============================================="
+```
