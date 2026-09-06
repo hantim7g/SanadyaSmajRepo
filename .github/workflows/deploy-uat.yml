@@ -63,8 +63,8 @@ jobs:
               -e CLOUDINARY_NAME=ddyoi5pl3 \
               -e CLOUDINARY_KEY=491572819866443 \
               -e CLOUDINARY_SECRET=eg6hovf3Uc1_NZBD-ykLutuFaiI \
-              -e GOOGLE_CLIENT_ID=345067666190-gn3c0utcp2t0tar9rmeoi3qb8reqjh4g.apps.googleusercontent.com \
-              -e GOOGLE_CLIENT_SECRET=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 \
+              -e $GOOGLE_CLIENT_ID=345067666190-gn3c0utcp2t0tar9rmeoi3qb8reqjh4g.apps.googleusercontent.com \
+              -e $GOOGLE_CLIENT_SECRET=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 \
               $IMAGE
 
             # 6. Post-deployment sanity check
