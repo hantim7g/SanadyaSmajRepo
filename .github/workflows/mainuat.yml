@@ -1,10 +1,10 @@
-name: Deploy to UATVPS
+name: Deploy UAT to VPS
 
 on:
   push:
     branches:
       - uat
-      
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -17,27 +17,56 @@ jobs:
           username: root
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            APP_DIR=/root/SanadyaBrahminSmaj-uat/SanadyaSmajRepo
+            APP_DIR=/root/SanadyaBrahminSmaj-uat/SanadyaSmajRepo/SanadyaBrahminSmaj
             CONTAINER=sanadya-container-uat
             IMAGE=sanadya-app-uat
             PORT=8081
+            GLOWROOT_PORT=4001
+            GLOWROOT_HOST_DIR=/root/glowroot-uat-data
 
+            # 1. Ensure unzip is installed and download/extract Glowroot if missing
+            apt update && apt install unzip -y
+            if [ ! -d "$GLOWROOT_HOST_DIR/glowroot" ]; then
+              echo "Glowroot not found. Downloading..."
+              mkdir -p $GLOWROOT_HOST_DIR
+              cd $GLOWROOT_HOST_DIR
+              wget https://github.com/glowroot/glowroot/releases/download/v0.14.2/glowroot-0.14.2-dist.zip
+              unzip -q glowroot-0.14.2-dist.zip
+              rm glowroot-0.14.2-dist.zip
+            fi
+
+            # 2. Force Glowroot to bind to 0.0.0.0 so it is accessible outside the container
+            mkdir -p $GLOWROOT_HOST_DIR/glowroot
+            echo '{"web":{"bindAddress":"0.0.0.0"}}' > $GLOWROOT_HOST_DIR/glowroot/admin.json
+
+            # 3. Pull latest UAT code and build image
             cd $APP_DIR
+            git reset --hard
             git pull origin uat
-
             docker build -t $IMAGE .
 
+            # 4. Tear down the old container instance cleanly
             docker rm -f $CONTAINER 2>/dev/null || true
 
+            # 5. Spin up UAT container with Glowroot agent and volume mapping
             docker run -d \
               --name $CONTAINER \
-              -p $PORT:8081 \
+              -p $PORT:8080 \
+              -p $GLOWROOT_PORT:4000 \
+              -v $GLOWROOT_HOST_DIR/glowroot:/glowroot \
               --restart always \
+              -e JAVA_TOOL_OPTIONS="-javaagent:/glowroot/glowroot.jar" \
               -e DB_HOST=localhost \
               -e DB_NAME=hst_samaj \
               -e DB_USER=hstuser \
-              -e DB_PASS=StrongPassword123! \
+              -e DB_PASS='StrongPassword123!' \
               -e CLOUDINARY_NAME=ddyoi5pl3 \
               -e CLOUDINARY_KEY=491572819866443 \
               -e CLOUDINARY_SECRET=eg6hovf3Uc1_NZBD-ykLutuFaiI \
+              -e GOOGLE_CLIENT_ID=345067666190-2v74da5kcadadk3ghk2q22igk0mqlbcn.apps.googleusercontent.com \
+              -e GOOGLE_CLIENT_SECRET=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 \
               $IMAGE
+
+            # 6. Post-deployment sanity check
+            sleep 5
+            docker ps | grep $CONTAINER
