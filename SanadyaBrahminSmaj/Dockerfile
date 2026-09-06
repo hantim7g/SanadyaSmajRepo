@@ -7,7 +7,6 @@ COPY . .
 
 RUN mvn clean package -DskipTests
 
-6 
 # ---------- RUNTIME STAGE ----------
 FROM tomcat:10.1-jdk17-temurin
 
