@@ -31,6 +31,12 @@
     <div class="container">
         <div class="profile-card">
             <h3 class="card-title"> आपकी विस्तृत प्रोफ़ाइल</h3>
+            <c:if test="${user.userType != 'Member'}">
+                <div class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <span><i class="fas fa-id-card me-2"></i> आप अभी सदस्य के रूप में पंजीकृत नहीं हैं। सदस्यता के लिए आवेदन करें।</span>
+                    <a href="/membership/apply" class="btn btn-premium">📋 सदस्यता के लिए आवेदन करें</a>
+                </div>
+            </c:if>
             <div class="row">
                 <div class="col-md-3 text-center mb-4">
                     <img id="profilePic" src="${not empty user.profileImagePath ? user.profileImagePath : '/images/default.png'}" alt="Profile" style="width:200px; height:200px; object-fit:cover; border-radius:15px; border:4px solid #fff;">

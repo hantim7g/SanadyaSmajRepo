@@ -20,7 +20,7 @@ public class User {
 	private String RegistrationNo;
 	private String fullName;
 	private String fatherName;
-	
+
 	private String gotra;
 
 	private LocalDate createdDate;
@@ -29,6 +29,7 @@ public class User {
 	private LocalDate dateOfBirth;
 	private String gender;
 	private String address;
+
 
 
 
@@ -65,12 +66,13 @@ public class User {
 	@Column(name = "last_annual_fee_amount")
 	private Double lastAnnualFeeAmount;
 	@Transient
-	private String annualFeeValidated ="प्रतीक्षारत"; 
+	private String annualFeeValidated ="प्रतीक्षारत";
 
 	@Column(name = "other_fee_validated")
-	private String otherFeeValidated ="प्रतीक्षारत"; 
-	@Column(name = "smaj_role",columnDefinition = "VARCHAR(255) DEFAULT  'सदस्य'")	
+	private String otherFeeValidated ="प्रतीक्षारत";
+	@Column(name = "smaj_role",columnDefinition = "VARCHAR(255) DEFAULT  'सदस्य'")
 	private String smajRole ="सदस्य";
+	private String userType;
 	@Column(name = "smaj_role_priority")
 	private Integer smajRolePriority = 99;
 	// Add this inside your User class
@@ -87,6 +89,7 @@ public class User {
 	public Double getLastAnnualFeeAmount() {
 		return lastAnnualFeeAmount;
 	}
+
 
 
 
@@ -117,7 +120,7 @@ public class User {
 	public void setRegistrationNo(String registrationNo) {
 		RegistrationNo = registrationNo;
 	}
-	
+
 	@PrePersist
 	@PreUpdate
 	private void assignSmajRolePriority() {
@@ -152,7 +155,6 @@ public class User {
 	            this.smajRolePriority = 99;
 	    }
 	}
-
 
 	public String getFullName() {
 		return fullName;
@@ -271,15 +273,15 @@ public class User {
 		return aadharNumber;
 	}
 
-	
+
 	/**
 	 * Returns masked Aadhaar for display: "293926382492" → "XXXX-XXXX-2492"
 	 * Only the last 4 digits are visible; everything else is masked.
 	 */
 	 @Transient
 	 private String maskedAadharNumber;
-	 
-		
+
+
 	public String getMaskedAadharNumber() {
 		if (aadharNumber == null || aadharNumber.length() < 4) {
 			return aadharNumber;
@@ -382,11 +384,9 @@ public class User {
 	}
 
 
-
 	public LocalDate getCreatedDate() {
 		return createdDate;
 	}
-
 
 
 	public void setCreatedDate(LocalDate createdDate) {
@@ -394,11 +394,9 @@ public class User {
 	}
 
 
-
 	public LocalDate getApprovedRejectDate() {
 		return approvedRejectDate;
 	}
-
 
 
 	public void setApprovedRejectDate(LocalDate approvedRejectDate) {
@@ -406,11 +404,9 @@ public class User {
 	}
 
 
-
 	public String getApproveRejectBy() {
 		return approveRejectBy;
 	}
-
 
 
 	public void setApproveRejectBy(String approveRejectBy) {
@@ -418,40 +414,41 @@ public class User {
 	}
 
 
-
 	public String getAnnualFeeValidated() {
 		return annualFeeValidated;
 	}
-
-
 
 	public void setAnnualFeeValidated(String annualFeeValidated) {
 		this.annualFeeValidated = annualFeeValidated;
 	}
 
 
-
 	public String getSmajRole() {
 		return smajRole;
 	}
-
-
 
 	public void setSmajRole(String smajRole) {
 		this.smajRole = smajRole;
 	}
 
+	public String getUserType() {
+		return userType;
+	}
 
+	public void setUserType(String userType) {
+		this.userType = userType;
+	}
 
 	public Integer getSmajRolePriority() {
 		return smajRolePriority;
 	}
 
-
-
 	public void setSmajRolePriority(Integer smajRolePriority) {
 		this.smajRolePriority = smajRolePriority;
 	}
+
+
+
 
 
 

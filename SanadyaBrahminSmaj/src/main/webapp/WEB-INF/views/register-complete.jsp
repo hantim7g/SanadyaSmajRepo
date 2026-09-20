@@ -80,16 +80,40 @@
         <p class="text-muted small">तब तक आप रूम बुकिंग, विवाह पंजीकरण और अन्य सार्वजनिक सुविधाओं का उपयोग कर सकते हैं।</p>
     </div>
 
-    <form method="post" action="/register/complete">
+    <c:choose>
+        <c:when test="${membershipMode}">
+            <div class="alert alert-info">
+                <i class="fas fa-id-card me-2"></i> <strong>सदस्यता आवेदन</strong> — कृपया अपनी सदस्य जानकारी पूर्ण करें। सबमिट करने पर आपका प्रकार 'सदस्य' में अपग्रेड हो जाएगा।
+            </div>
+        </c:when>
+        <c:otherwise>
+            <div class="mb-3">
+                <label class="form-label">आप किस रूप में पंजीकरण करना चाहते हैं? <span class="req">*</span></label>
+                <select name="userType" id="userTypeSelect" class="form-select" required>
+                    <option value="">-- चुनें --</option>
+                    <option value="Member" ${user.userType == 'Member' ? 'selected' : ''}>सदस्य (Member)</option>
+                    <option value="Matrimony" ${user.userType == 'Matrimony' ? 'selected' : ''}>विवाह पंजीकरण (Matrimony)</option>
+                    <option value="Booking" ${user.userType == 'Booking' ? 'selected' : ''}>रूम बुकिंग (Booking)</option>
+                </select>
+            </div>
+        </c:otherwise>
+    </c:choose>
+
+    <form method="post" action="${membershipMode ? '/membership/apply' : '/register/complete'}">
+        <c:if test="${membershipMode}">
+            <input type="hidden" name="userType" value="Member">
+        </c:if>
         <!-- ===== PERSONAL DETAILS ===== -->
         <div class="section-title">व्यक्तिगत जानकारी <span class="req">*</span></div>
 
-        <div class="mb-3">
-            <label class="form-label">पूरा नाम <span class="req">*</span></label>
-            <input type="text" name="fullName" class="form-control" value="${user.fullName}" required>
+        <div class="group-basic">
+            <div class="mb-3">
+                <label class="form-label">पूरा नाम <span class="req">*</span></label>
+                <input type="text" name="fullName" class="form-control" value="${user.fullName}" required>
+            </div>
         </div>
 
-        <div class="row g-3">
+        <div class="row g-3 group-member">
             <div class="col-md-6">
                 <label class="form-label">पिता का नाम</label>
                 <input type="text" name="fatherName" class="form-control" value="${user.fatherName}">
@@ -101,11 +125,11 @@
         </div>
 
         <div class="row g-3 mt-2">
-            <div class="col-md-4">
+            <div class="col-md-4 group-basic">
                 <label class="form-label">जन्म तिथि</label>
                 <input type="date" name="dateOfBirth" class="form-control" value="${user.dateOfBirth}">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 group-basic">
                 <label class="form-label">लिंग</label>
                 <select name="gender" class="form-select">
                     <option value="">चुनें</option>
@@ -114,7 +138,7 @@
                     <option value="अन्य" ${user.gender == 'अन्य' ? 'selected' : ''}>अन्य</option>
                 </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 group-member">
                 <label class="form-label">रक्त समूह</label>
                 <select name="bloodGroup" class="form-select">
                     <option value="">चुनें</option>
@@ -131,59 +155,63 @@
         </div>
 
         <!-- ===== CONTACT & ADDRESS ===== -->
-        <div class="section-title">पता और संपर्क</div>
+        <div class="section-title group-basic">पता और संपर्क</div>
 
-        <div class="mb-3">
-            <label class="form-label">मोबाइल</label>
-            <input type="text" class="form-control" value="${user.mobile}" readonly>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">ईमेल</label>
-            <input type="email" class="form-control" value="${user.email}" readonly>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">पता</label>
-            <textarea name="address" class="form-control" rows="2">${user.address}</textarea>
-        </div>
-
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label">शहर</label>
-                <input type="text" name="city" class="form-control" value="${user.city}" placeholder="शहर/गाँव">
+        <div class="group-basic">
+            <div class="mb-3">
+                <label class="form-label">मोबाइल</label>
+                <input type="text" class="form-control" value="${user.mobile}" readonly>
             </div>
-            <div class="col-md-6">
-                <label class="form-label">गृह जिला</label>
-                <input type="text" name="homeDistrict" class="form-control" value="${user.homeDistrict}" placeholder="जिला">
+
+            <div class="mb-3">
+                <label class="form-label">ईमेल</label>
+                <input type="email" class="form-control" value="${user.email}" readonly>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">पता</label>
+                <textarea name="address" class="form-control" rows="2">${user.address}</textarea>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">शहर</label>
+                    <input type="text" name="city" class="form-control" value="${user.city}" placeholder="शहर/गाँव">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">गृह जिला</label>
+                    <input type="text" name="homeDistrict" class="form-control" value="${user.homeDistrict}" placeholder="जिला">
+                </div>
             </div>
         </div>
 
         <!-- ===== EDUCATION & OCCUPATION ===== -->
-        <div class="section-title">शिक्षा और व्यवसाय</div>
+        <div class="section-title group-matrimony">शिक्षा और व्यवसाय</div>
 
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label">शिक्षा</label>
-                <input type="text" name="education" class="form-control" value="${user.education}">
+        <div class="group-matrimony">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">शिक्षा</label>
+                    <input type="text" name="education" class="form-control" value="${user.education}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">व्यवसाय</label>
+                    <input type="text" name="occupation" class="form-control" value="${user.occupation}">
+                </div>
             </div>
-            <div class="col-md-6">
-                <label class="form-label">व्यवसाय</label>
-                <input type="text" name="occupation" class="form-control" value="${user.occupation}">
-            </div>
-        </div>
 
-        <div class="row g-3 mt-2">
-            <div class="col-md-6">
-                <label class="form-label">वैवाहिक स्थिति</label>
-                <select name="maritalStatus" class="form-select">
-                    <option value="">चुनें</option>
-                    <option value="अविवाहित" ${user.maritalStatus == 'अविवाहित' ? 'selected' : ''}>अविवाहित</option>
-                    <option value="विवाहित" ${user.maritalStatus == 'विवाहित' ? 'selected' : ''}>विवाहित</option>
-                    <option value="विधुर" ${user.maritalStatus == 'विधुर' ? 'selected' : ''}>विधुर</option>
-                    <option value="विधवा" ${user.maritalStatus == 'विधवा' ? 'selected' : ''}>विधवा</option>
-                    <option value="तलाकशुदा" ${user.maritalStatus == 'तलाकशुदा' ? 'selected' : ''}>तलाकशुदा</option>
-                </select>
+            <div class="row g-3 mt-2">
+                <div class="col-md-6">
+                    <label class="form-label">वैवाहिक स्थिति</label>
+                    <select name="maritalStatus" class="form-select">
+                        <option value="">चुनें</option>
+                        <option value="अविवाहित" ${user.maritalStatus == 'अविवाहित' ? 'selected' : ''}>अविवाहित</option>
+                        <option value="विवाहित" ${user.maritalStatus == 'विवाहित' ? 'selected' : ''}>विवाहित</option>
+                        <option value="विधुर" ${user.maritalStatus == 'विधुर' ? 'selected' : ''}>विधुर</option>
+                        <option value="विधवा" ${user.maritalStatus == 'विधवा' ? 'selected' : ''}>विधवा</option>
+                        <option value="तलाकशुदा" ${user.maritalStatus == 'तलाकशुदा' ? 'selected' : ''}>तलाकशुदा</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -194,6 +222,41 @@
         </div>
     </form>
 </div>
+
+<script>
+    // Toggle conditional field groups based on the selected user type.
+    // - .group-basic    : always visible
+    // - .group-matrimony: visible for Member & Matrimony
+    // - .group-member   : visible only for Member
+    function toggleUserTypeGroups() {
+        const sel = document.getElementById('userTypeSelect');
+        if (!sel) return; // membership mode — all groups stay visible
+        const val = sel.value;
+        const showMatrimony = (val === 'Member' || val === 'Matrimony');
+        const showMember = (val === 'Member');
+
+        document.querySelectorAll('.group-matrimony').forEach(function (el) {
+            el.style.display = showMatrimony ? '' : 'none';
+            el.querySelectorAll('input, select, textarea').forEach(function (input) {
+                input.disabled = !showMatrimony;
+            });
+        });
+        document.querySelectorAll('.group-member').forEach(function (el) {
+            el.style.display = showMember ? '' : 'none';
+            el.querySelectorAll('input, select, textarea').forEach(function (input) {
+                input.disabled = !showMember;
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const sel = document.getElementById('userTypeSelect');
+        if (sel) {
+            sel.addEventListener('change', toggleUserTypeGroups);
+            toggleUserTypeGroups();
+        }
+    });
+</script>
 </body>
 </html>
 <%@ include file="/WEB-INF/views/includes/footer.jsp" %>

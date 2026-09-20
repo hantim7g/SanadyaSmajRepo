@@ -16,12 +16,12 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 /**
- * Handles profile completion for users who registered via Google OAuth.
- * These users have limited info (email, name) and need to fill in
- * the remaining registration fields before admin approval.
+ * Handles the "Apply for Membership" upgrade flow.
+ * Users who registered as 'Booking' or 'Matrimony' can upgrade to 'Member'
+ * by completing the member-only profile fields.
  */
 @Controller
-public class ProfileCompletionController {
+public class MembershipController {
 
     @Autowired
     private UserRepository userRepository;
@@ -30,12 +30,11 @@ public class ProfileCompletionController {
     private RegistrationNumberService registrationNumberService;
 
     /**
-     * Show the profile completion form for Google-registered users.
-     * Pre-fills fields that Google already provided (name, email).
+     * Show the membership application form (reuses register-complete.jsp in membership mode).
      */
-    @GetMapping("/register/complete")
-    public String showCompleteForm(Model model, Authentication authentication) {
-        if (authentication == null) {
+    @GetMapping("/membership/apply")
+    public String showMembershipForm(Model model, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
             return "redirect:/login";
         }
 
@@ -46,24 +45,22 @@ public class ProfileCompletionController {
         }
 
         User user = userOpt.get();
-
-        // Only allow profile completion for Google-auth users or pending users
-        if (!"GOOGLE".equals(user.getAuthProvider()) && !"प्रक्रिया में".equals(user.getApproved())) {
+        // Already a member — nothing to apply for
+        if ("Member".equals(user.getUserType())) {
             return "redirect:/home";
         }
 
         model.addAttribute("user", user);
+        model.addAttribute("membershipMode", true);
         return "register-complete";
     }
 
     /**
-     * Save the completed profile and generate registration number.
-     * After this, the user goes into admin approval queue.
+     * Save the membership application: update profile fields and upgrade userType to 'Member'.
      */
-    @PostMapping("/register/complete")
-    public String saveCompleteProfile(
-            @RequestParam String fullName,
-            @RequestParam(required = false) String userType,
+    @PostMapping("/membership/apply")
+    public String applyForMembership(
+            @RequestParam(required = false) String fullName,
             @RequestParam(required = false) String fatherName,
             @RequestParam(required = false) String gotra,
             @RequestParam(required = false) String dateOfBirth,
@@ -90,12 +87,9 @@ public class ProfileCompletionController {
 
         User user = userOpt.get();
 
-        // Update all profile fields
+        // Update profile fields
         if (fullName != null && !fullName.isBlank()) {
             user.setFullName(fullName);
-        }
-        if (userType != null && !userType.isBlank()) {
-            user.setUserType(userType);
         }
         user.setFatherName(fatherName);
         user.setGotra(gotra);
@@ -111,16 +105,18 @@ public class ProfileCompletionController {
         user.setBloodGroup(bloodGroup);
         user.setMaritalStatus(maritalStatus);
 
-        // Generate registration number if not already assigned
+        // Upgrade to Member
+        user.setUserType("Member");
+
+        // Ensure registration number is assigned
         if (user.getRegistrationNo() == null || user.getRegistrationNo().isBlank()) {
-            String regNo = registrationNumberService.generateRegistrationNumber();
-            user.setRegistrationNo(regNo);
+            user.setRegistrationNo(registrationNumberService.generateRegistrationNumber());
         }
 
         userRepository.save(user);
 
         redirect.addFlashAttribute("successMessage",
-                "आपकी प्रोफ़ाइल सफलतापूर्वक पूर्ण हुई। कृपया अनुमोदन की प्रतीक्षा करें।");
+                "आपका सदस्यता आवेदन सफलतापूर्वक सबमिट हो गया है। अब आप सदस्य के रूप में पंजीकृत हैं।");
         return "redirect:/home";
     }
 }

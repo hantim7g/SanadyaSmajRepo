@@ -65,10 +65,13 @@ public class RegistrationRequest {
     private String organizationAffiliation;
     private String contribution;
 
-    @NotNull(message = "नियम और शर्तें स्वीकार करना आवश्यक है।")
-    private boolean agreeToTerms;
+	@NotNull(message = "नियम और शर्तें स्वीकार करना आवश्यक है।")
+	private boolean agreeToTerms;
 
-    // Getters and Setters
+	@NotBlank(message = "यूज़र प्रकार आवश्यक है।")
+	private String userType;
+
+	// Getters and Setters
     public String getMobile() {
         return mobile;
     }
@@ -211,6 +214,14 @@ public class RegistrationRequest {
 
     public void setAgreeToTerms(boolean agreeToTerms) {
         this.agreeToTerms = agreeToTerms;
+    }
+
+    public String getUserType() {
+        return userType;
+    }
+
+    public void setUserType(String userType) {
+        this.userType = userType;
     }
 
     public String getCity() {

@@ -74,12 +74,23 @@
                     <div id="errorBox" class="alert alert-danger d-none" role="alert"></div>
                     <div class="row">
 
+                      <!-- User Type -->
+                      <div class="col-12 mb-3">
+                        <label>आप किस रूप में पंजीकरण करना चाहते हैं? <span class="required-asterisk">*</span></label>
+                        <select id="userType" class="form-select" required>
+                          <option value="">-- चुनें --</option>
+                          <option value="Member">सदस्य (Member)</option>
+                          <option value="Matrimony">विवाह पंजीकरण (Matrimony)</option>
+                          <option value="Booking">रूम बुकिंग (Booking)</option>
+                        </select>
+                      </div>
+
                       <!-- Required Fields -->
-                      <div class="col-md-6 mb-3"><label>पूरा नाम <span class="required-asterisk">*</span></label><input id="fullName" type="text"
+                      <div class="col-md-6 mb-3 group-basic"><label>पूरा नाम <span class="required-asterisk">*</span></label><input id="fullName" type="text"
                           class="form-control" required></div>
-                      <div class="col-md-6 mb-3"><label>पिता का नाम <span class="required-asterisk">*</span></label><input id="fatherName" type="text"
+                      <div class="col-md-6 mb-3 group-member"><label>पिता का नाम <span class="required-asterisk">*</span></label><input id="fatherName" type="text"
                           class="form-control" required></div>
-                      <div class="col-md-6 mb-3"><label>गोत्र <span class="required-asterisk">*</span></label>
+                      <div class="col-md-6 mb-3 group-member"><label>गोत्र <span class="required-asterisk">*</span></label>
                         <select id="gotra" name="gotra" class="form-select" required>
                           <option value="">-- गोत्र चुनें --</option>
 
@@ -92,14 +103,14 @@
                           <option value="OTHER">अन्य</option>
                         </select>
                       </div>
-                      <div class="col-md-6" id="selfGotraDiv" style="display:none">
+                      <div class="col-md-6 group-member" id="selfGotraDiv" style="display:none">
                         <label>अपना गोत्र लिखें <span class="required-asterisk">*</span></label>
                         <input id="customGotra" type="text" name="customGotra" class="form-control">
                       </div>
 
-                      <div class="col-md-6 mb-3"><label>जन्म तिथि <span class="required-asterisk">*</span></label><input id="dateOfBirth" type="date"
+                      <div class="col-md-6 mb-3 group-basic"><label>जन्म तिथि <span class="required-asterisk">*</span></label><input id="dateOfBirth" type="date"
                           class="form-control" required></div>
-                      <div class="col-md-6 mb-3"><label>लिंग <span class="required-asterisk">*</span></label>
+                      <div class="col-md-6 mb-3 group-basic"><label>लिंग <span class="required-asterisk">*</span></label>
                         <select id="gender" class="form-select" required>
                           <option value="">लिंग चुनें</option>
                           <option>पुरुष</option>
@@ -107,36 +118,36 @@
                           <option>अन्य</option>
                         </select>
                       </div>
-                      <div class="col-md-6 mb-3"><label>पता <span class="required-asterisk">*</span></label><input id="address" type="text"
+                      <div class="col-md-6 mb-3 group-basic"><label>पता <span class="required-asterisk">*</span></label><input id="address" type="text"
                           class="form-control" required></div>
-                             <div class="col-md-6 mb-3"><label>शहर<span class="required-asterisk">*</span></label>
+                             <div class="col-md-6 mb-3 group-basic"><label>शहर<span class="required-asterisk">*</span></label>
                         <select id="city" class="form-select" required>
                           <option value="">-- शहर चुनें --</option>
                         </select></div>
-                           <div class="col-md-6 mb-3"><label>जिला<span class="required-asterisk">*</span></label>
+                           <div class="col-md-6 mb-3 group-basic"><label>जिला<span class="required-asterisk">*</span></label>
                         <select id="homeDistrict" class="form-select" required>
                           <option value="">-- जिला चुनें --</option>
                         </select></div>
                        
-                      <div class="col-md-6 mb-3"><label>मोबाइल नंबर <span class="required-asterisk">*</span></label><input id="mobile" type="text"
+                      <div class="col-md-6 mb-3 group-basic"><label>मोबाइल नंबर <span class="required-asterisk">*</span></label><input id="mobile" type="text"
                           class="form-control" required></div>
-                      <div class="col-md-6 mb-3"><label>ईमेल <span class="required-asterisk">*</span></label><input id="email" type="email" class="form-control" required>
+                      <div class="col-md-6 mb-3 group-basic"><label>ईमेल <span class="required-asterisk">*</span></label><input id="email" type="email" class="form-control" required>
                       </div>
-                      <div class="col-md-6 mb-3"><label>पासवर्ड <span class="required-asterisk">*</span></label><input id="password" onkeyup="passwordCheck()"
+                      <div class="col-md-6 mb-3 group-basic"><label>पासवर्ड <span class="required-asterisk">*</span></label><input id="password" onkeyup="passwordCheck()"
                           type="password" class="form-control" required></div>
                       <div id="password-errors" style="color: red;"></div>
 
                       <!-- Optional Fields -->
-                      <div class="col-md-6 mb-3"><label>शैक्षणिक योग्यता</label><input id="education" type="text"
+                      <div class="col-md-6 mb-3 group-matrimony"><label>शैक्षणिक योग्यता</label><input id="education" type="text"
                           class="form-control"></div>
-                      <div class="col-md-6 mb-3"><label>पेशा / कार्य</label><input id="occupation" type="text"
+                      <div class="col-md-6 mb-3 group-matrimony"><label>पेशा / कार्य</label><input id="occupation" type="text"
                           class="form-control"></div>
                      
-                      <div class="col-md-6 mb-3"><label>आधार नंबर</label><input id="aadharNumber" type="text"
+                      <div class="col-md-6 mb-3 group-member"><label>आधार नंबर</label><input id="aadharNumber" type="text"
                           class="form-control"></div>
-                      <div class="col-md-6 mb-3"><label>ब्लड ग्रुप</label><input id="bloodGroup" type="text"
+                      <div class="col-md-6 mb-3 group-member"><label>ब्लड ग्रुप</label><input id="bloodGroup" type="text"
                           class="form-control"></div>
-                      <div class="col-md-6 mb-3"><label>वैवाहिक स्थिति</label>
+                      <div class="col-md-6 mb-3 group-matrimony"><label>वैवाहिक स्थिति</label>
                         <select id="maritalStatus" class="form-select">
                           <option value="">चुनें</option>
                           <option>अविवाहित</option>
@@ -144,17 +155,17 @@
                           <option>अन्य</option>
                         </select>
                       </div>
-                      <div class="col-12 mb-3"><label>संस्था / संगठन</label><input id="organizationAffiliation"
+                      <div class="col-12 mb-3 group-basic"><label>संस्था / संगठन</label><input id="organizationAffiliation"
                           type="text" class="form-control"></div>
-                      <div class="col-12 mb-3"><label>योगदान / सन्देश</label><textarea id="contribution"
+                      <div class="col-12 mb-3 group-basic"><label>योगदान / सन्देश</label><textarea id="contribution"
                           class="form-control" rows="2"></textarea></div>
 
                       <!-- 🔁 Profile Image Upload -->
-                      <div class="col-12 mb-3"><label>प्रोफ़ाइल फ़ोटो</label><input id="profileImage"
+                      <div class="col-12 mb-3 group-basic"><label>प्रोफ़ाइल फ़ोटो</label><input id="profileImage"
                           name="profileImage" type="file" class="form-control" accept="image/*"></div>
 
                       <!-- ✔️ Terms -->
-                      <div class="col-12 mb-3 form-check">
+                      <div class="col-12 mb-3 form-check group-basic">
                         <input type="checkbox" class="form-check-input" id="agreeToTerms" required>
                         <label class="form-check-label" for="agreeToTerms">मैं शर्तों और नियमों से सहमत हूं <span class="required-asterisk">*</span></label>
                       </div>

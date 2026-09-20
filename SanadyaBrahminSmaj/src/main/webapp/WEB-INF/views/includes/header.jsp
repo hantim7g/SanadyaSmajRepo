@@ -629,10 +629,14 @@ document.addEventListener("DOMContentLoaded", function () {
         const user = res.data;
         usernameSpan.textContent = user.fullName;
         statusDot.classList.remove('d-none');
+        const membershipLink = (user.userType && user.userType !== 'Member')
+          ? `<li><a class="dropdown-item" href="/membership/apply"><i class="fas fa-id-card"></i> सदस्यता के लिए आवेदन करें</a></li>`
+          : '';
         dropdownMenu.innerHTML = `
           <li><a class="dropdown-item" href="/member/profile"><i class="fas fa-id-badge"></i> प्रोफ़ाइल</a></li>
           <li><a class="dropdown-item" href="/member/payment"><i class="fas fa-receipt"></i> भुगतान</a></li>
           <li><a class="dropdown-item" href="/member/doc"><i class="fas fa-folder-open"></i> सदस्य निर्देशिका</a></li>
+          ${membershipLink}
           <li><hr class="dropdown-divider"></li>
           <li><a class="dropdown-item text-danger" href="#" onclick="logout(event)"><i class="fas fa-sign-out-alt"></i> लॉगआउट</a></li>
         `;

@@ -80,6 +80,26 @@ $(function () {
 
 
 $(function() {
+	// --- User type conditional field groups (scoped to the registration form) ---
+	// .group-basic     : always visible
+	// .group-matrimony : visible for Member & Matrimony
+	// .group-member    : visible only for Member
+	function toggleUserTypeGroups() {
+		const val = $('#userType').val();
+		const showMatrimony = (val === 'Member' || val === 'Matrimony');
+		const showMember = (val === 'Member');
+		$('#registrationForm .group-matrimony').each(function () {
+			$(this).toggle(showMatrimony);
+			$(this).find('input, select, textarea').prop('disabled', !showMatrimony);
+		});
+		$('#registrationForm .group-member').each(function () {
+			$(this).toggle(showMember);
+			$(this).find('input, select, textarea').prop('disabled', !showMember);
+		});
+	}
+	$('#userType').on('change', toggleUserTypeGroups);
+	toggleUserTypeGroups();
+
 	$('#registrationForm').submit(function(e) {
 		e.preventDefault();
 		const errorBox = $('#errorBox');
@@ -118,6 +138,7 @@ if (result.valid) {
 			fatherName: $('#fatherName').val(),
 			dateOfBirth: $('#dateOfBirth').val(),
 			gotra: selectedGotra === 'OTHER' ? customGotra : selectedGotra,
+			userType: $('#userType').val(),
 			gender: $('#gender').val(),
 			address: $('#address').val(),
 			mobile: mobile,

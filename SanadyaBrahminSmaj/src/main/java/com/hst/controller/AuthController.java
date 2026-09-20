@@ -156,6 +156,7 @@ public class AuthController {
 		user.setOrganizationAffiliation(req.getOrganizationAffiliation());
 		user.setContribution(req.getContribution());
 		user.setAgreeToTerms(req.isAgreeToTerms());
+		user.setUserType(req.getUserType());
 		user.setRole("USER");
 		user.setApproved(APPROVAL_PENDING);
 		user.setRegistrationNo(registrationNumberService.generateRegistrationNumber());
@@ -267,6 +268,7 @@ public class AuthController {
 	    data.put("mobile", user.getMobile());
 	    data.put("fullName", user.getFullName());
 	    data.put("role", user.getRole());
+	    data.put("userType", user.getUserType());
 
 	    return ResponseEntity.ok(
 	            new ApiResponse<>(true, "User info", data)

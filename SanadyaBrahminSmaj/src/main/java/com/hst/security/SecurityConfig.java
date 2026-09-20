@@ -103,6 +103,7 @@ public class SecurityConfig {
                         "/user/**",
                         "/api/user/**",
                         "/member/**",
+                        "/membership/apply",
                         "/matrimony/**",
                         "/testimonial/my-testimonials",
                         "/member/add-testimonial",

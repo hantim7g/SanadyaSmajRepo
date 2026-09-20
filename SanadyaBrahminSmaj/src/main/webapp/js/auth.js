@@ -122,6 +122,30 @@
       });
     }
 
+    // --- User type conditional field groups (scoped to the registration form) ---
+    // .group-basic     : always visible
+    // .group-matrimony : visible for Member & Matrimony
+    // .group-member    : visible only for Member
+    const userTypeSel = document.getElementById('userType');
+    function toggleUserTypeGroups() {
+      if (!userTypeSel) return;
+      const val = userTypeSel.value;
+      const showMatrimony = (val === 'Member' || val === 'Matrimony');
+      const showMember = (val === 'Member');
+      document.querySelectorAll('#registrationForm .group-matrimony').forEach(function (el) {
+        el.style.display = showMatrimony ? '' : 'none';
+        el.querySelectorAll('input, select, textarea').forEach(function (input) { input.disabled = !showMatrimony; });
+      });
+      document.querySelectorAll('#registrationForm .group-member').forEach(function (el) {
+        el.style.display = showMember ? '' : 'none';
+        el.querySelectorAll('input, select, textarea').forEach(function (input) { input.disabled = !showMember; });
+      });
+    }
+    if (userTypeSel) {
+      userTypeSel.addEventListener('change', toggleUserTypeGroups);
+      toggleUserTypeGroups();
+    }
+
     // --- Date of birth: display dd/mm/yyyy, keep ISO value for backend ---
     if (window.flatpickr) {
       flatpickr('#dateOfBirth', {
@@ -187,6 +211,7 @@
         fullName: v('fullName').trim(),
         fatherName: v('fatherName').trim(),
         gotra: v('gotra') === 'OTHER' ? v('customGotra').trim() : v('gotra'),
+        userType: v('userType'),
         dateOfBirth: v('dateOfBirth'),
         gender: v('gender'),
         address: v('address').trim(),
