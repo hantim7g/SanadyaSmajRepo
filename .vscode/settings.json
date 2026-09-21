@@ -1,4 +1,46 @@
 {
     "java.compile.nullAnalysis.mode": "automatic",
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "java.configuration.updateBuildConfiguration": "automatic",
+    // Pin the JDK so the Java language server compiles consistently.
+    // pom.xml targets Java 17; JDK 21 satisfies >=17 and releases to 17.
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-21",
+            "path": "C:\\Program Files\\Java\\jdk-21",
+            "default": true
+        }
+    ],
+    "java.home": "C:\\Program Files\\Java\\jdk-21",
+    // Point the language server straight at the nested Maven project so it is
+    // indexed even though the window root is the wrapping SanadyaSmajRepo folder.
+    "java.import.maven.enabled": true,
+    "java.autobuild.enabled": true,
+    "editor.codeActionsOnSave": {},
+    "[json].editor.defaultFormatter": "vscode.json-language-features",
+    "java.debug.settings.onBuildFailureProceed": true,
+    // ===== Spring Boot Extension Pack =====
+    // The real Maven project is nested one level down. Register it explicitly so
+    // the Spring Boot dashboard and Boot Tools index it despite the wrapper root.
+    "spring-boot.ls.problem.application-properties.unknown-property": "WARNING",
+    "spring-boot.ls.problem.application-yaml.unknown-property": "WARNING",
+    "spring-boot.ls.java.classpath.maven": true,
+    // JSP lives under src/main/webapp (war packaging); keep the LS from choking on it.
+    "java.eclipse.downloadSources": true,
+    "java.maven.downloadSources": true,
+    "files.exclude": {
+        "**/target": true
+    },
+    "search.exclude": {
+        "**/target": true
+    },
+    // Associate JSP/FO/XSL so Boot Tools + XML tooling give content assist.
+    "files.associations": {
+        "*.jsp": "jsp",
+        "*.fo": "xml",
+        "*.xsl": "xml"
+    },
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "workbench.activityBar.autoHide": false,
+    "workbench.editor.decorations.colors": true
 }

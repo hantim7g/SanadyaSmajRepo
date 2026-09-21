@@ -79,9 +79,19 @@ public class AuthController {
 	@PostMapping("/login")
 	public ResponseEntity<ApiResponse<Map<String, String>>> login(@RequestBody LoginRequest request,
 			HttpServletResponse response, HttpServletRequest httpRequest) {
-		Optional<User> optionalUser = userRepository.findByMobile(request.getMobile());
+		String identifier = request.resolveIdentifier();
+		if (identifier == null || identifier.isBlank()) {
+			return ResponseEntity.badRequest().body(new ApiResponse<>(false, "कृपया मोबाइल नंबर या ईमेल दर्ज करें।", null));
+		}
+
+		// Mobile is the primary/canonical identifier; fall back to email lookup.
+		Optional<User> optionalUser = userRepository.findByMobile(identifier);
 		if (optionalUser.isEmpty()) {
-			return ResponseEntity.badRequest().body(new ApiResponse<>(false, "मोबाइल नंबर पंजीकृत नहीं है।", null));
+			optionalUser = userRepository.findByEmail(identifier);
+		}
+		if (optionalUser.isEmpty()) {
+			return ResponseEntity.badRequest()
+					.body(new ApiResponse<>(false, "मोबाइल नंबर या ईमेल पंजीकृत नहीं है।", null));
 		}
 
 		User user = optionalUser.get();
@@ -89,15 +99,17 @@ public class AuthController {
 			return ResponseEntity.badRequest()
 					.body(new ApiResponse<>(false, "आपका पंजीकरण अनुमोदित नहीं है।कृपया प्रतीक्षा करें।", null));
 		}
+		// Authentication and JWT subject always use the canonical mobile number.
+		String canonicalMobile = user.getMobile();
 		try {
 			authenticationManager
-					.authenticate(new UsernamePasswordAuthenticationToken(request.getMobile(), request.getPassword()));
+					.authenticate(new UsernamePasswordAuthenticationToken(canonicalMobile, request.getPassword()));
 		} catch (BadCredentialsException e) {
 			return ResponseEntity.badRequest()
 					.body(new ApiResponse<>(false, "लॉगिन करने में विफल . यूजरनेम पासवर्ड गलत है।", null));
 		}
 
-		String token = jwtTokenProvider.generateToken(request.getMobile(), List.of(user.getRole()));
+		String token = jwtTokenProvider.generateToken(canonicalMobile, List.of(user.getRole()));
 
 		ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie.from("authToken", token)
 				.httpOnly(true)
@@ -125,6 +137,12 @@ public class AuthController {
 
 		if (userRepository.existsByMobile(req.getMobile())) {
 			return ResponseEntity.badRequest().body(new ApiResponse<>(false, "मोबाइल नंबर पहले से पंजीकृत है।", null));
+		}
+
+		if (req.getEmail() != null && !req.getEmail().isBlank()
+				&& userRepository.existsByEmail(req.getEmail())) {
+			return ResponseEntity.badRequest()
+					.body(new ApiResponse<>(false, "ईमेल पहले से पंजीकृत है।", null));
 		}
 
 		if (req.getCity() != null && !req.getCity().isBlank()
@@ -217,16 +235,35 @@ public class AuthController {
 	}
 
 	@PostMapping("/forgot-password")
-	public ResponseEntity<?> requestPasswordReset(@RequestParam String mobile, @RequestParam String newPassword,
+	public ResponseEntity<?> requestPasswordReset(@RequestParam(required = false) String mobile,
+			@RequestParam(required = false) String email,
+			@RequestParam(required = false) String identifier,
+			@RequestParam String newPassword,
 			@RequestParam(required = false) String reason) {
 
-		Optional<User> userOpt = userRepository.findByMobile(mobile);
-		if (userOpt.isEmpty()) {
-			return ResponseEntity.badRequest().body(Map.of("message", "मोबाइल नंबर पंजीकृत नहीं है।"));
+		// Resolve the identifier: explicit identifier -> mobile -> email.
+		String id = (identifier != null && !identifier.isBlank()) ? identifier.trim()
+				: (mobile != null && !mobile.isBlank()) ? mobile.trim()
+				: (email != null && !email.isBlank()) ? email.trim() : null;
+
+		if (id == null) {
+			return ResponseEntity.badRequest().body(Map.of("message", "कृपया मोबाइल नंबर या ईमेल दर्ज करें।"));
 		}
 
+		// Mobile is the primary/canonical identifier; fall back to email lookup.
+		Optional<User> userOpt = userRepository.findByMobile(id);
+		if (userOpt.isEmpty()) {
+			userOpt = userRepository.findByEmail(id);
+		}
+		if (userOpt.isEmpty()) {
+			return ResponseEntity.badRequest().body(Map.of("message", "मोबाइल नंबर या ईमेल पंजीकृत नहीं है।"));
+		}
+
+		// Always store the canonical mobile on the reset request.
+		String canonicalMobile = userOpt.get().getMobile();
+
 		PasswordResetRequest req = new PasswordResetRequest();
-		req.setMobile(mobile);
+		req.setMobile(canonicalMobile);
 		req.setNewPassword(passwordEncoder.encode(newPassword));
 		req.setReason(reason);
 		req.setStatus("PENDING");

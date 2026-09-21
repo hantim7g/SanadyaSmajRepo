@@ -7,7 +7,6 @@ import com.hst.repository.PaymentRepository;
 
 import jakarta.transaction.Transactional;
 
-
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
@@ -39,7 +38,8 @@ public class UserService {
 	public Long findUserIdByMobile(String mobile) {
 
 		return userRepo.findIdByMobile(mobile);
-				}
+	}
+
 	public void updateProfile(String mobile, User updated) {
 		User user = findByMobile(mobile);
 
@@ -58,73 +58,77 @@ public class UserService {
 		userRepo.save(user);
 	}
 
-	public Page<User> filterUsersPaginated(String name, String mobile, String approved, String annualFeeStatus, int page, int size, List<Integer> years) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("fullName").ascending());
-        
-        Integer startYear = (years != null && !years.isEmpty()) ? years.stream().min(Integer::compare).orElse(null) : null;
-//        Integer endYear = (years != null && !years.isEmpty()) ? years.stream().max(Integer::compare).orElse(null) : null;
+	public Page<User> filterUsersPaginated(String name, String mobile, String approved, String annualFeeStatus,
+			int page, int size, List<Integer> years, String userType) {
+		Pageable pageable = PageRequest.of(page, size, Sort.by("fullName").ascending());
 
-       System.out.println("Filtering with: name=" + name + ", mobile=" + mobile + ", approved=" + approved + ", annualFeeStatus=" + annualFeeStatus + ", years=" + years + ", startYear=" + startYear);
-        // DB does the heavy filtering and pagination
-        Page<User> userPage = userRepo.filterUsersWithPayments(
-                name, mobile, approved, annualFeeStatus, startYear, pageable
-        );
+		Integer startYear = (years != null && !years.isEmpty()) ? years.stream().min(Integer::compare).orElse(null)
+				: null;
+		// Integer endYear = (years != null && !years.isEmpty()) ?
+		// years.stream().max(Integer::compare).orElse(null) : null;
 
-        System.out.println("Query returned " + userPage.getTotalElements() + " total users");
-        // Enrich only the current page content
-        userPage.getContent().forEach(user -> updateFeeStatusForUser(user, years));
+		System.out.println("Filtering with: name=" + name + ", mobile=" + mobile + ", approved=" + approved
+				+ ", annualFeeStatus=" + annualFeeStatus + ", years=" + years + ", startYear=" + startYear);
+		// DB does the heavy filtering and pagination
+		Page<User> userPage = userRepo.filterUsersWithPayments(
+				name, mobile, approved, annualFeeStatus, startYear, userType, pageable);
 
-        return userPage;
-    }
+		System.out.println("Query returned " + userPage.getTotalElements() + " total users");
+		// Enrich only the current page content
+		userPage.getContent().forEach(user -> updateFeeStatusForUser(user, years));
 
-	public Page<User> getAllUsersWithPaymentInfo(int page, int size,List<Integer> years) {
+		return userPage;
+	}
+
+	public Page<User> getAllUsersWithPaymentInfo(int page, int size, List<Integer> years) {
 		Pageable pageable = PageRequest.of(page, size);
-		Page<User> users = userRepo.findAllByOrderByFullNameAsc(pageable);
+		// Page<User> users = userRepo.findAllByOrderByFullNameAsc(pageable);
+		Page<User> users = userRepo.findAllByUserTypeOrderByFullNameAsc("MEMBER", pageable);
 
-//		users.forEach(this::updateFeeStatusForUser);
-		
-		for(User user :users) {
-			updateFeeStatusForUser(user,years);
+		// users.forEach(this::updateFeeStatusForUser);
+
+		for (User user : users) {
+			updateFeeStatusForUser(user, years);
 		}
-		
+
 		return users;
 	}
 
 	// Called inside your filterUsersPaginated logic or DTO population
 	public void updateFeeStatusForUser(User user, List<Integer> years) {
-        // We use the pre-fetched payments from the JOIN FETCH
-        List<Payment> payments = user.getPayments();
+		// We use the pre-fetched payments from the JOIN FETCH
+		List<Payment> payments = user.getPayments();
 
-        boolean hasPendingAnnual = payments.stream()
-                .anyMatch(p -> (p.getDescription().contains("वार्षिक"))
-                        && ("सत्यापित".equals(p.getValidated()) || "प्रक्रिया में".equals(p.getValidated()))
-                        && (years == null || years.stream().anyMatch(y -> {
-                            LocalDate from = p.getFeeFrom().toLocalDate();
-                            LocalDate to = p.getFeeTo().toLocalDate();
-                            return y >= from.getYear() && y <= to.getYear();
-                        })));
+		boolean hasPendingAnnual = payments.stream()
+				.anyMatch(p -> (p.getDescription().contains("वार्षिक"))
+						&& ("सत्यापित".equals(p.getValidated()) || "प्रक्रिया में".equals(p.getValidated()))
+						&& (years == null || years.stream().anyMatch(y -> {
+							LocalDate from = p.getFeeFrom().toLocalDate();
+							LocalDate to = p.getFeeTo().toLocalDate();
+							return y >= from.getYear() && y <= to.getYear();
+						})));
 
-        boolean hasPendingValidateAnnual = payments.stream()
-                .anyMatch(p -> (p.getDescription().contains("वार्षिक")) && "प्रक्रिया में".equals(p.getValidated()));
+		boolean hasPendingValidateAnnual = payments.stream()
+				.anyMatch(p -> (p.getDescription().contains("वार्षिक")) && "प्रक्रिया में".equals(p.getValidated()));
 
-        boolean hasPendingOther = payments.stream()
-                .anyMatch(p -> !(p.getDescription().contains("वार्षिक")) && "प्रक्रिया में".equals(p.getValidated()) && "सफल".equals(p.getStatus()));
+		boolean hasPendingOther = payments.stream()
+				.anyMatch(p -> !(p.getDescription().contains("वार्षिक")) && "प्रक्रिया में".equals(p.getValidated())
+						&& "सफल".equals(p.getStatus()));
 
-        user.setAnnualFeeValidated(hasPendingValidateAnnual ? "प्रक्रिया में" : "प्रतीक्षारत");
-        user.setAnnualFeeStatus(hasPendingAnnual ? "सत्यापित/प्रक्रिया में" : "प्रतीक्षारत");
-        user.setOtherFeeValidated(hasPendingOther ? "प्रक्रिया में" : "सत्यापित");
+		user.setAnnualFeeValidated(hasPendingValidateAnnual ? "प्रक्रिया में" : "प्रतीक्षारत");
+		user.setAnnualFeeStatus(hasPendingAnnual ? "सत्यापित/प्रक्रिया में" : "प्रतीक्षारत");
+		user.setOtherFeeValidated(hasPendingOther ? "प्रक्रिया में" : "सत्यापित");
 
-        payments.stream()
-                .filter(p -> (p.getDescription().contains("वार्षिक")) && "सत्यापित".equals(p.getValidated()))
-                .max(Comparator.comparing(Payment::getPaymentDate))
-                .ifPresent(latest -> {
-                    user.setLastAnnualFeePaid(latest.getPaymentDate().toLocalDate());
-                    user.setLastAnnualFeeAmount(latest.getAmount());
-                });
-    }
-	
-	
-	public void approveUser(Long userId, String status,String actionBy) {
+		payments.stream()
+				.filter(p -> (p.getDescription().contains("वार्षिक")) && "सत्यापित".equals(p.getValidated()))
+				.max(Comparator.comparing(Payment::getPaymentDate))
+				.ifPresent(latest -> {
+					user.setLastAnnualFeePaid(latest.getPaymentDate().toLocalDate());
+					user.setLastAnnualFeeAmount(latest.getAmount());
+				});
+	}
+
+	public void approveUser(Long userId, String status, String actionBy) {
 		User user = userRepo.findById(userId).orElseThrow();
 		user.setApprovedRejectDate(LocalDate.now());
 		user.setApproveRejectBy(actionBy);
@@ -132,36 +136,38 @@ public class UserService {
 		userRepo.save(user);
 	}
 
-//	public List<User> getAllUsers() {
-//		List<User> users = userRepo.findAll();
-//		return enrichUsers(users);
-//	}
+	// public List<User> getAllUsers() {
+	// List<User> users = userRepo.findAll();
+	// return enrichUsers(users);
+	// }
 
-//    public List<User> filterUsers(String name, String city, Boolean approved, Boolean due) {
-//        List<User> users = userRepo.findFiltered(name, city, approved);
-//        if (due != null) {
-//            users = users.stream().filter(u -> {
-//                int annualDue = calculateAnnualFeeDue(u);
-//                return due ? annualDue > 0 : annualDue <= 0;
-//            }).collect(Collectors.toList());
-//        }
-//        return enrichUsers(users);
-//    }
+	// public List<User> filterUsers(String name, String city, Boolean approved,
+	// Boolean due) {
+	// List<User> users = userRepo.findFiltered(name, city, approved);
+	// if (due != null) {
+	// users = users.stream().filter(u -> {
+	// int annualDue = calculateAnnualFeeDue(u);
+	// return due ? annualDue > 0 : annualDue <= 0;
+	// }).collect(Collectors.toList());
+	// }
+	// return enrichUsers(users);
+	// }
 
-//	private List<User> enrichUsers(List<User> users) {
-//		for (User user : users) {
-//			Payment lastPayment = paymentRepo.findTopByUserIdAndDescriptionOrderByPaymentDateDesc(user.getId(),
-//					"Annual Fee");
-//			if (lastPayment != null) {
-//				user.setLastAnnualFeePaid(lastPayment.getPaymentDate().toLocalDate());
-//				user.setAnnualFeeDue(calculateAnnualFeeDue(user));
-//				user.setLastAnnualFeeAmount(lastPayment.getAmount());
-//			} else {
-//				user.setAnnualFeeDue(calculateAnnualFeeDue(user));
-//			}
-//		}
-//		return users;
-//	}
+	// private List<User> enrichUsers(List<User> users) {
+	// for (User user : users) {
+	// Payment lastPayment =
+	// paymentRepo.findTopByUserIdAndDescriptionOrderByPaymentDateDesc(user.getId(),
+	// "Annual Fee");
+	// if (lastPayment != null) {
+	// user.setLastAnnualFeePaid(lastPayment.getPaymentDate().toLocalDate());
+	// user.setAnnualFeeDue(calculateAnnualFeeDue(user));
+	// user.setLastAnnualFeeAmount(lastPayment.getAmount());
+	// } else {
+	// user.setAnnualFeeDue(calculateAnnualFeeDue(user));
+	// }
+	// }
+	// return users;
+	// }
 
 	private int calculateAnnualFeeDue(User user) {
 		int currentYear = LocalDate.now().getYear();
@@ -171,52 +177,45 @@ public class UserService {
 		return currentYear - lastPaidYear;
 	}
 
-	public List<Payment> getAnnualPaymentsByUserId(Long userId)
-    {
-    	return    	paymentRepo.findLastAnnualFeePaymentByUserId(userId);
-    }
+	public List<Payment> getAnnualPaymentsByUserId(Long userId) {
+		return paymentRepo.findLastAnnualFeePaymentByUserId(userId);
+	}
 
-	public List<Payment> getOtherPaymentsByUserId(Long userId)
-    {
-    	return    	paymentRepo.findLastOtherFeePaymentByUserId(userId);
-    }
-	
-	
-	public void   validateSinglePayment(Long paymentId,String response,String reason,User user)
-	{
+	public List<Payment> getOtherPaymentsByUserId(Long userId) {
+		return paymentRepo.findLastOtherFeePaymentByUserId(userId);
+	}
+
+	public void validateSinglePayment(Long paymentId, String response, String reason, User user) {
 		Payment pmt = paymentRepo.findPaymentById(paymentId);
-		
+
 		pmt.setLstUpBy(user.getId());
 		pmt.setLstUpDt(Date.valueOf(LocalDate.now()));
 		pmt.setValidated(response);
 		pmt.setReason(reason);
 		paymentRepo.save(pmt);
-//		paymentRepo
-		
+		// paymentRepo
+
 	}
-    
+
 	@Transactional
 	public void updateUserSmajRole(Long userId, String role) {
-	    User user = userRepo.findById(userId)
-	        .orElseThrow(() -> new RuntimeException("User not found"));
+		User user = userRepo.findById(userId)
+				.orElseThrow(() -> new RuntimeException("User not found"));
 
-	    user.setSmajRole(role);
-	    userRepo.save(user);
+		user.setSmajRole(role);
+		userRepo.save(user);
 	}
 
-	
-	public 	List<User> getAllUsers(int page, int size) {
-	
+	public List<User> getAllUsers(int page, int size) {
+
 		List<User> users = userRepo.findAll();
-		for (int i=0 ;i<10;i++)
-		users.addAll(users);
+		for (int i = 0; i < 10; i++)
+			users.addAll(users);
 		return users;
 	}
 
-	
-	public List<User> findAllByOrderBySmajRolePriorityAsc()
-	{
+	public List<User> findAllByOrderBySmajRolePriorityAsc() {
 		return userRepo.findAllByOrderBySmajRolePriorityAsc();
 	}
-	
+
 }

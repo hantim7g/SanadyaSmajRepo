@@ -32,12 +32,15 @@
   if (fpForm) {
     fpForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      const mobile = (document.getElementById('fpMobile') || {}).value || '';
+      const identifier = (document.getElementById('fpIdentifier') || {}).value || '';
       const newPassword = (document.getElementById('fpNewPassword') || {}).value || '';
       const reason = (document.getElementById('fpReason') || {}).value || '';
 
-      if (!/^\d{10}$/.test(mobile.trim())) {
-        if (window.bootbox) bootbox.alert('मान्य 10 अंकों का मोबाइल नंबर दर्ज करें');
+      // Accept a 10-digit mobile number OR an email address.
+      const isMobile = /^\d{10}$/.test(identifier.trim());
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier.trim());
+      if (!isMobile && !isEmail) {
+        if (window.bootbox) bootbox.alert('मान्य मोबाइल नंबर या ईमेल दर्ज करें');
         return;
       }
       const r = window.validatePassword(newPassword);
@@ -46,9 +49,9 @@
         return;
       }
 
-      fetch(CTX + '/api/auth/forgot-password?mobile=' + encodeURIComponent(mobile.trim())
-          + '&newPassword=' + encodeURIComponent(newPassword)
-          + '&reason=' + encodeURIComponent(reason), {
+      fetch(CTX + '/api/auth/forgot-password?identifier=' + encodeURIComponent(identifier.trim())
+        + '&newPassword=' + encodeURIComponent(newPassword)
+        + '&reason=' + encodeURIComponent(reason), {
         method: 'POST',
         credentials: 'same-origin'
       }).then(function (res) { return res.json().then(function (b) { return { ok: res.ok, body: b }; }); })
@@ -81,16 +84,24 @@
   if (loginForm) {
     loginForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      const mobile = (document.getElementById('loginMobile') || {}).value || '';
+      const identifier = (document.getElementById('loginIdentifier') || {}).value || '';
       const password = (document.getElementById('loginPassword') || {}).value || '';
       const errEl = document.getElementById('loginError');
       if (errEl) { errEl.textContent = ''; }
+
+      // Accept a 10-digit mobile number OR an email address.
+      const isMobile = /^\d{10}$/.test(identifier.trim());
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier.trim());
+      if (!isMobile && !isEmail) {
+        if (errEl) errEl.textContent = 'मान्य मोबाइल नंबर या ईमेल दर्ज करें।';
+        return;
+      }
 
       fetch(CTX + '/api/auth/login', {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ mobile: mobile.trim(), password: password })
+        body: JSON.stringify({ identifier: identifier.trim(), password: password })
       }).then(function (res) {
         return res.json().then(function (body) { return { ok: res.ok, body: body }; });
       }).then(function (r) {

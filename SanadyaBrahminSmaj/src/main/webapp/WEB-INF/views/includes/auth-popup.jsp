@@ -38,8 +38,8 @@
                 <div class="tab-pane fade show active" id="loginTab" role="tabpanel">
                   <form id="loginForm">
                     <div class="mb-3">
-                      <label>मोबाइल नंबर *</label>
-                      <input id="loginMobile" type="text" class="form-control" placeholder="मोबाइल नंबर" required>
+                      <label>मोबाइल नंबर / ईमेल *</label>
+                      <input id="loginIdentifier" type="text" class="form-control" placeholder="मोबाइल नंबर या ईमेल" autocomplete="username" required>
                     </div>
                     <div class="mb-3">
                       <label>पासवर्ड *</label>
@@ -197,8 +197,8 @@
           <div class="modal-body">
             <form id="forgotPasswordForm">
               <div class="mb-3">
-                <label>मोबाइल नंबर *</label>
-                <input type="text" id="fpMobile" class="form-control" required>
+                <label>मोबाइल नंबर / ईमेल *</label>
+                <input type="text" id="fpIdentifier" class="form-control" placeholder="मोबाइल नंबर या ईमेल" autocomplete="username" required>
               </div>
               <div class="mb-3">
                 <label>नया पासवर्ड *</label>

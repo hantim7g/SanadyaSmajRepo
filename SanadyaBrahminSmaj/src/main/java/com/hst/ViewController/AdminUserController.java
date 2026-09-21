@@ -33,12 +33,13 @@ public class AdminUserController {
 
 	@Autowired
 	private NotificationService notificationService;
+
 	@GetMapping("/memberList")
 	public String listUsers(Model model, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) {
-		List<Integer> years= new ArrayList<Integer>();
+		List<Integer> years = new ArrayList<Integer>();
 		years.add(LocalDate.now().getYear());
-		Page<User> userList = userService.getAllUsersWithPaymentInfo(page, size,years);
+		Page<User> userList = userService.getAllUsersWithPaymentInfo(page, size, years);
 		model.addAttribute("userList", userList.getContent());
 		model.addAttribute("currentPage", page);
 		model.addAttribute("totalPages", userList.getTotalPages());
@@ -55,8 +56,7 @@ public class AdminUserController {
 		userService.approveUser(id, "स्वीकृत", principal.getName());
 
 		// Send approval notification
-		userRepo.findById(id).ifPresent(user ->
-			notificationService.notifyApproval(user, principal.getName()));
+		userRepo.findById(id).ifPresent(user -> notificationService.notifyApproval(user, principal.getName()));
 
 		return ResponseEntity.ok().build();
 	}
@@ -66,17 +66,17 @@ public class AdminUserController {
 		userService.approveUser(id, "अस्वीकृत", principal.getName());
 
 		// Send rejection notification
-		userRepo.findById(id).ifPresent(user ->
-			notificationService.notifyRejection(user, principal.getName()));
+		userRepo.findById(id).ifPresent(user -> notificationService.notifyRejection(user, principal.getName()));
 
 		return ResponseEntity.ok().build();
 	}
 
 	@GetMapping("/users/filter")
-	public String filterUsers(@RequestParam(required = false) String name, @RequestParam(required = false) String mobile,
+	public String filterUsers(@RequestParam(required = false) String name,
+			@RequestParam(required = false) String mobile,
 			@RequestParam(required = false) String approved, @RequestParam(required = false) String annualFeeStatus,
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,@RequestParam(required = true)String yearDropdown, Model model) {
-				
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
+			@RequestParam(required = true) String yearDropdown, Model model) {
 
 		if (StringUtils.isEmpty(mobile))
 			mobile = null;
@@ -84,23 +84,23 @@ public class AdminUserController {
 			name = null;
 		if (StringUtils.isEmpty(approved))
 			approved = null;
-		
-		
+
 		List<Integer> years = new ArrayList<>();
 
-        if (yearDropdown.startsWith("last")) {
-            // Extract the number after "last"
-            int yearsBack = Integer.parseInt(yearDropdown.replace("last", "").replace("years", "").trim());
+		if (yearDropdown.startsWith("last")) {
+			// Extract the number after "last"
+			int yearsBack = Integer.parseInt(yearDropdown.replace("last", "").replace("years", "").trim());
 
-            int currentYear = java.time.Year.now().getValue();
-            for (int i = 0; i < yearsBack; i++) {
-                years.add(currentYear - i);
-            }
-        } else {
-            // If it is just a specific year (e.g., "2023")
-            years.add(Integer.parseInt(yearDropdown));
-        }
-		Page<User> userPage = userService.filterUsersPaginated(name, mobile, approved, annualFeeStatus, page, size,years);
+			int currentYear = java.time.Year.now().getValue();
+			for (int i = 0; i < yearsBack; i++) {
+				years.add(currentYear - i);
+			}
+		} else {
+			// If it is just a specific year (e.g., "2023")
+			years.add(Integer.parseInt(yearDropdown));
+		}
+		Page<User> userPage = userService.filterUsersPaginated(name, mobile, approved, annualFeeStatus, page, size,
+				years, "MEMBER");
 		model.addAttribute("userList", userPage.getContent());
 		model.addAttribute("currentPage", page);
 		model.addAttribute("totalPages", userPage.getTotalPages());
@@ -110,9 +110,8 @@ public class AdminUserController {
 
 	@GetMapping("/user/{id}/annualPayments")
 	public String getAnnualPayments(@PathVariable Long id, Model model) {
-		
+
 		List<Payment> payments = userService.getAnnualPaymentsByUserId(id);
-		
 
 		model.addAttribute("paymentList", payments);
 		return "fragments/annual-payment-table";
@@ -120,48 +119,48 @@ public class AdminUserController {
 
 	@GetMapping("/user/{id}/otherPayments")
 	public String getOtherPaymentsByUserId(@PathVariable Long id, Model model) {
-		
+
 		List<Payment> payments = userService.getOtherPaymentsByUserId(id);
-		
 
 		model.addAttribute("paymentList", payments);
 		return "fragments/annual-payment-table";
 	}
-	
-	
+
 	@PostMapping("/validatePayment/{paymentId}/{reason}")
 	@ResponseBody
-	public ResponseEntity<?> validatePayment(@PathVariable Long paymentId, @PathVariable String reason , Principal principal)
-	{
-	    String mobile = principal.getName(); // current admin user
-	    User user= userService.findByMobile(mobile);
-	    userService.validateSinglePayment(paymentId,"सत्यापित",reason,user); // Include reason
-	    return ResponseEntity.ok().build();
+	public ResponseEntity<?> validatePayment(@PathVariable Long paymentId, @PathVariable String reason,
+			Principal principal) {
+		String mobile = principal.getName(); // current admin user
+		User user = userService.findByMobile(mobile);
+		userService.validateSinglePayment(paymentId, "सत्यापित", reason, user); // Include reason
+		return ResponseEntity.ok().build();
 	}
 
 	@PostMapping("/rejectPayment/{paymentId}/{reason}")
 	@ResponseBody
-	public ResponseEntity<?> rejectPayment(@PathVariable Long paymentId, @PathVariable String reason,Principal principal) {
-		 String mobile = principal.getName(); // current admin user
-		    User user= userService.findByMobile(mobile);
-		userService.validateSinglePayment(paymentId,"अस्वीकृत", reason,user); // Implement this
+	public ResponseEntity<?> rejectPayment(@PathVariable Long paymentId, @PathVariable String reason,
+			Principal principal) {
+		String mobile = principal.getName(); // current admin user
+		User user = userService.findByMobile(mobile);
+		userService.validateSinglePayment(paymentId, "अस्वीकृत", reason, user); // Implement this
 		return ResponseEntity.ok().build();
 	}
+
 	@GetMapping("/reset-requests")
 	public String showResetRequests(Model model) {
-	    List<PasswordResetRequest> requests = passwordResetRequestService.findByStatus("PENDING");
-	    model.addAttribute("resetRequests", requests);
-	    return "resetRequests"; // JSP name without .jsp
+		List<PasswordResetRequest> requests = passwordResetRequestService.findByStatus("PENDING");
+		model.addAttribute("resetRequests", requests);
+		return "resetRequests"; // JSP name without .jsp
 	}
+
 	@PostMapping("/users/update-role")
 	public ResponseEntity<?> updateUserRole(@RequestBody UserRoleUpdateRequest request) {
 
-	    userService.updateUserSmajRole(
-	        request.getUserId(),
-	        request.getRole()
-	    );
+		userService.updateUserSmajRole(
+				request.getUserId(),
+				request.getRole());
 
-	    return ResponseEntity.ok().build();
+		return ResponseEntity.ok().build();
 	}
 
 }
