@@ -160,7 +160,7 @@
         <div class="group-basic">
             <div class="mb-3">
                 <label class="form-label">मोबाइल</label>
-                <input type="text" class="form-control" value="${user.mobile}" readonly>
+                <input type="text" class="form-control" value="${user.mobile}" >
             </div>
 
             <div class="mb-3">

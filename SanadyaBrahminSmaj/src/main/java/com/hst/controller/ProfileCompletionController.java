@@ -5,6 +5,7 @@ import com.hst.repository.UserRepository;
 import com.hst.service.RegistrationNumberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,6 +70,7 @@ public class ProfileCompletionController {
             @RequestParam(required = false) String dateOfBirth,
             @RequestParam(required = false) String gender,
             @RequestParam(required = false) String address,
+            @RequestParam (required = false) String mobile,
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String homeDistrict,
             @RequestParam(required = false) String education,
@@ -82,13 +84,27 @@ public class ProfileCompletionController {
             return "redirect:/login";
         }
 
-        String mobile = authentication.getName();
-        Optional<User> userOpt = userRepository.findByMobile(mobile);
+    String     mobileSystem = authentication.getName();
+
+        Optional<User> userOpt = userRepository.findByMobile(mobileSystem);
         if (userOpt.isEmpty()) {
             return "redirect:/register";
         }
 
+        
         User user = userOpt.get();
+
+        if(mobile != null && !mobile.isBlank() && !mobile.equals(mobileSystem)) {
+            // Check if the new mobile number is already registered
+            if (userRepository.existsByMobile(mobile)) {
+                redirect.addFlashAttribute("errorMessage", "मोबाइल नंबर पहले से पंजीकृत है। कृपया एक अलग नंबर दर्ज करें।");
+                return "redirect:/register/complete";
+            }
+            else {
+                user.setMobile(mobile);
+            }
+
+        }
 
         // Update all profile fields
         if (fullName != null && !fullName.isBlank()) {
