@@ -133,29 +133,31 @@
         <!-- ===== CONTACT & ADDRESS ===== -->
         <div class="section-title">पता और संपर्क</div>
 
-        <div class="mb-3">
-            <label class="form-label">मोबाइल</label>
-            <input type="text" class="form-control" value="${user.mobile}" readonly>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">ईमेल</label>
-            <input type="email" class="form-control" value="${user.email}" readonly>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">पता</label>
-            <textarea name="address" class="form-control" rows="2">${user.address}</textarea>
-        </div>
-
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label">शहर</label>
-                <input type="text" name="city" class="form-control" value="${user.city}" placeholder="शहर/गाँव">
+        <div class="group-basic">
+            <div class="mb-3">
+                <label class="form-label">मोबाइल</label>
+                <input type="text" class="form-control" value="${user.mobile}">
             </div>
-            <div class="col-md-6">
-                <label class="form-label">गृह जिला</label>
-                <input type="text" name="homeDistrict" class="form-control" value="${user.homeDistrict}" placeholder="जिला">
+
+            <div class="mb-3">
+                <label class="form-label">ईमेल</label>
+                <input type="email" class="form-control" value="${user.email}" readonly>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">पता</label>
+                <textarea name="address" class="form-control" rows="2">${user.address}</textarea>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">शहर</label>
+                    <input type="text" name="city" class="form-control" value="${user.city}" placeholder="शहर/गाँव">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">गृह जिला</label>
+                    <input type="text" name="homeDistrict" class="form-control" value="${user.homeDistrict}" placeholder="जिला">
+                </div>
             </div>
         </div>
 
