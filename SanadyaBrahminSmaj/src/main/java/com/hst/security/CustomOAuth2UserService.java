@@ -1,6 +1,8 @@
 package com.hst.security;
 
 import com.hst.entity.User;
+import com.hst.entity.LoginUser;
+import com.hst.repository.LoginUserRepository;
 import com.hst.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +14,6 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -23,8 +24,7 @@ import java.util.UUID;
  *
  * 1. Existing member (matched by email) → logs in with their current role
  * 2. Existing Google-linked user (matched by GOOGLE_<id> mobile) → logs in
- * 3. First-time Google user → creates a pending member (role=USER, approved=प्रक्रिया में)
- *    so they can complete registration later and get admin approval for full access.
+ * 3. First-time Google user → creates a room/matrimony login account only.
  *
  * Even before admin approval, the user can:
  *   - Browse and book rooms
@@ -40,6 +40,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private LoginUserRepository loginUserRepository;
+
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
@@ -52,15 +55,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         log.info("Google OAuth login attempt: email={}, name={}", email, name);
 
         // ----------------------------------------------------------------
-        // 1. Try to find existing user by email (registered member)
+        // 1. Find an existing login account by email.
         // ----------------------------------------------------------------
         if (email != null && !email.isBlank()) {
             try {
-                Optional<User> byEmail = userRepository.findByEmail(email);
+                Optional<LoginUser> byEmail = loginUserRepository.findFirstByEmailOrderByIdAsc(email);
                 if (byEmail.isPresent()) {
-                    User existing = byEmail.get();
-                    log.info("Found existing member by email: {} — logging in as USER", email);
-                    return buildOAuth2User(oAuth2User, existing, "ROLE_USER");
+                    LoginUser existing = byEmail.get();
+                    User member = userRepository.findByLoginUser_Mobile(existing.getMobile()).orElse(null);
+                    log.info("Found existing login account by email: {}", email);
+                    return buildOAuth2User(oAuth2User, existing, member);
                 }
             } catch (Exception e) {
                 log.warn("Error looking up email {}: {}", email, e.getMessage());
@@ -68,45 +72,46 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         // ----------------------------------------------------------------
-        // 2. Check if a Google-linked user already exists (by GOOGLE_<id> mobile)
+        // 2. Check if a Google-linked account already exists (by GOOGLE_<id> mobile)
         // ----------------------------------------------------------------
-        Optional<User> existingGoogleUser = userRepository.findByMobile(googleMobile);
+        Optional<LoginUser> existingGoogleUser = loginUserRepository.findByMobile(googleMobile);
         if (existingGoogleUser.isPresent()) {
-            User user = existingGoogleUser.get();
+            LoginUser account = existingGoogleUser.get();
             log.info("Found existing Google user: {} — logging in", googleMobile);
-            return buildOAuth2User(oAuth2User, user, "ROLE_" + user.getRole());
+            User member = userRepository.findByLoginUser_Mobile(googleMobile).orElse(null);
+            return buildOAuth2User(oAuth2User, account, member);
         }
 
         // ----------------------------------------------------------------
-        // 3. First-time Google login — create a pending member
+        // 3. First-time Google login creates an account only. Member details can
+        // be added later if the account holder chooses member registration.
         // ----------------------------------------------------------------
-        log.info("Creating new pending member for Google login: email={}", email);
-        User newUser = new User();
-        newUser.setMobile(googleMobile);
-        newUser.setPassword(UUID.randomUUID().toString()); // Random — not used for OAuth
-        newUser.setFullName(name != null ? name : "Google User");
-        newUser.setEmail(email);
-        newUser.setRole("USER");
-        // Pending — admin must approve for full access
-        newUser.setApproved("प्रक्रिया में");
-        newUser.setCreatedDate(LocalDate.now());
-        newUser.setAgreeToTerms(true);
-        newUser.setAuthProvider("GOOGLE");
-        userRepository.save(newUser);
+        log.info("Creating login account for Google user: email={}", email);
+        LoginUser account = new LoginUser();
+        account.setMobile(googleMobile);
+        account.setPassword(UUID.randomUUID().toString());
+        account.setFullName(name != null ? name : "Google User");
+        account.setEmail(email);
+        account.setRole("USER");
+        account.setAuthProvider("GOOGLE");
+        account.setAccountType("ROOM_MATRIMONY");
+        loginUserRepository.save(account);
 
-        log.info("Pending member created: mobile={}, email={}", googleMobile, email);
-        return buildOAuth2User(oAuth2User, newUser, "ROLE_USER");
+        log.info("Google login account created: mobile={}, email={}", googleMobile, email);
+        return buildOAuth2User(oAuth2User, account, null);
     }
 
     /**
      * Build an OAuth2User with the user's details and role.
      */
-    private OAuth2User buildOAuth2User(OAuth2User original, User user, String role) {
+    private OAuth2User buildOAuth2User(OAuth2User original, LoginUser account, User member) {
         Map<String, Object> attributes = new HashMap<>(original.getAttributes());
-        attributes.put("userMobile", user.getMobile());
+        String role = "ROLE_" + account.getRole();
+        attributes.put("userMobile", account.getMobile());
         attributes.put("userRole", role);
-        attributes.put("fullName", user.getFullName());
-        attributes.put("userApproved", user.getApproved());
+        attributes.put("fullName", account.getFullName());
+        attributes.put("userApproved", member != null ? member.getApproved() : null);
+        attributes.put("hasMemberProfile", member != null);
 
         return new DefaultOAuth2User(
                 java.util.List.of(

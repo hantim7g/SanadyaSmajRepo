@@ -1,0 +1,95 @@
+{
+    // Task runner wired to the NESTED SanadyaBrahminSmaj Maven project.
+    // Commands cd into the project folder so ./mvnw.cmd resolves correctly.
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Spring Boot: Compile/Build",
+            "type": "process",
+            "command": "cmd.exe",
+            "args": ["/c", "mvnw.cmd", "compile"],
+            "options": {
+                "cwd": "${workspaceFolder}\\SanadyaBrahminSmaj"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            },
+            "problemMatcher": "$javac"
+        },
+        {
+            "label": "Spring Boot: Clean Package",
+            "type": "process",
+            "command": "cmd.exe",
+            "args": ["/c", "mvnw.cmd", "clean", "package", "-DskipTests"],
+            "options": {
+                "cwd": "${workspaceFolder}\\SanadyaBrahminSmaj"
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Spring Boot: Run (dev profile)",
+            "type": "process",
+            "command": "cmd.exe",
+            "args": ["/c", "mvnw.cmd", "spring-boot:run", "-Dspring-boot.run.profiles=dev"],
+            "options": {
+                "cwd": "${workspaceFolder}\\SanadyaBrahminSmaj"
+            },
+            "isBackground": true,
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Spring Boot: Verify Maven POM",
+            "type": "process",
+            "command": "cmd.exe",
+            "args": ["/c", "mvnw.cmd", "help:effective-pom", "-q", "-Doutput=target/effective-pom.xml"],
+            "options": {
+                "cwd": "${workspaceFolder}\\SanadyaBrahminSmaj"
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Spring Boot: Run Tests",
+            "type": "process",
+            "command": "cmd.exe",
+            "args": ["/c", "mvnw.cmd", "test"],
+            "options": {
+                "cwd": "${workspaceFolder}\\SanadyaBrahminSmaj"
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": false
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

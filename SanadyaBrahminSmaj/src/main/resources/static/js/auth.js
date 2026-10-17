@@ -80,6 +80,63 @@ $(function () {
 
 
 $(function() {
+	$('#memberRegistrationMode').on('click', function() {
+		$('#memberRegistrationMode').addClass('active');
+		$('#guestRegistrationMode').removeClass('active');
+		$('#registrationForm').removeClass('d-none');
+		$('#accountRegistrationForm').addClass('d-none');
+	});
+
+	$('#guestRegistrationMode').on('click', function() {
+		$('#guestRegistrationMode').addClass('active');
+		$('#memberRegistrationMode').removeClass('active');
+		$('#accountRegistrationForm').removeClass('d-none');
+		$('#registrationForm').addClass('d-none');
+	});
+
+	$('#accountRegistrationForm').submit(function(e) {
+		e.preventDefault();
+		const errorBox = $('#accountRegistrationError');
+		const mobile = $('#accountMobile').val().trim();
+		const password = $('#accountPassword').val();
+		errorBox.addClass('d-none').text('');
+
+		if (!/^\d{10}$/.test(mobile)) {
+			errorBox.removeClass('d-none').text('मान्य 10 अंकों का मोबाइल नंबर दर्ज करें।');
+			return;
+		}
+		if (password.length < 6) {
+			errorBox.removeClass('d-none').text('पासवर्ड कम से कम 6 वर्णों का होना चाहिए।');
+			return;
+		}
+
+		$.ajax({
+			url: '/api/auth/register-account',
+			method: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify({
+				fullName: $('#accountFullName').val().trim(),
+				mobile: mobile,
+				email: $('#accountEmail').val().trim(),
+				password: password
+			}),
+			success: function(response) {
+				if (!response.success) {
+					errorBox.removeClass('d-none').text(response.message || 'खाता नहीं बन सका।');
+					return;
+				}
+				$('#loginMobile').val(mobile);
+				$('#loginPassword').val('');
+				bootstrap.Tab.getOrCreateInstance(document.getElementById('login-tab')).show();
+				bootbox.alert(response.message || 'खाता बन गया। अब लॉगिन करें।');
+			},
+			error: function(xhr) {
+				const message = xhr.responseJSON?.message || 'खाता नहीं बन सका। कृपया विवरण जाँचें।';
+				errorBox.removeClass('d-none').text(message);
+			}
+		});
+	});
+
 	$('#registrationForm').submit(function(e) {
 		e.preventDefault();
 		const errorBox = $('#errorBox');

@@ -12,13 +12,13 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@Column(unique = true, nullable = false)
-	private String mobile;
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+	@JoinColumn(name = "login_user_id", unique = true)
+	private LoginUser loginUser;
 	private String approved = "प्रक्रिया में";
 
 	@Column(unique = true)
 	private String RegistrationNo;
-	private String fullName;
 	private String fatherName;
 	
 	private String gotra;
@@ -33,16 +33,10 @@ public class User {
 
 
 
-	private String email;
-
-	@Column(nullable = false)
-	private String password;
-
 	private String education;
 	private String occupation;
 	private String homeDistrict;
 	private String city;
-	private String authProvider; // "GOOGLE" for OAuth users, null for normal registration
 
 	@Convert(converter = EncryptedStringConverter.class)
 	@Column(columnDefinition = "VARCHAR(512)")
@@ -54,8 +48,6 @@ public class User {
 	private String contribution;
 	private String profileImagePath;
 	private boolean agreeToTerms;
-	@Column(nullable = false)
-	private String role = "USER";
 	@Column(name = "annual_fee_Status")
 	private String annualFeeStatus="प्रतीक्षारत";  // default: due
 
@@ -104,6 +96,15 @@ public class User {
 
 	public Long getId() {
 		return id;
+	}
+
+	@com.fasterxml.jackson.annotation.JsonIgnore
+	public LoginUser getLoginUser() {
+		return loginUser;
+	}
+
+	public void setLoginUser(LoginUser loginUser) {
+		this.loginUser = loginUser;
 	}
 
 	public void setId(Long id) {
@@ -155,11 +156,13 @@ public class User {
 
 
 	public String getFullName() {
-		return fullName;
+		return loginUser == null ? null : loginUser.getFullName();
 	}
 
 	public void setFullName(String fullName) {
-		this.fullName = fullName;
+		if (loginUser != null) {
+			loginUser.setFullName(fullName);
+		}
 	}
 
 	public String getFatherName() {
@@ -204,27 +207,34 @@ public class User {
 
 
 	public String getMobile() {
-		return mobile;
+		return loginUser == null ? null : loginUser.getMobile();
 	}
 
 	public void setMobile(String mobile) {
-		this.mobile = mobile;
+		if (loginUser != null) {
+			loginUser.setMobile(mobile);
+		}
 	}
 
 	public String getEmail() {
-		return email;
+		return loginUser == null ? null : loginUser.getEmail();
 	}
 
 	public void setEmail(String email) {
-		this.email = email;
+		if (loginUser != null) {
+			loginUser.setEmail(email);
+		}
 	}
 
+	@com.fasterxml.jackson.annotation.JsonIgnore
 	public String getPassword() {
-		return password;
+		return loginUser == null ? null : loginUser.getPassword();
 	}
 
 	public void setPassword(String password) {
-		this.password = password;
+		if (loginUser != null) {
+			loginUser.setPassword(password);
+		}
 	}
 
 	public String getEducation() {
@@ -260,11 +270,13 @@ public class User {
 	}
 
 	public String getAuthProvider() {
-		return authProvider;
+		return loginUser == null ? null : loginUser.getAuthProvider();
 	}
 
 	public void setAuthProvider(String authProvider) {
-		this.authProvider = authProvider;
+		if (loginUser != null) {
+			loginUser.setAuthProvider(authProvider);
+		}
 	}
 
 	public String getAadharNumber() {
@@ -340,11 +352,13 @@ public class User {
 	}
 
 	public String getRole() {
-		return role;
+		return loginUser == null ? null : loginUser.getRole();
 	}
 
 	public void setRole(String role) {
-		this.role = role;
+		if (loginUser != null) {
+			loginUser.setRole(role);
+		}
 	}
 
 	// Optional constructor

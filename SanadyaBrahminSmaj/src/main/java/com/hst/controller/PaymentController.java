@@ -72,7 +72,7 @@ public class PaymentController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
 
-        User user = userRepository.findByMobile(authentication.getName())
+        User user = userRepository.findByLoginUser_Mobile(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         try {

@@ -153,6 +153,7 @@ public class SecurityConfig {
                 /* 🌍 PUBLIC — auth endpoints (login, register, forgot-password, me) */
                 .requestMatchers(
                         "/api/auth/login",
+                        "/api/auth/register-account",
                         "/api/auth/register",
                         "/api/auth/forgot-password",
                         "/api/auth/me",

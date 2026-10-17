@@ -1,7 +1,9 @@
 package com.hst.controller;
 
 import com.hst.entity.PasswordResetRequest;
+import com.hst.entity.LoginUser;
 import com.hst.entity.User;
+import com.hst.repository.LoginUserRepository;
 import com.hst.repository.UserRepository;
 import com.hst.service.NotificationService;
 import com.hst.service.PasswordResetRequestService;
@@ -25,6 +27,8 @@ public class AdminController {
     @Autowired
     private  UserRepository userRepository;
     @Autowired
+    private LoginUserRepository loginUserRepository;
+    @Autowired
     private PasswordResetRequestService passwordResetRequestService;
     @Autowired
     private NotificationService notificationService;
@@ -32,7 +36,7 @@ public class AdminController {
     // ⏳ Get all users with approved = false
     @GetMapping("/pending-users")
     public List<User> getPendingUsers() {
-        return userRepository.findByApprovedFalse();
+        return userRepository.findByApproved("प्रक्रिया में");
     }
 
     // ✅ Approve a user by ID
@@ -80,12 +84,12 @@ public class AdminController {
             return ResponseEntity.badRequest().body(Map.of("message", "अनुरोध मान्य नहीं है।"));
         }
 
-        Optional<User> userOpt = userRepository.findByMobile(req.getMobile());
-        if (userOpt.isEmpty()) return ResponseEntity.status(404).body(Map.of("message", "यूज़र नहीं मिला।"));
+        Optional<LoginUser> loginUserOpt = loginUserRepository.findByMobile(req.getMobile());
+        if (loginUserOpt.isEmpty()) return ResponseEntity.status(404).body(Map.of("message", "यूज़र नहीं मिला।"));
 
-        User user = userOpt.get();
-        user.setPassword(req.getNewPassword()); // Set approved new password
-        userRepository.save(user);
+        LoginUser loginUser = loginUserOpt.get();
+        loginUser.setPassword(req.getNewPassword());
+        loginUserRepository.save(loginUser);
 
         req.setStatus("APPROVED");
         req.setAdminRemarks(adminRemarks);

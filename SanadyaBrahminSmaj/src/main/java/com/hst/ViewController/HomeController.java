@@ -75,15 +75,14 @@ public String home(Model model) {
         }
 
         String mobile = authentication.getName();
-        Optional<User> userOpt = userRepository.findByMobile(mobile);
+        Optional<User> userOpt = userRepository.findByLoginUser_Mobile(mobile);
 
         if (userOpt.isPresent()) {
             model.addAttribute("user", userOpt.get());
             model.addAttribute("paymentList", paymentService.getPaymentsByMobile(mobile));
             return "profile"; // member-profile.jsp
         } else {
-            model.addAttribute("error", "यूज़र प्रोफ़ाइल नहीं मिली।");
-            return "error";
+            return "redirect:/register/complete";
         }
     }
 
@@ -106,15 +105,14 @@ public String home(Model model) {
         }
 
         String mobile = authentication.getName();
-        Optional<User> userOpt = userRepository.findByMobile(mobile);
+        Optional<User> userOpt = userRepository.findByLoginUser_Mobile(mobile);
 
         if (userOpt.isPresent()) {
             model.addAttribute("user", userOpt.get());
             model.addAttribute("paymentList", paymentService.getPaymentsByMobile(mobile));
             return "payment"; // member-profile.jsp
         } else {
-            model.addAttribute("error", "यूज़र प्रोफ़ाइल नहीं मिली।");
-            return "error";
+            return "redirect:/register/complete";
         }
     }
 

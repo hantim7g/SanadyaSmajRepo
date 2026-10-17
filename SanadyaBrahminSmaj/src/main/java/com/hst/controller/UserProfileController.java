@@ -55,7 +55,7 @@ public class UserProfileController {
 	public User getProfile(HttpServletRequest request) {
 		String token = jwtTokenProvider.getJwtFromCookies(request);
 		String mobile = jwtTokenProvider.getUsernameFromToken(token);
-		return userRepository.findByMobile(mobile).orElse(null);
+		return userRepository.findByLoginUser_Mobile(mobile).orElse(null);
 	}
 
 	@PostMapping("/update")
@@ -63,7 +63,7 @@ public class UserProfileController {
 			@RequestBody User user) {
 		String token = jwtTokenProvider.getJwtFromCookies(request);
 		String mobile = jwtTokenProvider.getUsernameFromToken(token);
-		User existingUser = userRepository.findByMobile(mobile).orElseThrow();
+		User existingUser = userRepository.findByLoginUser_Mobile(mobile).orElseThrow();
 
 		// Update editable fields only
 		existingUser.setAddress(user.getAddress());
@@ -85,7 +85,7 @@ public class UserProfileController {
 	@PostMapping("/upload-image")
 	public ResponseEntity<?> uploadProfileImage(@RequestParam("image") MultipartFile image, Principal principal) {
 		String mobile = principal.getName();
-		Optional<User> optionalUser = userRepository.findByMobile(mobile);
+		Optional<User> optionalUser = userRepository.findByLoginUser_Mobile(mobile);
 		if (optionalUser.isEmpty())
 			return ResponseEntity.badRequest().body("User not found");
 
@@ -112,7 +112,7 @@ public class UserProfileController {
 	@GetMapping("/payments")
 	public ResponseEntity<List<Payment>> getUserPayments(Authentication auth) {
 	    String mobile = auth.getName();
-	    User user = userRepository.findByMobile(mobile).orElseThrow();
+	    User user = userRepository.findByLoginUser_Mobile(mobile).orElseThrow();
 	    List<Payment> payments = paymentService.getPaymentsByUserId(user.getId());
 	    return ResponseEntity.ok(payments);
 	}

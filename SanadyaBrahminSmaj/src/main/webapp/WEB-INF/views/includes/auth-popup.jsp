@@ -58,7 +58,7 @@
                     <i class="fab fa-google me-2"></i>Google से लॉगिन करें
                   </a>
                   <p class="text-muted small mt-2 mb-1">
-                    नए उपयोगकर्ता: Google से लॉगिन करें, फिर प्रोफ़ाइल पूर्ण करें और अनुमोदन प्राप्त करें।
+                    Google से बने खाते room और matrimony सेवाओं के लिए सीधे उपयोग किए जा सकते हैं।
                   </p>
 
                   <a href="#" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">🔑 पासवर्ड भूल गए?</a>
@@ -70,6 +70,31 @@
 
                 <!-- 📝 Registration -->
                 <div class="tab-pane fade" id="registerTab" role="tabpanel">
+                  <div class="btn-group w-100 mb-3" role="group" aria-label="Registration type">
+                    <button type="button" id="memberRegistrationMode" class="btn btn-outline-primary active">सदस्य पंजीकरण</button>
+                    <button type="button" id="guestRegistrationMode" class="btn btn-outline-primary">Room / Matrimony खाता</button>
+                  </div>
+                  <form id="accountRegistrationForm" class="d-none">
+                    <p class="text-muted">इस खाते से room booking और matrimony सेवाएँ उपयोग करें। सदस्य विवरण बाद में जोड़े जा सकते हैं।</p>
+                    <div class="mb-3">
+                      <label for="accountFullName">पूरा नाम *</label>
+                      <input id="accountFullName" type="text" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                      <label for="accountMobile">मोबाइल नंबर *</label>
+                      <input id="accountMobile" type="tel" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                      <label for="accountEmail">ईमेल</label>
+                      <input id="accountEmail" type="email" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                      <label for="accountPassword">पासवर्ड *</label>
+                      <input id="accountPassword" type="password" minlength="6" class="form-control" required>
+                    </div>
+                    <div id="accountRegistrationError" class="alert alert-danger d-none" role="alert"></div>
+                    <button type="submit" class="btn btn-success w-100">खाता बनाएँ</button>
+                  </form>
                   <form id="registrationForm">
                     <div id="errorBox" class="alert alert-danger d-none" role="alert"></div>
                     <div class="row">

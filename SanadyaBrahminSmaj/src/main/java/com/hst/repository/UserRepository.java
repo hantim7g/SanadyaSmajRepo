@@ -16,20 +16,18 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     
-	Optional<User> findByMobile(String mobile);
+	Optional<User> findByLoginUser_Mobile(String mobile);
 
-	Optional<User> findByEmail(String email);
-	
-	 @Query("SELECT u.id FROM User u WHERE u.mobile = :mobile")
+	 @Query("SELECT u.id FROM User u WHERE u.loginUser.mobile = :mobile")
 	Long findIdByMobile(String mobile) ;
 	
-    boolean existsByMobile(String mobile);
-    List<User> findByApprovedFalse();
+	boolean existsByLoginUser_Mobile(String mobile);
+	List<User> findByApproved(String approved);
     @Query("SELECT COUNT(u) FROM User u")
     long countUsers();
     
 
-    @Query("SELECT u FROM User u WHERE (:name IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) AND (:city IS NULL OR LOWER(u.homeDistrict) LIKE LOWER(CONCAT('%', :city, '%'))) AND (:approved IS NULL OR u.approved = :approved)")
+	     @Query("SELECT u FROM User u WHERE (:name IS NULL OR LOWER(u.loginUser.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) AND (:city IS NULL OR LOWER(u.homeDistrict) LIKE LOWER(CONCAT('%', :city, '%'))) AND (:approved IS NULL OR u.approved = :approved)")
      List<User> findFiltered(@Param("name") String name,
                              @Param("city") String city,
                              @Param("approved") String approved);
@@ -42,8 +40,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     // Optional field filters (AND logic)
     @Query("SELECT u FROM User u " +
-    	       "WHERE (:name IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) " +
-    	       "AND (:mobile IS NULL OR LOWER(u.mobile) LIKE LOWER(CONCAT('%', :mobile, '%'))) " +
+            "WHERE (:name IS NULL OR LOWER(u.loginUser.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+            "AND (:mobile IS NULL OR LOWER(u.loginUser.mobile) LIKE LOWER(CONCAT('%', :mobile, '%'))) " +
     	       "AND (:approved IS NULL OR u.approved = :approved) ")
     	Page<User> filterUsers(@Param("name") String name,
     	                       @Param("mobile") String mobile,
@@ -53,8 +51,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     // Optional field filters (AND logic)
     @Query("SELECT u FROM User u " +
-    	       "WHERE (:name IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) " +
-    	       "AND (:mobile IS NULL OR LOWER(u.mobile) LIKE LOWER(CONCAT('%', :mobile, '%'))) " +
+            "WHERE (:name IS NULL OR LOWER(u.loginUser.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+            "AND (:mobile IS NULL OR LOWER(u.loginUser.mobile) LIKE LOWER(CONCAT('%', :mobile, '%'))) " +
     	       "AND (:approved IS NULL OR u.approved = :approved) ")
     	List<User> filterUsersAll(@Param("name") String name,
     	                       @Param("mobile") String mobile,
@@ -67,8 +65,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     
     @Query(value = "SELECT DISTINCT u FROM User u " +
-    	       "WHERE (:name IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) " +
-    	       "AND (:mobile IS NULL OR u.mobile LIKE CONCAT('%', :mobile, '%')) " +
+            "WHERE (:name IS NULL OR LOWER(u.loginUser.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+            "AND (:mobile IS NULL OR u.loginUser.mobile LIKE CONCAT('%', :mobile, '%')) " +
     	       "AND (:approved IS NULL OR u.approved = :approved) " +
     	       "AND (" +
     	       "  :feeStatus IS NULL OR :feeStatus = '' OR " +
@@ -86,8 +84,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     	       "  ))" +
     	       ")",
     	       countQuery = "SELECT COUNT(DISTINCT u) FROM User u " +
-    	       "WHERE (:name IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) " +
-    	       "AND (:mobile IS NULL OR u.mobile LIKE CONCAT('%', :mobile, '%')) " +
+            "WHERE (:name IS NULL OR LOWER(u.loginUser.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+            "AND (:mobile IS NULL OR u.loginUser.mobile LIKE CONCAT('%', :mobile, '%')) " +
     	       "AND (:approved IS NULL OR u.approved = :approved) " +
     	       "AND (" +
     	       "  :feeStatus IS NULL OR :feeStatus = '' OR " +
@@ -111,6 +109,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     	        @Param("feeStatus") String feeStatus,
     	        @Param("startYear") Integer startYear,
     	        Pageable pageable);
-        Page<User> findAllByOrderByFullNameAsc(Pageable pageable);
+		Page<User> findAllByOrderByLoginUser_FullNameAsc(Pageable pageable);
         }
 

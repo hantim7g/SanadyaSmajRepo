@@ -23,6 +23,7 @@ import com.hst.entity.User;
 import com.hst.entity.BookingSys.*;
 import com.hst.phonepe.PPPaymentService;
 import com.hst.repository.BookingGuestRepository;
+import com.hst.repository.LoginUserRepository;
 import com.hst.repository.BookingRepository;
 import com.hst.repository.PaymentRepository;
 import com.hst.repository.RoomRepository;
@@ -84,6 +85,8 @@ public class BookingController {
     private BookingGuestRepository guestRepo;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private LoginUserRepository loginUserRepository;
     @Autowired
     private RoomRepository roomRepo;
     @Autowired
@@ -208,10 +211,11 @@ public class BookingController {
         req.setFeeFrom(booking.getCheckInDate().toString());
         req.setFeeTo(booking.getCheckOutDate().toString());
 
-        User user = userRepository.findByMobile(principal.getName()).get();
+        com.hst.entity.LoginUser loginUser = loginUserRepository.findByMobile(principal.getName())
+            .orElseThrow(() -> new IllegalStateException("Login account not found"));
 
         String redirectUrl = paymentService.initiatePhonePeTransaction(
-                user,
+            loginUser,
                 req,
                 "http://sanadhyabrahmin.ddns.net:8080/bookings/payment/response?bookingId=" + booking.getId(),
                 booking.getBookingCode()

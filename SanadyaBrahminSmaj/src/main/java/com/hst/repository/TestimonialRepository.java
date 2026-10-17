@@ -22,7 +22,7 @@ public interface TestimonialRepository extends JpaRepository<Testimonial, Long> 
       SELECT t FROM Testimonial t
       WHERE t.status = :status
         AND (
-             LOWER(t.user.fullName) LIKE LOWER(CONCAT('%', :q, '%'))
+             LOWER(t.user.loginUser.fullName) LIKE LOWER(CONCAT('%', :q, '%'))
           OR LOWER(COALESCE(t.designation, '')) LIKE LOWER(CONCAT('%', :q, '%'))
           OR LOWER(t.message) LIKE LOWER(CONCAT('%', :q, '%'))
         )

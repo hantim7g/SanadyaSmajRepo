@@ -1,9 +1,12 @@
 package com.hst.controller;
 
 import com.hst.dto.LoginRequest;
+import com.hst.dto.AccountRegistrationRequest;
 import com.hst.dto.RegistrationRequest;
 import com.hst.entity.PasswordResetRequest;
+import com.hst.entity.LoginUser;
 import com.hst.entity.User;
+import com.hst.repository.LoginUserRepository;
 import com.hst.repository.UserRepository;
 import com.hst.response.ApiResponse;
 import com.hst.security.JwtTokenProvider;
@@ -34,6 +37,7 @@ import java.util.Optional;
 
 import org.springframework.http.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,15 +54,17 @@ public class AuthController {
 	private final AuthenticationManager authenticationManager;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final UserRepository userRepository;
+	private final LoginUserRepository loginUserRepository;
 	private final PasswordEncoder passwordEncoder;
 
 	public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider,
-			UserRepository userRepository, PasswordEncoder passwordEncoder,
+			UserRepository userRepository, LoginUserRepository loginUserRepository, PasswordEncoder passwordEncoder,
 			CloudinaryService cloudinaryService, PasswordResetRequestService passwordResetRequestService,
 			RegistrationNumberService registrationNumberService, CityVillageMasterService cityVillageMasterService) {
 		this.authenticationManager = authenticationManager;
 		this.jwtTokenProvider = jwtTokenProvider;
 		this.userRepository = userRepository;
+		this.loginUserRepository = loginUserRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.cloudinaryService = cloudinaryService;
 		this.passwordResetRequestService = passwordResetRequestService;
@@ -76,16 +82,38 @@ public class AuthController {
 		return ResponseEntity.badRequest().body(new ApiResponse<>(false, message, errors));
 	}
 
+	@PostMapping("/register-account")
+	public ResponseEntity<ApiResponse<Map<String, Object>>> registerAccount(
+			@Valid @RequestBody AccountRegistrationRequest request) {
+		if (loginUserRepository.existsByMobile(request.getMobile())) {
+			return ResponseEntity.badRequest().body(new ApiResponse<>(false, "मोबाइल नंबर पहले से पंजीकृत है।", null));
+		}
+
+		LoginUser account = new LoginUser();
+		account.setMobile(request.getMobile());
+		account.setPassword(passwordEncoder.encode(request.getPassword()));
+		account.setFullName(request.getFullName());
+		account.setEmail(request.getEmail());
+		account.setRole("USER");
+		account.setAuthProvider("LOCAL");
+		account.setAccountType("ROOM_MATRIMONY");
+		loginUserRepository.save(account);
+
+		return ResponseEntity.ok(new ApiResponse<>(true,
+				"खाता सफलतापूर्वक बनाया गया। अब आप लॉगिन कर सकते हैं।", null));
+	}
+
 	@PostMapping("/login")
 	public ResponseEntity<ApiResponse<Map<String, String>>> login(@RequestBody LoginRequest request,
 			HttpServletResponse response, HttpServletRequest httpRequest) {
-		Optional<User> optionalUser = userRepository.findByMobile(request.getMobile());
-		if (optionalUser.isEmpty()) {
+		Optional<LoginUser> loginUserOpt = loginUserRepository.findByMobile(request.getMobile());
+		if (loginUserOpt.isEmpty()) {
 			return ResponseEntity.badRequest().body(new ApiResponse<>(false, "मोबाइल नंबर पंजीकृत नहीं है।", null));
 		}
 
-		User user = optionalUser.get();
-		if (!APPROVED.equals(user.getApproved())) {
+		LoginUser loginUser = loginUserOpt.get();
+		Optional<User> memberOpt = userRepository.findByLoginUser_Mobile(request.getMobile());
+		if (memberOpt.isPresent() && !APPROVED.equals(memberOpt.get().getApproved())) {
 			return ResponseEntity.badRequest()
 					.body(new ApiResponse<>(false, "आपका पंजीकरण अनुमोदित नहीं है।कृपया प्रतीक्षा करें।", null));
 		}
@@ -97,7 +125,7 @@ public class AuthController {
 					.body(new ApiResponse<>(false, "लॉगिन करने में विफल . यूजरनेम पासवर्ड गलत है।", null));
 		}
 
-		String token = jwtTokenProvider.generateToken(request.getMobile(), List.of(user.getRole()));
+		String token = jwtTokenProvider.generateToken(request.getMobile(), List.of(loginUser.getRole()));
 
 		ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie.from("authToken", token)
 				.httpOnly(true)
@@ -109,10 +137,11 @@ public class AuthController {
 		}
 		response.addHeader("Set-Cookie", cookieBuilder.build().toString());
 
-		return ResponseEntity.ok(new ApiResponse<>(true, user.getFullName(), null));
+		return ResponseEntity.ok(new ApiResponse<>(true, loginUser.getFullName(), null));
 	}
 
 	@PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@Transactional
 	public ResponseEntity<ApiResponse<Map<String, Object>>> register(
 			@Valid @RequestPart("data") RegistrationRequest req,
 			BindingResult bindingResult,
@@ -123,7 +152,7 @@ public class AuthController {
 			return ResponseEntity.badRequest().body(new ApiResponse<>(false, "कृपया सभी आवश्यक फ़ील्ड सही से भरें।", errors));
 		}
 
-		if (userRepository.existsByMobile(req.getMobile())) {
+		if (loginUserRepository.existsByMobile(req.getMobile())) {
 			return ResponseEntity.badRequest().body(new ApiResponse<>(false, "मोबाइल नंबर पहले से पंजीकृत है।", null));
 		}
 
@@ -136,17 +165,24 @@ public class AuthController {
 			return fieldError("homeDistrict", "दर्ज किया गया जिला मान्य नहीं है। कृपया सूची से चुनें।");
 		}
 
+		LoginUser loginUser = new LoginUser();
+		loginUser.setMobile(req.getMobile());
+		loginUser.setPassword(passwordEncoder.encode(req.getPassword()));
+		loginUser.setRole("USER");
+		loginUser.setFullName(req.getFullName());
+		loginUser.setEmail(req.getEmail());
+		loginUser.setAuthProvider("LOCAL");
+		loginUser.setAccountType("MEMBER");
+
 		User user = new User();
+		user.setLoginUser(loginUser);
 		user.setCreatedDate(LocalDate.now());
-		user.setMobile(req.getMobile());
-		user.setPassword(passwordEncoder.encode(req.getPassword()));
 		user.setFullName(req.getFullName());
 		user.setFatherName(req.getFatherName());
 		user.setGotra(req.getGotra());
 		user.setDateOfBirth(req.getDateOfBirth());
 		user.setGender(req.getGender());
 		user.setAddress(req.getAddress());
-		user.setEmail(req.getEmail());
 		user.setEducation(req.getEducation());
 		user.setOccupation(req.getOccupation());
 		user.setHomeDistrict(req.getHomeDistrict());
@@ -156,7 +192,6 @@ public class AuthController {
 		user.setOrganizationAffiliation(req.getOrganizationAffiliation());
 		user.setContribution(req.getContribution());
 		user.setAgreeToTerms(req.isAgreeToTerms());
-		user.setRole("USER");
 		user.setApproved(APPROVAL_PENDING);
 		user.setRegistrationNo(registrationNumberService.generateRegistrationNumber());
 
@@ -170,6 +205,7 @@ public class AuthController {
 			}
 		}
 
+		loginUserRepository.save(loginUser);
 		userRepository.save(user);
 
 		Map<String, Object> responseData = new HashMap<>();
@@ -190,7 +226,7 @@ public class AuthController {
 
 		// IDOR FIX: Verify the userId matches the authenticated user
 		String mobile = authentication.getName();
-		Optional<User> loggedInUserOpt = userRepository.findByMobile(mobile);
+		Optional<User> loggedInUserOpt = userRepository.findByLoginUser_Mobile(mobile);
 		if (loggedInUserOpt.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "यूज़र नहीं मिला"));
 		}
@@ -219,8 +255,8 @@ public class AuthController {
 	public ResponseEntity<?> requestPasswordReset(@RequestParam String mobile, @RequestParam String newPassword,
 			@RequestParam(required = false) String reason) {
 
-		Optional<User> userOpt = userRepository.findByMobile(mobile);
-		if (userOpt.isEmpty()) {
+		Optional<LoginUser> loginUserOpt = loginUserRepository.findByMobile(mobile);
+		if (loginUserOpt.isEmpty()) {
 			return ResponseEntity.badRequest().body(Map.of("message", "मोबाइल नंबर पंजीकृत नहीं है।"));
 		}
 
@@ -238,7 +274,7 @@ public class AuthController {
 
 	@PostMapping("/makeAdmin")
 	public ResponseEntity<ApiResponse<Map<String, String>>> approveUser() {
-		Optional<User> userOpt = userRepository.findByMobile("8089101719");
+		Optional<User> userOpt = userRepository.findByLoginUser_Mobile("8089101719");
 		if (userOpt.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
 					.body(new ApiResponse<>(false, "यूज़र नहीं मिला।", null));
@@ -248,6 +284,10 @@ public class AuthController {
 		user.setRole("ADMIN");
 		user.setApproved(APPROVED);
 		userRepository.save(user);
+		loginUserRepository.findByMobile(user.getMobile()).ifPresent(loginUser -> {
+			loginUser.setRole("ADMIN");
+			loginUserRepository.save(loginUser);
+		});
 		return ResponseEntity.ok(new ApiResponse<>(true, "यूज़र को सफलतापूर्वक अनुमोदित किया गया।", null));
 	}
 	@GetMapping("/me")
@@ -260,13 +300,15 @@ public class AuthController {
 
 	    String mobile = authentication.getName();
 
-	    User user = userRepository.findByMobile(mobile)
-	            .orElseThrow(() -> new RuntimeException("User not found"));
+	    LoginUser loginUser = loginUserRepository.findByMobile(mobile)
+	            .orElseThrow(() -> new RuntimeException("Login account not found"));
+	    Optional<User> member = userRepository.findByLoginUser_Mobile(mobile);
 
 	    Map<String, Object> data = new HashMap<>();
-	    data.put("mobile", user.getMobile());
-	    data.put("fullName", user.getFullName());
-	    data.put("role", user.getRole());
+	    data.put("mobile", loginUser.getMobile());
+	    data.put("fullName", loginUser.getFullName());
+	    data.put("role", loginUser.getRole());
+	    data.put("hasMemberProfile", member.isPresent());
 
 	    return ResponseEntity.ok(
 	            new ApiResponse<>(true, "User info", data)

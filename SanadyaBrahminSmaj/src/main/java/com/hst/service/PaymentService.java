@@ -27,7 +27,7 @@ public class PaymentService {
 
     // 🔍 Get all payments made by the user (by mobile number)
     public List<Payment> getPaymentsByMobile(String mobile) {
-        User user = userRepository.findByMobile(mobile)
+		User user = userRepository.findByLoginUser_Mobile(mobile)
                 .orElseThrow(() -> new RuntimeException("User not found with mobile: " + mobile));
         return paymentRepository.findByUserId(user.getId());
     }

@@ -42,6 +42,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String userRole = oAuth2User.getAttribute("userRole");
         String fullName = oAuth2User.getAttribute("fullName");
         String userApproved = oAuth2User.getAttribute("userApproved");
+        Boolean hasMemberProfile = oAuth2User.getAttribute("hasMemberProfile");
 
         if (userMobile == null) {
             log.error("OAuth2 login failed: no userMobile in attributes");
@@ -68,6 +69,11 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         // ----------------------------------------------------------------
         // Redirect logic based on user state
         // ----------------------------------------------------------------
+        if (!Boolean.TRUE.equals(hasMemberProfile)) {
+            response.sendRedirect("/home");
+            return;
+        }
+
         boolean isPending = userApproved == null || "प्रक्रिया में".equals(userApproved);
 
         if (isPending) {

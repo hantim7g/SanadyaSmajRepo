@@ -59,7 +59,7 @@ public class PhonePeController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
 
-        User user = userRepository.findByMobile(authentication.getName())
+        User user = userRepository.findByLoginUser_Mobile(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -87,7 +87,7 @@ public class PhonePeController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
 		}
 
-		User user = userRepository.findByMobile(authentication.getName())
+        User user = userRepository.findByLoginUser_Mobile(authentication.getName())
 				.orElseThrow(() -> new RuntimeException("User not found"));
 
 		// This service will save the 'Pending' state and return a confirmation message

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hst.dto.PaymentRequest;
 import com.hst.entity.Payment;
+import com.hst.entity.LoginUser;
 import com.hst.entity.User;
 import com.hst.repository.PaymentRepository;
 import com.hst.service.PaymentService;
@@ -44,10 +45,20 @@ public class PPPaymentService {
      * Step 1: Create a Pending record and get PhonePe URL
      */
     public String initiatePhonePeTransaction(User user, PaymentRequest req, String redirectUrl, String parentTransactionId) {
+        return initiatePhonePeTransaction(user, null, req, redirectUrl, parentTransactionId);
+    }
+
+    public String initiatePhonePeTransaction(LoginUser loginUser, PaymentRequest req, String redirectUrl, String parentTransactionId) {
+        return initiatePhonePeTransaction(null, loginUser, req, redirectUrl, parentTransactionId);
+    }
+
+    private String initiatePhonePeTransaction(User user, LoginUser loginUser, PaymentRequest req,
+                                               String redirectUrl, String parentTransactionId) {
         String mTxnId = "MT" + System.currentTimeMillis();
 
         Payment payment = new Payment();
         payment.setUser(user);
+        payment.setLoginUser(loginUser);
         payment.setTransactionId(mTxnId);
         
         // 1. Handle Amount (Avoid nulls if req.getAmount() is a wrapper Double)

@@ -14,8 +14,12 @@ public class Payment {
 
 	// 🔗 Foreign key to User
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id", nullable = false)
+	@JoinColumn(name = "user_id")
 	private User user;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "login_user_id")
+	private LoginUser loginUser;
 	@Column(name = "parent_txn_id")
 	private String parentTransactionId;
 
@@ -87,6 +91,14 @@ public class Payment {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public LoginUser getLoginUser() {
+		return loginUser;
+	}
+
+	public void setLoginUser(LoginUser loginUser) {
+		this.loginUser = loginUser;
 	}
 
 	public String getTransactionId() {

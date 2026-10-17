@@ -33,7 +33,7 @@ public class UserService {
 
 	public User findByMobile(String mobile) {
 
-		return userRepo.findByMobile(mobile).orElseThrow(() -> new RuntimeException("User not found"));
+		return userRepo.findByLoginUser_Mobile(mobile).orElseThrow(() -> new RuntimeException("User not found"));
 	}
 
 	public Long findUserIdByMobile(String mobile) {
@@ -59,7 +59,7 @@ public class UserService {
 	}
 
 	public Page<User> filterUsersPaginated(String name, String mobile, String approved, String annualFeeStatus, int page, int size, List<Integer> years) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("fullName").ascending());
+		Pageable pageable = PageRequest.of(page, size, Sort.by("loginUser.fullName").ascending());
         
         Integer startYear = (years != null && !years.isEmpty()) ? years.stream().min(Integer::compare).orElse(null) : null;
 //        Integer endYear = (years != null && !years.isEmpty()) ? years.stream().max(Integer::compare).orElse(null) : null;
@@ -79,7 +79,7 @@ public class UserService {
 
 	public Page<User> getAllUsersWithPaymentInfo(int page, int size,List<Integer> years) {
 		Pageable pageable = PageRequest.of(page, size);
-		Page<User> users = userRepo.findAllByOrderByFullNameAsc(pageable);
+		Page<User> users = userRepo.findAllByOrderByLoginUser_FullNameAsc(pageable);
 
 //		users.forEach(this::updateFeeStatusForUser);
 		
