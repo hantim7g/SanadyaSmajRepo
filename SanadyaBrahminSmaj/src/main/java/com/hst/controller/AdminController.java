@@ -10,6 +10,7 @@ import com.hst.service.PasswordResetRequestService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -24,14 +25,23 @@ public class AdminController {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminController.class);
 
     
-    @Autowired
-    private  UserRepository userRepository;
-    @Autowired
-    private LoginUserRepository loginUserRepository;
-    @Autowired
-    private PasswordResetRequestService passwordResetRequestService;
-    @Autowired
-    private NotificationService notificationService;
+	private final UserRepository userRepository;
+	private final LoginUserRepository loginUserRepository;
+	private final PasswordResetRequestService passwordResetRequestService;
+	private final NotificationService notificationService;
+	private final PasswordEncoder passwordEncoder;
+    
+    public AdminController(UserRepository userRepository,
+									   LoginUserRepository loginUserRepository,
+						   PasswordResetRequestService passwordResetRequestService,
+						   NotificationService notificationService,
+						   PasswordEncoder passwordEncoder) {
+		this.userRepository = userRepository;
+		this.loginUserRepository = loginUserRepository;
+		this.passwordResetRequestService = passwordResetRequestService;
+		this.notificationService = notificationService;
+		this.passwordEncoder = passwordEncoder;
+	}
 
     // ⏳ Get all users with approved = false
     @GetMapping("/pending-users")
@@ -88,7 +98,7 @@ public class AdminController {
         if (loginUserOpt.isEmpty()) return ResponseEntity.status(404).body(Map.of("message", "यूज़र नहीं मिला।"));
 
         LoginUser loginUser = loginUserOpt.get();
-        loginUser.setPassword(req.getNewPassword());
+        loginUser.setPassword(passwordEncoder.encode(req.getNewPassword()));
         loginUserRepository.save(loginUser);
 
         req.setStatus("APPROVED");

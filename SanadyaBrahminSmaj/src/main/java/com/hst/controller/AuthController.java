@@ -112,11 +112,11 @@ public class AuthController {
 		}
 
 		LoginUser loginUser = loginUserOpt.get();
-		Optional<User> memberOpt = userRepository.findByLoginUser_Mobile(request.getMobile());
-		if (memberOpt.isPresent() && !APPROVED.equals(memberOpt.get().getApproved())) {
-			return ResponseEntity.badRequest()
-					.body(new ApiResponse<>(false, "आपका पंजीकरण अनुमोदित नहीं है।कृपया प्रतीक्षा करें।", null));
-		}
+//		Optional<User> memberOpt = userRepository.findByLoginUser_Mobile(request.getMobile());
+//		if (memberOpt.isPresent() && !APPROVED.equals(memberOpt.get().getApproved())) {
+//			return ResponseEntity.badRequest()
+//					.body(new ApiResponse<>(false, "आपका पंजीकरण अनुमोदित नहीं है।कृपया प्रतीक्षा करें।", null));
+//		}
 		try {
 			authenticationManager
 					.authenticate(new UsernamePasswordAuthenticationToken(request.getMobile(), request.getPassword()));

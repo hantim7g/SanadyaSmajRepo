@@ -64,7 +64,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAllByOrderBySmajRolePriorityAsc();
 
     
-    @Query(value = "SELECT DISTINCT u FROM User u " +
+    @Query(value = "SELECT u FROM User u " +
             "WHERE (:name IS NULL OR LOWER(u.loginUser.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) " +
             "AND (:mobile IS NULL OR u.loginUser.mobile LIKE CONCAT('%', :mobile, '%')) " +
     	       "AND (:approved IS NULL OR u.approved = :approved) " +
@@ -83,7 +83,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     	       "     AND (:startYear IS NULL OR YEAR(p2.feeFrom) <= :startYear AND YEAR(p2.feeTo) >= :startYear)" +
     	       "  ))" +
     	       ")",
-    	       countQuery = "SELECT COUNT(DISTINCT u) FROM User u " +
+    	       countQuery = "SELECT COUNT(u) FROM User u " +
             "WHERE (:name IS NULL OR LOWER(u.loginUser.fullName) LIKE LOWER(CONCAT('%', :name, '%'))) " +
             "AND (:mobile IS NULL OR u.loginUser.mobile LIKE CONCAT('%', :mobile, '%')) " +
     	       "AND (:approved IS NULL OR u.approved = :approved) " +
@@ -111,4 +111,3 @@ public interface UserRepository extends JpaRepository<User, Long> {
     	        Pageable pageable);
 		Page<User> findAllByOrderByLoginUser_FullNameAsc(Pageable pageable);
         }
-
