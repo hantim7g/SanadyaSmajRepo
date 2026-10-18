@@ -164,6 +164,7 @@ public class AuthController {
 				&& !cityVillageMasterService.isValidCityOrVillage(req.getHomeDistrict())) {
 			return fieldError("homeDistrict", "दर्ज किया गया जिला मान्य नहीं है। कृपया सूची से चुनें।");
 		}
+		
 
 		LoginUser loginUser = new LoginUser();
 		loginUser.setMobile(req.getMobile());
