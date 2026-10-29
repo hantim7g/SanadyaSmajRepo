@@ -8,31 +8,30 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-import com.hst.entity.User;
+import com.hst.entity.LoginUser;
 
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	Optional<Payment> findByTransactionId(String transactionId);
 	List<Payment> findByStatus(String status);
-    // 🔍 Find all payments for a user by their user ID
-    List<Payment> findByUserId(Long userId);
+    List<Payment> findByLoginUserId(Long loginUserId);
 
     @Query("""
-    	    SELECT p FROM Payment p
-    	    WHERE p.user.id = :userId AND p.status = 'सफल' AND p.description LIKE 'वार्षिक%'
-    	    ORDER BY p.paymentDate DESC
-    	""")
-    	List<Payment> findLastAnnualFeePaymentByUserId(@Param("userId") Long userId);
+            SELECT p FROM Payment p
+            WHERE p.loginUser.id = :loginUserId AND p.status = 'सफल' AND p.description LIKE 'वार्षिक%'
+            ORDER BY p.paymentDate DESC
+        """)
+    List<Payment> findLastAnnualFeePaymentByLoginUserId(@Param("loginUserId") Long loginUserId);
     
     @Query("""
-    	    SELECT p FROM Payment p
-    	    WHERE p.user.id = :userId AND p.status = 'सफल' AND p.description != 'वार्षिक शुल्क'
-    	    ORDER BY p.paymentDate DESC
-    	""")
-    	List<Payment> findLastOtherFeePaymentByUserId(@Param("userId") Long userId);
-    Payment findTopByUserIdAndDescriptionOrderByPaymentDateDesc(Long userId, String description);
+            SELECT p FROM Payment p
+            WHERE p.loginUser.id = :loginUserId AND p.status = 'सफल' AND p.description != 'वार्षिक शुल्क'
+            ORDER BY p.paymentDate DESC
+        """)
+    List<Payment> findLastOtherFeePaymentByLoginUserId(@Param("loginUserId") Long loginUserId);
+    Payment findTopByLoginUserIdAndDescriptionOrderByPaymentDateDesc(Long loginUserId, String description);
 
     Payment findPaymentById(Long id); 
     
-     List<Payment> findPaymentByTransactionIdAndUser(String transactionId, User user);
+     List<Payment> findPaymentByTransactionIdAndLoginUser(String transactionId, LoginUser loginUser);
 }

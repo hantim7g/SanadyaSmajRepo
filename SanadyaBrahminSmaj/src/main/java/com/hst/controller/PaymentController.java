@@ -2,13 +2,12 @@ package com.hst.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hst.dto.PaymentRequest;
+import com.hst.entity.LoginUser;
 import com.hst.entity.Payment;
-import com.hst.entity.User;
-import com.hst.repository.UserRepository;
+import com.hst.repository.LoginUserRepository;
 import com.hst.service.AuditLogService;
 import com.hst.service.CloudinaryService;
 import com.hst.service.PaymentService;
-import com.hst.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -43,18 +42,15 @@ public class PaymentController {
     private String uploadDir;
 
     private final PaymentService paymentService;
-    private final UserService userService;
-    private final UserRepository userRepository;
+    private final LoginUserRepository loginUserRepository;
     private final ObjectMapper objectMapper;
 
     public PaymentController(PaymentService paymentService,
-                             UserService userService,
-                             UserRepository userRepository,
+                             LoginUserRepository loginUserRepository,
                              ObjectMapper objectMapper,
                              AuditLogService auditLogService) {
         this.paymentService = paymentService;
-        this.userService = userService;
-        this.userRepository = userRepository;
+        this.loginUserRepository = loginUserRepository;
         this.objectMapper = objectMapper;
         		this.auditLogService = auditLogService;
     }
@@ -72,8 +68,8 @@ public class PaymentController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
 
-        User user = userRepository.findByLoginUser_Mobile(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        LoginUser loginUser = loginUserRepository.findByMobile(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Login user not found"));
 
         try {
             // Map to PaymentRequest DTO instead of Payment entity directly
@@ -87,14 +83,14 @@ public class PaymentController {
             // Logical Branching
             if ("वार्षिक शुल्क".equals(req.getDescription()) && req.getFinancialYears() != null && !req.getFinancialYears().isEmpty()) {
                 // Service handles the loop and splitting the amount
-                paymentService.saveAnnualMultiYearPayment(req, user, imagePath);
+                paymentService.saveAnnualMultiYearPayment(req, loginUser, imagePath);
             } else {
                 // Standard flow for single entries (Donations, Hall booking, etc.)
-                Payment payment = convertToEntity(req, user, imagePath);
+                Payment payment = convertToEntity(req, loginUser, imagePath);
                 paymentService.addPayment(payment);
             }
 
-            auditLogService.log("PAYMENT_CREATED", "Payment", 0L, user.getId(), user.getMobile(), 
+            auditLogService.log("PAYMENT_CREATED", "Payment", 0L, loginUser.getId(), loginUser.getMobile(),
                                "Payment processed for: " + req.getDescription(), request);
 
             return ResponseEntity.ok("Payment saved successfully");
@@ -105,9 +101,9 @@ public class PaymentController {
     }
 
     // Helper to convert DTO to Entity for non-annual payments
-    private Payment convertToEntity(PaymentRequest req, User user, String imagePath) {
+    private Payment convertToEntity(PaymentRequest req, LoginUser loginUser, String imagePath) {
         Payment p = new Payment();
-        p.setUser(user);
+        p.setLoginUser(loginUser);
         p.setTransactionId(req.getTransactionId());
         p.setAmount(req.getAmount());
         p.setPaymentMode(req.getPaymentMode());
@@ -118,7 +114,7 @@ public class PaymentController {
         p.setFeeFrom(Date.valueOf(req.getFeeFrom()));
         p.setFeeTo(Date.valueOf(req.getFeeTo()));
         p.setReceiptImagePath(imagePath);
-        p.setCrtBy(user.getId());
+        p.setCrtBy(loginUser.getId());
         p.setCrtDt(Date.valueOf(LocalDate.now()));
         return p;
     }
@@ -141,19 +137,21 @@ public class PaymentController {
             Authentication authentication,
             HttpServletRequest request) {
 
-        User user = userService.findByMobile(authentication.getName());
+        LoginUser loginUser = loginUserRepository.findByMobile(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Login user not found"));
 
         Payment payment = paymentService.findPaymentById(paymentId);
 
         
-        if (!payment.getUser().getId().equals(user.getId())) {
+        if (payment == null || payment.getLoginUser() == null
+                || !payment.getLoginUser().getId().equals(loginUser.getId())) {
 
             auditLogService.log(
                     "UNAUTHORIZED_PAYMENT_UPDATE",
                     "Payment",
                     paymentId,
-                    user.getId(),
-                    user.getMobile(),
+                    loginUser.getId(),
+                    loginUser.getMobile(),
                     "Attempted to update payment not owned by user",
                     request
             );
@@ -161,12 +159,6 @@ public class PaymentController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("You are not allowed to update this payment");
         }
-        // 🔐 Ownership check (CRITICAL)
-        if (!payment.getUser().getId().equals(user.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("You are not allowed to update this payment");
-        }
-
         if (!"प्रक्रिया में".equalsIgnoreCase(payment.getValidated())) {
             return ResponseEntity.badRequest()
                     .body("Payment already processed");
@@ -181,7 +173,7 @@ public class PaymentController {
         payment.setReason(reason);
         payment.setFeeFrom(feeFrom);
         payment.setFeeTo(feeTo);
-        payment.setLstUpBy(user.getId());
+        payment.setLstUpBy(loginUser.getId());
         payment.setLstUpDt(Date.valueOf(LocalDate.now()));
 
         if (receiptImage != null && !receiptImage.isEmpty()) {
@@ -196,8 +188,8 @@ public class PaymentController {
                 "PAYMENT_UPDATED",
                 "Payment",
                 payment.getId(),
-                user.getId(),
-                user.getMobile(),
+                loginUser.getId(),
+                loginUser.getMobile(),
                 "Payment updated. Status: " + payment.getStatus(),
                 request
         );

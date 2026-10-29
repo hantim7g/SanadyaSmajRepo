@@ -61,6 +61,8 @@ public class ProfileCompletionController {
         }
 
         LoginUser account = accountOpt.get();
+        model.addAttribute("mobileNumber",
+                account.getMobile() != null && account.getMobile().startsWith("GOOGLE_") ? "" : account.getMobile());
         User user = userRepository.findByLoginUser_Mobile(mobile).orElseGet(() -> {
             User profile = new User();
             profile.setLoginUser(account);
@@ -117,6 +119,10 @@ public class ProfileCompletionController {
         user.setLoginUser(account);
 
         if(mobile != null && !mobile.isBlank() && !mobile.equals(mobileSystem)) {
+            if (!mobile.matches("^[0-9]{10}$")) {
+                redirect.addFlashAttribute("errorMessage", "मान्य 10 अंकों का मोबाइल नंबर दर्ज करें।");
+                return "redirect:/register/complete";
+            }
             // Check if the new mobile number is already registered
             if (loginUserRepository.existsByMobile(mobile)) {
                 redirect.addFlashAttribute("errorMessage", "मोबाइल नंबर पहले से पंजीकृत है। कृपया एक अलग नंबर दर्ज करें।");

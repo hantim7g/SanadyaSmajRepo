@@ -46,7 +46,13 @@
                             <div class="col-md-4"><label class="label-col">पूरा नाम</label><input type="text" class="form-control readonly-input" name="fullName" value="${user.fullName}" readonly></div>
                             <div class="col-md-4"><label class="label-col">पिता का नाम</label><input name="fatherName" type="text" class="form-control" value="${user.fatherName}"></div>
                             <div class="col-md-4"><label class="label-col">गोत्र</label><input name="gotra" type="text" class="form-control" value="${user.gotra}"></div>
-                            <div class="col-md-4"><label class="label-col">मोबाइल</label><input type="text" class="form-control readonly-input" name="mobile" value="${user.mobile}" readonly></div>
+                            <div class="col-md-4">
+                                <label class="label-col">मोबाइल</label>
+                                <input type="tel" class="form-control " name="mobile"
+                                       value="${user.mobile}" maxlength="10" inputmode="numeric" pattern="[0-9]{10}"
+                                       placeholder="10 अंकों का मोबाइल नंबर दर्ज करें" required>
+                               
+                            </div>
                             <div class="col-md-4"><label class="label-col">ईमेल</label><input name="email" type="email" class="form-control" value="${user.email}"></div>
                             <div class="col-md-4"><label class="label-col">जन्म तिथि</label><input name="dateOfBirth" type="date" class="form-control" value="${user.dateOfBirth}"></div>                            
                             <div class="col-md-12"><label class="label-col">स्थाई पता</label><input name="address" type="text" class="form-control" value="${user.address}"></div>

@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hst.dto.PaymentRequest;
+import com.hst.entity.LoginUser;
 import com.hst.entity.Payment;
-import com.hst.entity.User;
 import com.hst.repository.PaymentRepository;
-import com.hst.repository.UserRepository;
+import com.hst.repository.LoginUserRepository;
 import com.phonepe.sdk.pg.common.exception.PhonePeException;
 import com.phonepe.sdk.pg.common.models.response.CallbackResponse;
 import com.phonepe.sdk.pg.payments.v2.StandardCheckoutClient;
@@ -40,7 +40,7 @@ public class PhonePeController {
     @Autowired
     private PaymentRepository paymentRepository;
     @Autowired
-    private UserRepository userRepository;
+    private LoginUserRepository loginUserRepository;
     @Autowired
     private PPPaymentService ppPaymentService;
 
@@ -59,8 +59,8 @@ public class PhonePeController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
 
-        User user = userRepository.findByLoginUser_Mobile(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        LoginUser loginUser = loginUserRepository.findByMobile(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Login user not found"));
 
         ObjectMapper objectMapper = new ObjectMapper();
         
@@ -69,7 +69,7 @@ public class PhonePeController {
             
             // This service will save the 'Pending' state and return the PhonePe URL
             String redirectUrl = "https://yourwebsite.com/payment-completion";
-            String gatewayUrl = "";//paymentService.initiatePhonePeTransaction(user, req, redirectUrl);
+            String gatewayUrl = "";//paymentService.initiatePhonePeTransaction(loginUser, req, redirectUrl, null);
 
             return ResponseEntity.ok(Map.of("redirectUrl", gatewayUrl));
 
@@ -87,8 +87,8 @@ public class PhonePeController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
 		}
 
-        User user = userRepository.findByLoginUser_Mobile(authentication.getName())
-				.orElseThrow(() -> new RuntimeException("User not found"));
+        loginUserRepository.findByMobile(authentication.getName())
+				.orElseThrow(() -> new RuntimeException("Login user not found"));
 
 		// This service will save the 'Pending' state and return a confirmation message
 	//	paymentService.initiateOfflineTransaction(user, req);
@@ -137,8 +137,8 @@ public class PhonePeController {
             Optional<Payment> paymentOpt = paymentRepository.findByTransactionId(txnId);
             if (paymentOpt.isPresent()) {
                 Payment existingPayment = paymentOpt.get();
-                if (existingPayment.getUser() != null
-                        && !existingPayment.getUser().getMobile().equals(authentication.getName())) {
+                if (existingPayment.getLoginUser() == null
+                        || !existingPayment.getLoginUser().getMobile().equals(authentication.getName())) {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN)
                             .body(Map.of("error", "Access denied"));
                 }

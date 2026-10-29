@@ -77,13 +77,15 @@ public String home(Model model) {
         String mobile = authentication.getName();
         Optional<User> userOpt = userRepository.findByLoginUser_Mobile(mobile);
 
-        if (userOpt.isPresent()) {
-            model.addAttribute("user", userOpt.get());
+        // if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            model.addAttribute("user", user);
+            // model.addAttribute("googleUser", "GOOGLE".equals(user.getAuthProvider()));
             model.addAttribute("paymentList", paymentService.getPaymentsByMobile(mobile));
             return "profile"; // member-profile.jsp
-        } else {
-            return "redirect:/register/complete";
-        }
+        // } else {
+        //     return "redirect:/register/complete";
+        // }
     }
 
     @PostMapping("/logout")

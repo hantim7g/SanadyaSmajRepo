@@ -1,10 +1,10 @@
 package com.hst.service;
 
 import com.hst.dto.PaymentRequest;
+import com.hst.entity.LoginUser;
 import com.hst.entity.Payment;
-import com.hst.entity.User;
+import com.hst.repository.LoginUserRepository;
 import com.hst.repository.PaymentRepository;
-import com.hst.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -18,18 +18,18 @@ import java.util.List;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final UserRepository userRepository;
+    private final LoginUserRepository loginUserRepository;
 
-    public PaymentService(PaymentRepository paymentRepository, UserRepository userRepository) {
+    public PaymentService(PaymentRepository paymentRepository, LoginUserRepository loginUserRepository) {
         this.paymentRepository = paymentRepository;
-        this.userRepository = userRepository;
+        this.loginUserRepository = loginUserRepository;
     }
 
-    // 🔍 Get all payments made by the user (by mobile number)
+    // Get all payments made by the login account (by mobile number)
     public List<Payment> getPaymentsByMobile(String mobile) {
-		User user = userRepository.findByLoginUser_Mobile(mobile)
-                .orElseThrow(() -> new RuntimeException("User not found with mobile: " + mobile));
-        return paymentRepository.findByUserId(user.getId());
+        LoginUser loginUser = loginUserRepository.findByMobile(mobile)
+                .orElseThrow(() -> new RuntimeException("Login user not found with mobile: " + mobile));
+        return getPaymentsByLoginUserId(loginUser.getId());
     }
 
     // 💾 Save a payment (for future use e.g., online payment integration)
@@ -37,9 +37,8 @@ public class PaymentService {
         return paymentRepository.save(payment);
     }
 
-    // 🔍 Optional: Find by user ID directly
-    public List<Payment> getPaymentsByUserId(Long userId) {
-        return paymentRepository.findByUserId(userId);
+    public List<Payment> getPaymentsByLoginUserId(Long loginUserId) {
+        return paymentRepository.findByLoginUserId(loginUserId);
     }
 
     public Payment addPayment(Payment payment) {
@@ -52,7 +51,7 @@ public class PaymentService {
 	}
 	
 	@Transactional
-	public void saveAnnualMultiYearPayment(PaymentRequest req, User user, String imagePath) {
+	public void saveAnnualMultiYearPayment(PaymentRequest req, LoginUser loginUser, String imagePath) {
 	    List<String> years = req.getFinancialYears();
 	    int totalYears = years.size();
 	    
@@ -65,7 +64,7 @@ public class PaymentService {
 	        String fy = years.get(i);
 	        Payment p = new Payment();
 	        
-	        p.setUser(user);
+	        p.setLoginUser(loginUser);
 	        p.setTransactionId(req.getTransactionId() + "-" + fy); // Unique constraint fix
 	        p.setAmount((i == totalYears - 1) ? lastYearAmount : perYearAmount);
 	        p.setPaymentMode(req.getPaymentMode());
@@ -81,7 +80,7 @@ public class PaymentService {
 	        p.setFeeTo(Date.valueOf(LocalDate.of(startYear + 1, 3, 31)));
 
 	        p.setReceiptImagePath(imagePath);
-	        p.setCrtBy(user.getId());
+	        p.setCrtBy(loginUser.getId());
 	        p.setCrtDt(Date.valueOf(LocalDate.now()));
 
 	        paymentRepository.save(p);

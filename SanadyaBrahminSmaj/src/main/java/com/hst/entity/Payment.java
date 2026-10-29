@@ -12,11 +12,6 @@ public class Payment {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	// 🔗 Foreign key to User
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
-	private User user;
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "login_user_id")
 	private LoginUser loginUser;
@@ -85,14 +80,7 @@ public class Payment {
 		this.id = id;
 	}
 
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-
+	@com.fasterxml.jackson.annotation.JsonIgnore
 	public LoginUser getLoginUser() {
 		return loginUser;
 	}

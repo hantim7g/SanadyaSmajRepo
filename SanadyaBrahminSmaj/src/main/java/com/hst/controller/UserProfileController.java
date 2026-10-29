@@ -2,6 +2,8 @@
 package com.hst.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +21,10 @@ import java.util.Optional;
 
 
 import com.hst.entity.Payment;
+import com.hst.entity.LoginUser;
 import com.hst.entity.User;
+import com.hst.dto.ProfileUpdateRequest;
+import com.hst.repository.LoginUserRepository;
 import com.hst.repository.UserRepository;
 
 
@@ -29,6 +34,7 @@ import com.hst.service.CloudinaryService;
 import com.hst.service.PaymentService;
 import com.hst.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -40,14 +46,17 @@ public class UserProfileController {
 	private final CloudinaryService cloudinaryService;
 	private final UserService userService;
 	private final UserRepository userRepository;
+	private final LoginUserRepository loginUserRepository;
 	private final JwtTokenProvider jwtTokenProvider;
 
 	public UserProfileController(PaymentService paymentService, CloudinaryService cloudinaryService,
-			UserService userService, UserRepository userRepository, JwtTokenProvider jwtTokenProvider) {
+			UserService userService, UserRepository userRepository, LoginUserRepository loginUserRepository,
+			JwtTokenProvider jwtTokenProvider) {
 		this.paymentService = paymentService;
 		this.cloudinaryService = cloudinaryService;
 		this.userService = userService;
 		this.userRepository = userRepository;
+		this.loginUserRepository = loginUserRepository;
 		this.jwtTokenProvider = jwtTokenProvider;
 	}
 
@@ -60,10 +69,33 @@ public class UserProfileController {
 
 	@PostMapping("/update")
 	public ResponseEntity<ApiResponse<String>> updateProfile(HttpServletRequest request,
-			@RequestBody User user) {
+			HttpServletResponse response, @RequestBody ProfileUpdateRequest user) {
 		String token = jwtTokenProvider.getJwtFromCookies(request);
+		if (token == null || !jwtTokenProvider.validateToken(token)) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(new ApiResponse<>(false, "कृपया फिर से लॉगिन करें।", null));
+		}
 		String mobile = jwtTokenProvider.getUsernameFromToken(token);
 		User existingUser = userRepository.findByLoginUser_Mobile(mobile).orElseThrow();
+
+		LoginUser account = existingUser.getLoginUser();
+		String requestedMobile = user.getMobile();
+		if (requestedMobile != null && !requestedMobile.isBlank()
+				&& !requestedMobile.equals(account.getMobile())) {
+			// if (!"GOOGLE".equals(account.getAuthProvider())) {
+			// 	return ResponseEntity.status(HttpStatus.FORBIDDEN)
+			// 			.body(new ApiResponse<>(false, "मोबाइल नंबर बदलने की अनुमति नहीं है।", null));
+			// }
+			if (!requestedMobile.matches("^[0-9]{10}$")) {
+				return ResponseEntity.badRequest()
+						.body(new ApiResponse<>(false, "मान्य 10 अंकों का मोबाइल नंबर दर्ज करें।", null));
+			}
+			if (loginUserRepository.existsByMobile(requestedMobile)) {
+				return ResponseEntity.status(HttpStatus.CONFLICT)
+						.body(new ApiResponse<>(false, "मोबाइल नंबर पहले से पंजीकृत है। कृपया दूसरा नंबर दर्ज करें।", null));
+			}
+			account.setMobile(requestedMobile);
+		}
 
 		// Update editable fields only
 		existingUser.setAddress(user.getAddress());
@@ -79,6 +111,20 @@ public class UserProfileController {
 		}
 
 		userRepository.save(existingUser);
+		if (requestedMobile != null && !requestedMobile.isBlank()
+				&& !requestedMobile.equals(mobile) && "GOOGLE".equals(account.getAuthProvider())) {
+			loginUserRepository.save(account);
+			String updatedToken = jwtTokenProvider.generateToken(
+					account.getMobile(), jwtTokenProvider.getRolesFromToken(token));
+			ResponseCookie cookie = ResponseCookie.from("authToken", updatedToken)
+					.httpOnly(true)
+					.secure(request.isSecure())
+					.path("/")
+					.maxAge(7L * 24 * 60 * 60)
+					.sameSite("Lax")
+					.build();
+			response.addHeader("Set-Cookie", cookie.toString());
+		}
 		return ResponseEntity.ok(new ApiResponse<>(true, "प्रोफ़ाइल सफलतापूर्वक सहेजी गई।", null));
 	}
 
@@ -112,8 +158,7 @@ public class UserProfileController {
 	@GetMapping("/payments")
 	public ResponseEntity<List<Payment>> getUserPayments(Authentication auth) {
 	    String mobile = auth.getName();
-	    User user = userRepository.findByLoginUser_Mobile(mobile).orElseThrow();
-	    List<Payment> payments = paymentService.getPaymentsByUserId(user.getId());
+	    List<Payment> payments = paymentService.getPaymentsByMobile(mobile);
 	    return ResponseEntity.ok(payments);
 	}
 

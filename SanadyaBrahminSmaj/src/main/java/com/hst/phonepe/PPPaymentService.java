@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hst.dto.PaymentRequest;
 import com.hst.entity.Payment;
 import com.hst.entity.LoginUser;
-import com.hst.entity.User;
 import com.hst.repository.PaymentRepository;
 import com.hst.service.PaymentService;
 import com.phonepe.sdk.pg.common.models.response.CallbackResponse;
@@ -44,20 +43,10 @@ public class PPPaymentService {
     /**
      * Step 1: Create a Pending record and get PhonePe URL
      */
-    public String initiatePhonePeTransaction(User user, PaymentRequest req, String redirectUrl, String parentTransactionId) {
-        return initiatePhonePeTransaction(user, null, req, redirectUrl, parentTransactionId);
-    }
-
     public String initiatePhonePeTransaction(LoginUser loginUser, PaymentRequest req, String redirectUrl, String parentTransactionId) {
-        return initiatePhonePeTransaction(null, loginUser, req, redirectUrl, parentTransactionId);
-    }
-
-    private String initiatePhonePeTransaction(User user, LoginUser loginUser, PaymentRequest req,
-                                               String redirectUrl, String parentTransactionId) {
         String mTxnId = "MT" + System.currentTimeMillis();
 
         Payment payment = new Payment();
-        payment.setUser(user);
         payment.setLoginUser(loginUser);
         payment.setTransactionId(mTxnId);
         
@@ -127,7 +116,7 @@ public class PPPaymentService {
         if ("वार्षिक शुल्क".equals(req.getDescription())) {
             // Call your existing complex logic
             // Note: imagePath is null because it's an online payment
-            offlinePaymentService.saveAnnualMultiYearPayment(req, masterPayment.getUser(), null);
+            offlinePaymentService.saveAnnualMultiYearPayment(req, masterPayment.getLoginUser(), null);
             
             // Update the master record status
             masterPayment.setStatus("SUCCESS");
@@ -140,13 +129,13 @@ public class PPPaymentService {
             paymentRepository.save(masterPayment);
         }
     }
-    public String initiatePaymentWithEntity(User user, double amount, String redirectUrl) {
+    public String initiatePaymentWithEntity(LoginUser loginUser, double amount, String redirectUrl) {
         // Generate a unique Merchant Transaction ID
         String mTxnId = "MT" + System.currentTimeMillis();
 
         // 1. Create and Save "Pending" Payment record in your DB using your Payment Entity
         Payment payment = new Payment();
-        payment.setUser(user);
+        payment.setLoginUser(loginUser);
         payment.setTransactionId(mTxnId);
         payment.setAmount(amount); // Your entity uses double (INR)
         payment.setStatus("PENDING");

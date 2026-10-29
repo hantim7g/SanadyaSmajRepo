@@ -68,6 +68,9 @@
     <c:if test="${not empty error}">
         <div class="alert alert-danger">${error}</div>
     </c:if>
+    <c:if test="${not empty errorMessage}">
+        <div class="alert alert-danger">${errorMessage}</div>
+    </c:if>
 
     <div class="text-center mb-3">
         <span class="google-badge">
@@ -136,7 +139,9 @@
         <div class="group-basic">
             <div class="mb-3">
                 <label class="form-label">मोबाइल</label>
-                <input type="text" class="form-control" value="${user.mobile}">
+                <input type="tel" name="mobile" class="form-control" value="${mobileNumber}"
+                       maxlength="10" inputmode="numeric" pattern="[0-9]{10}"
+                       placeholder="10 अंकों का मोबाइल नंबर (वैकल्पिक)">
             </div>
 
             <div class="mb-3">

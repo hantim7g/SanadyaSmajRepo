@@ -30,7 +30,12 @@ $(document).ready(function () {
             contentType: 'application/json',
             data: JSON.stringify(formData),
             success: function () { showSuccessAlert("✅ प्रोफ़ाइल अपडेट हो गई!"); location.reload(); },
-            error: function () { showErrorAlert("❌ अपडेट में त्रुटि!"); }
+            error: function (xhr) {
+                const message = xhr.responseJSON && xhr.responseJSON.message
+                    ? xhr.responseJSON.message
+                    : "❌ अपडेट में त्रुटि!";
+                showErrorAlert(message);
+            }
         });
     });
 

@@ -92,8 +92,9 @@ public class UserService {
 
 	// Called inside your filterUsersPaginated logic or DTO population
 	public void updateFeeStatusForUser(User user, List<Integer> years) {
-        // We use the pre-fetched payments from the JOIN FETCH
-        List<Payment> payments = user.getPayments();
+        List<Payment> payments = user.getLoginUser() == null
+                ? List.of()
+                : paymentRepo.findByLoginUserId(user.getLoginUser().getId());
 
         boolean hasPendingAnnual = payments.stream()
                 .anyMatch(p -> (p.getDescription().contains("वार्षिक"))
@@ -173,12 +174,16 @@ public class UserService {
 
 	public List<Payment> getAnnualPaymentsByUserId(Long userId)
     {
-    	return    	paymentRepo.findLastAnnualFeePaymentByUserId(userId);
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        return paymentRepo.findLastAnnualFeePaymentByLoginUserId(user.getLoginUser().getId());
     }
 
 	public List<Payment> getOtherPaymentsByUserId(Long userId)
     {
-    	return    	paymentRepo.findLastOtherFeePaymentByUserId(userId);
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        return paymentRepo.findLastOtherFeePaymentByLoginUserId(user.getLoginUser().getId());
     }
 	
 	
