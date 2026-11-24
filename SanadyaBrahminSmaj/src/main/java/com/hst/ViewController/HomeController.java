@@ -2,8 +2,10 @@ package com.hst.ViewController;
 
 import com.hst.entity.Event;
 import com.hst.entity.GotraMaster;
+import com.hst.entity.LoginUser;
 import com.hst.entity.Testimonial;
 import com.hst.entity.User;
+import com.hst.repository.LoginUserRepository;
 import com.hst.repository.UserRepository;
 import com.hst.service.EventService;
 import com.hst.service.GotraMasterService;
@@ -31,6 +33,8 @@ public class HomeController {
 private final GotraMasterService gotraMasterService;
 @Autowired
     private  UserRepository userRepository;
+@Autowired
+    private LoginUserRepository loginUserRepository;
 @Autowired
     private  PaymentService paymentService;
 @Autowired
@@ -75,17 +79,20 @@ public String home(Model model) {
         }
 
         String mobile = authentication.getName();
-        Optional<User> userOpt = userRepository.findByLoginUser_Mobile(mobile);
+        Optional<LoginUser> loginUserOpt = loginUserRepository.findByMobile(mobile);
+        if (loginUserOpt.isEmpty()) {
+            return "redirect:/login";
+        }
 
-        // if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            model.addAttribute("user", user);
-            // model.addAttribute("googleUser", "GOOGLE".equals(user.getAuthProvider()));
-            model.addAttribute("paymentList", paymentService.getPaymentsByMobile(mobile));
-            return "profile"; // member-profile.jsp
-        // } else {
-        //     return "redirect:/register/complete";
-        // }
+        Optional<User> userOpt = userRepository.findByLoginUser_Mobile(mobile);
+        if (userOpt.isEmpty()) {
+            return "redirect:/register/complete";
+        }
+
+        model.addAttribute("loginUser", loginUserOpt.get());
+        model.addAttribute("user", userOpt.get());
+        model.addAttribute("paymentList", paymentService.getPaymentsByMobile(mobile));
+        return "profile";
     }
 
     @PostMapping("/logout")
@@ -107,12 +114,18 @@ public String home(Model model) {
         }
 
         String mobile = authentication.getName();
+        Optional<LoginUser> loginUserOpt = loginUserRepository.findByMobile(mobile);
+        if (loginUserOpt.isEmpty()) {
+            return "redirect:/login";
+        }
+
         Optional<User> userOpt = userRepository.findByLoginUser_Mobile(mobile);
 
         if (userOpt.isPresent()) {
+            model.addAttribute("loginUser", loginUserOpt.get());
             model.addAttribute("user", userOpt.get());
             model.addAttribute("paymentList", paymentService.getPaymentsByMobile(mobile));
-            return "payment"; // member-profile.jsp
+            return "payment";
         } else {
             return "redirect:/register/complete";
         }

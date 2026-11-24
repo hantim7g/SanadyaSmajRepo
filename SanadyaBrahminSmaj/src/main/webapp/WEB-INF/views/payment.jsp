@@ -43,11 +43,11 @@
                     <form id="profileForm">
                         <input type="hidden" name="id" value="${user.id}" />
                         <div class="row g-3">
-                            <div class="col-md-4"><label class="label-col">पूरा नाम</label><input type="text" class="form-control readonly-input" name="fullName" value="${user.fullName}" readonly></div>
+                            <div class="col-md-4"><label class="label-col">पूरा नाम</label><input type="text" class="form-control readonly-input" name="fullName" value="${loginUser.fullName}" readonly></div>
                             <div class="col-md-4"><label class="label-col">पिता का नाम</label><input name="fatherName" type="text" class="form-control" value="${user.fatherName}"></div>
                             <div class="col-md-4"><label class="label-col">गोत्र</label><input name="gotra" type="text" class="form-control" value="${user.gotra}"></div>
-                            <div class="col-md-4"><label class="label-col">मोबाइल</label><input type="text" class="form-control readonly-input" name="mobile" value="${user.mobile}" readonly></div>
-                            <div class="col-md-4"><label class="label-col">ईमेल</label><input name="email" type="email" class="form-control" value="${user.email}"></div>
+                            <div class="col-md-4"><label class="label-col">मोबाइल</label><input type="text" class="form-control readonly-input" name="mobile" value="${loginUser.mobile}" readonly></div>
+                            <div class="col-md-4"><label class="label-col">ईमेल</label><input name="email" type="email" class="form-control" value="${loginUser.email}"></div>
                             <div class="col-md-4"><label class="label-col">जन्म तिथि</label><input name="dateOfBirth" type="date" class="form-control" value="${user.dateOfBirth}"></div>                            
                             <div class="col-md-12"><label class="label-col">स्थाई पता</label><input name="address" type="text" class="form-control" value="${user.address}"></div>
                             <div class="col-md-4"><label class="label-col">शैक्षणिक योग्यता</label><input name="education" type="text" class="form-control" value="${user.education}"></div>
