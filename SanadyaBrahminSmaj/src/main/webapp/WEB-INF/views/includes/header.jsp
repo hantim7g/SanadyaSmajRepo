@@ -6,7 +6,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>सनाढ्य ब्राह्मण महासभा महावीर नगर प्रथम, कोटा</title>
+  <title>UAT-सनाढ्य ब्राह्मण महासभा महावीर नगर प्रथम, कोटा</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;600;700&display=swap" rel="stylesheet">
 
